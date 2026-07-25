@@ -73,12 +73,12 @@ If `$1` is `help`, `?`, or unrecognized, display:
 Transmute Pipeline — AI-driven business plan to production
 
 Usage:
-  /transmute:cast              Run full pipeline (Stage 0-9)
-  /transmute:cast full         Same as above
-  /transmute:cast resume       Resume from last completed stage
-  /transmute:cast <stage>      Run a specific stage
+  /transmuter:cast              Run full pipeline (Stage 0-9)
+  /transmuter:cast full         Same as above
+  /transmuter:cast resume       Resume from last completed stage
+  /transmuter:cast <stage>      Run a specific stage
 
-Individual stages (also invocable directly as /transmute:<stage>):
+Individual stages (also invocable directly as /transmuter:<stage>):
   tech-stack (0), brd (1), prd (2), validate-specs (2B), scaffold (3),
   implement (5), audit-completeness (5B), audit-security (6A),
   audit-a11y (6B), optimize (6C), docs (6D), refactor (6E),
@@ -93,9 +93,9 @@ Manual stages (not invocable):
   Stage 7 — Deployment (deploy backend before frontend)
 
 Examples:
-  /transmute:cast brd          Generate Business Requirement Document
-  /transmute:cast implement    Run feature implementation orchestrator
-  /transmute:cast redesign     Run frontend design elevation
-  /transmute:cast resume       Continue from where you left off
-  /transmute:brd               Run BRD stage directly
+  /transmuter:cast brd          Generate Business Requirement Document
+  /transmuter:cast implement    Run feature implementation orchestrator
+  /transmuter:cast redesign     Run frontend design elevation
+  /transmuter:cast resume       Continue from where you left off
+  /transmuter:brd               Run BRD stage directly
 ```

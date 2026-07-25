@@ -197,8 +197,8 @@ These values govern session limits, token budgets, and splitting thresholds acro
 
 | Parameter | Value | Derivation |
 |---|---|---|
-| Pipeline model | Claude Opus 4.6 (`claude-opus-4-6`) | Auto-detected from Claude Code session |
-| Lighter-stage alternative | Claude Sonnet 4.6 | For audit stages (6A–6G) where document volume is lower |
+| Pipeline model | Claude Opus 5 (`claude-opus-5`) | Auto-detected from Claude Code session |
+| Lighter-stage alternative | Claude Sonnet 5 (`claude-sonnet-5`) | For audit stages (6A–6G) where document volume is lower |
 | Context window | 1,000,000 tokens | Per-model specification |
 | Output token limit | 32,000 tokens per response | Per-agent response cap |
 | Safe output budget | 25,000 tokens | Output limit minus 7K headroom for formatting/error recovery |
@@ -453,7 +453,9 @@ curl -s -o /dev/null -w "%{http_code}" https://api.anthropic.com/v1/messages \
   -H "content-type: application/json" \
   -d '{"model":"<MODEL_ID>","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}'
 # Replace <MODEL_ID> with the model ID from your plancasting/tech-stack.md § AI/LLM Model field
-# (e.g., claude-sonnet-4-5-20250514 — or any valid model from console.anthropic.com/docs/models)
+# (e.g., claude-opus-5 — or any valid model from console.anthropic.com/docs/models).
+# Current Claude model IDs carry NO date suffix: claude-opus-5, claude-sonnet-5, claude-fable-5.
+# Only claude-haiku-4-5 has a dated full form (claude-haiku-4-5-20251001).
 # Expected: 200. If 401: bad key. If 400/404: bad model ID or API version.
 
 # E2B: verify API key and sandbox creation works

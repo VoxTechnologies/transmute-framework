@@ -197,7 +197,7 @@ Checklist:
 
 ### Check 2. Environment Variable Spot-Check
 
-**Early AI model validation**: Check all AI model IDs used in code (e.g., `claude-sonnet-4-6-20250514`, `gpt-4-turbo`) against the provider's documentation. Send a 1-token test request for each model to verify they exist and respond. If any model ID is invalid, flag as CRITICAL — all AI-powered features will fail.
+**Early AI model validation**: Check all AI model IDs used in code (e.g., `claude-opus-5`, `gpt-4-turbo`) against the provider's documentation. Send a 1-token test request for each model to verify they exist and respond. If any model ID is invalid, flag as CRITICAL — all AI-powered features will fail.
 
 Before testing pages, check for common env var issues:
 - Navigate to the app and view page source or `__NEXT_DATA__` (for Next.js) — check that `NEXT_PUBLIC_*` values are present and not `"undefined"` or empty

@@ -1,7 +1,7 @@
 {
   "name": "transmuter",
   "description": "Transmute Framework — AI-driven pipeline that transforms a business plan into a fully deployed product through 25 stages (23 automated, 2 manual)",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": {
     "name": "Transmute",
     "url": "https://github.com/masterleopold/transmute-framework"
