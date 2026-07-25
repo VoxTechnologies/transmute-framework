@@ -932,8 +932,8 @@ These values govern session limits, token budgets, and splitting thresholds acro
 
 | Parameter | Value | Derivation |
 |---|---|---|
-| Pipeline model | [Auto-detected from Claude Code session — e.g., Claude Opus 4.6 (`claude-opus-4-6`)] | Auto-detected from Claude Code session |
-| Lighter-stage alternative | [e.g., Claude Sonnet 4.6] | For audit stages (6A–6G) where output quality requirements are lower |
+| Pipeline model | [Auto-detected from Claude Code session — e.g., Claude Opus 5 (`claude-opus-5`)] | Auto-detected from Claude Code session |
+| Lighter-stage alternative | [e.g., Claude Sonnet 5 (`claude-sonnet-5`)] | For audit stages (6A–6G) where output quality requirements are lower |
 | Context window | [Per-model specification — e.g., 1,000,000 tokens] | Per-model specification |
 | Output token limit | [Per-model specification — e.g., 32,000 tokens per response] | Per-agent response cap |
 | Safe output budget | [Output limit minus 7K — e.g., 25,000 tokens] | Output limit minus 7K headroom for formatting/error recovery |

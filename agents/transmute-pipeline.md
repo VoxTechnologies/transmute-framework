@@ -2,7 +2,7 @@
 name: transmute-pipeline
 description: |
   Orchestrates the full Transmute pipeline from business plan to production.
-  Use when the user runs "/transmute:cast full", "/transmute:cast resume", or asks to
+  Use when the user runs "/transmuter:cast full", "/transmuter:cast resume", or asks to
   "run the full pipeline", "plan cast", "transmute my business plan",
   or "resume the pipeline". Examples:
 
@@ -15,7 +15,7 @@ description: |
 
   <example>
   Context: User previously ran some stages and wants to continue
-  user: "/transmute:cast resume"
+  user: "/transmuter:cast resume"
   assistant: "I'll launch the transmute-pipeline agent to resume from the last completed stage."
   <commentary>The resume keyword triggers pipeline continuation from plancasting/_progress.md state.</commentary>
   </example>
@@ -47,7 +47,7 @@ Business Plan → Tech Stack → BRD → PRD → Spec Validation → Scaffold + 
 2. **Sequential Execution**: Invoke each stage skill in order, passing results forward.
 3. **Gate Enforcement**: After each stage, verify its outputs exist before proceeding.
 4. **Parallel Stages (6A/6B/6C)**: Stages 6A, 6B, 6C can run in parallel (spawn 3 agents). **Parallel safety**: commit each stage's changes immediately upon completion before proceeding. Shared config files (e.g., `next.config.ts`, `middleware.ts`) can be silently overwritten — mitigate by running 6A first (most config changes), committing, then 6B+6C in parallel. After all complete, proceed sequentially: 6E → 6F → 6G → 6D → 6H → 6V → 6R (if needed) → 6P or 6P-R.
-5. **Recovery**: If a stage fails, log the failure in `plancasting/_progress.md` and stop. The user can fix the issue and run `/transmute:cast resume`.
+5. **Recovery**: If a stage fails, log the failure in `plancasting/_progress.md` and stop. The user can fix the issue and run `/transmuter:cast resume`.
 6. **Stages 8 + 9**: **NEVER concurrent** — both modify `package.json`, lock files, and source code. Run one, commit, then the other.
 7. **Always run 5B after Stage 5** — never skip. Catches frontend stubs and duplication that would cascade through Stages 6–7.
 
@@ -168,7 +168,7 @@ If 6P-R Phase 2 is rejected by the user: revert the `redesign/frontend-elevation
 
 ## Resume Protocol
 
-When resuming (`/transmute:cast resume`):
+When resuming (`/transmuter:cast resume`):
 1. Read `plancasting/_progress.md` to find the last completed stage
 2. Determine the next stage to execute
 3. Continue the pipeline from that point

@@ -32,7 +32,7 @@ In Claude Code, run:
 1. Navigate to the **Marketplaces** tab
 2. Select **Add marketplace** and enter: `masterleopold/transmute-framework`
 3. Navigate to the **Discover** tab
-4. Find **transmute** and install it
+4. Find **transmuter** and install it
 
 After this, just run `claude` — Transmute loads automatically in every session. No extra flags needed.
 
@@ -59,7 +59,7 @@ This loads the plugin for the current session only. You'll need to pass `--plugi
 /plugin
 ```
 
-Navigate to the **Installed** tab and select **Update** next to transmute, or run `/reload-plugins` to refresh all plugins.
+Navigate to the **Installed** tab and select **Update** next to transmuter, or run `/reload-plugins` to refresh all plugins.
 
 ### Requirements
 
@@ -83,12 +83,12 @@ claude --plugin-dir /path/to/transmute-framework
 
 4. **Run the pipeline**:
 ```
-/transmute:cast
+/transmuter:cast
 ```
 
 5. **Resume if interrupted**:
 ```
-/transmute:cast resume
+/transmuter:cast resume
 ```
 
 ## Pipeline
@@ -141,41 +141,41 @@ Business Plan → Tech Stack → BRD → PRD → Spec Validation → Scaffold + 
 
 | Command                     | Description                        |
 | --------------------------- | ---------------------------------- |
-| `/transmute:cast`           | Run the full pipeline (Stages 0–9) |
-| `/transmute:cast full`      | Same as above                      |
-| `/transmute:cast resume`    | Resume from last completed stage   |
-| `/transmute:cast <stage>`   | Run a specific stage               |
-| `/transmute:cast help`      | Show all stage names               |
+| `/transmuter:cast`           | Run the full pipeline (Stages 0–9) |
+| `/transmuter:cast full`      | Same as above                      |
+| `/transmuter:cast resume`    | Resume from last completed stage   |
+| `/transmuter:cast <stage>`   | Run a specific stage               |
+| `/transmuter:cast help`      | Show all stage names               |
 
 ### Individual Stages
 
-Each stage is also a standalone skill. Claude Code autocomplete shows them as short names with a `(transmute)` label:
+Each stage is also a standalone skill. The plugin namespace is `transmuter`, so the qualified form is `/transmuter:<stage>`. Claude Code autocomplete matches on the stage name as you type and labels the entry `(transmuter)`:
 
-| Command              | Stage | Description                      |
-| -------------------- | ----- | -------------------------------- |
-| `/tech-stack`        | 0     | Interactive tech stack discovery |
-| `/brd`               | 1     | Business Requirements            |
-| `/prd`               | 2     | Product Requirements             |
-| `/validate-specs`    | 2B    | Spec validation                  |
-| `/scaffold`          | 3     | Project scaffolding              |
-| `/implement`         | 5     | Feature implementation           |
-| `/audit-completeness`| 5B    | Implementation audit             |
-| `/audit-security`    | 6A    | Security audit                   |
-| `/audit-a11y`        | 6B    | Accessibility audit              |
-| `/optimize`          | 6C    | Performance optimization         |
-| `/docs`              | 6D    | Documentation                    |
-| `/refactor`          | 6E    | Code refactoring                 |
-| `/seed-data`         | 6F    | Seed data generation             |
-| `/harden`            | 6G    | Error resilience                 |
-| `/prelaunch`         | 6H    | Pre-launch verification          |
-| `/verify`            | 6V    | Visual & functional verification |
-| `/remediate`         | 6R    | Runtime remediation              |
-| `/polish`            | 6P    | Visual polish                    |
-| `/redesign`          | 6P-R  | Frontend design elevation        |
-| `/smoke`             | 7V    | Production smoke tests           |
-| `/user-guide`        | 7D    | User guide generation            |
-| `/feedback`          | 8     | Feedback loop                    |
-| `/maintain`          | 9     | Dependency maintenance           |
+| Command                        | Stage | Description                      |
+| ------------------------------ | ----- | -------------------------------- |
+| `/transmuter:tech-stack`        | 0     | Interactive tech stack discovery |
+| `/transmuter:brd`               | 1     | Business Requirements            |
+| `/transmuter:prd`               | 2     | Product Requirements             |
+| `/transmuter:validate-specs`    | 2B    | Spec validation                  |
+| `/transmuter:scaffold`          | 3     | Project scaffolding              |
+| `/transmuter:implement`         | 5     | Feature implementation           |
+| `/transmuter:audit-completeness`| 5B    | Implementation audit             |
+| `/transmuter:audit-security`    | 6A    | Security audit                   |
+| `/transmuter:audit-a11y`        | 6B    | Accessibility audit              |
+| `/transmuter:optimize`          | 6C    | Performance optimization         |
+| `/transmuter:docs`              | 6D    | Documentation                    |
+| `/transmuter:refactor`          | 6E    | Code refactoring                 |
+| `/transmuter:seed-data`         | 6F    | Seed data generation             |
+| `/transmuter:harden`            | 6G    | Error resilience                 |
+| `/transmuter:prelaunch`         | 6H    | Pre-launch verification          |
+| `/transmuter:verify`            | 6V    | Visual & functional verification |
+| `/transmuter:remediate`         | 6R    | Runtime remediation              |
+| `/transmuter:polish`            | 6P    | Visual polish                    |
+| `/transmuter:redesign`          | 6P-R  | Frontend design elevation        |
+| `/transmuter:smoke`             | 7V    | Production smoke tests           |
+| `/transmuter:user-guide`        | 7D    | User guide generation            |
+| `/transmuter:feedback`          | 8     | Feedback loop                    |
+| `/transmuter:maintain`          | 9     | Dependency maintenance           |
 
 Stages **4** and **7** are manual and cannot be invoked via commands.
 
@@ -189,7 +189,7 @@ Stages **4** and **7** are manual and cannot be invoked via commands.
 6. **Stage 7 is manual deployment** — you deploy, then the plugin runs smoke tests
 7. **Stages 8–9 are ongoing** — process user feedback and maintain dependencies
 
-The pipeline is **gate-enforced** — you cannot skip stages. Prerequisites are checked before each stage runs. If a stage fails, fix the issue and run `/transmute:cast resume`.
+The pipeline is **gate-enforced** — you cannot skip stages. Prerequisites are checked before each stage runs. If a stage fails, fix the issue and run `/transmuter:cast resume`.
 
 ### Gate Logic
 
@@ -256,7 +256,7 @@ your-project/
 ```
 transmute-framework/
 ├── .claude-plugin/plugin.json   # Plugin manifest
-├── commands/cast.md             # /transmute:cast entry point
+├── commands/cast.md             # /transmuter:cast entry point
 ├── agents/
 │   ├── transmute-pipeline.md    # Full pipeline orchestrator
 │   ├── brd-writer.md            # BRD section writer
@@ -295,6 +295,20 @@ transmute-framework/
 - A business plan (markdown or PDF files)
 
 ## Changelog
+
+### v3.0.1
+
+**Command namespace correction** — the plugin was renamed to `transmuter` in v3.0.0's config files, but the docs still told users to type `/transmute:cast`. That prefix matches no installed plugin, so every documented command failed.
+
+- All command references corrected to `/transmuter:cast` and `/transmuter:<stage>` across README, `commands/cast.md`, `CONTRIBUTING.md`, and `agents/transmute-pipeline.md`
+- Install and update instructions now name **transmuter** in the `/plugin` marketplace listing (was **transmute**)
+- Individual-stage table now shows the qualified `/transmuter:<stage>` form rather than bare short names, with the autocomplete behavior described in prose
+
+**Model IDs refreshed to the current generation**
+
+- Pipeline model: `claude-opus-4-6` → `claude-opus-5`; lighter-stage alternative: Sonnet 4.6 → `claude-sonnet-5` (`templates/execution-guide.md`, `skills/tech-stack/references/tech-stack-detailed-guide.md`)
+- Fixed two non-existent model IDs used as examples: `claude-sonnet-4-5-20250514` and `claude-sonnet-4-6-20250514`. Neither is a real ID — current Claude models carry no date suffix, and the latter appeared in the Stage 7V guide that teaches agents to detect hallucinated model IDs
+- Added a note to the Stage 0 credential-validation snippet recording that current IDs take no date suffix, and that `claude-haiku-4-5-20251001` is the only dated full form among the current models
 
 ### v3.0.0
 

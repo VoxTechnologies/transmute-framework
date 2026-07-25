@@ -39,7 +39,7 @@ Use conventional commits: `type(scope): description`
 ```
 transmute-framework/
 ├── .claude-plugin/plugin.json   # Plugin manifest
-├── commands/cast.md             # Pipeline controller (/transmute:cast)
+├── commands/cast.md             # Pipeline controller (/transmuter:cast)
 ├── agents/                      # 7 agent definitions (pipeline orchestrator + feature teams)
 ├── skills/                      # 23 stage skills (one per pipeline stage)
 │   └── <stage-name>/
@@ -91,7 +91,7 @@ transmute-framework/
 There is no automated test suite — the plugin is prompt engineering, not traditional code. To validate changes:
 
 1. Create a test project with a simple business plan in `plancasting/businessplan/`
-2. Run the modified stage: `/transmute:cast <stage-name>`
+2. Run the modified stage: `/transmuter:cast <stage-name>`
 3. Verify the output matches expectations
 
 ## Areas Needing Help
