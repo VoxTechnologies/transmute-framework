@@ -1,8 +1,8 @@
 # Transmute Framework
 
-[![GitHub Release](https://img.shields.io/github/v/release/masterleopold/transmute-framework)](https://github.com/masterleopold/transmute-framework/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/VoxTechnologies/transmute-framework)](https://github.com/VoxTechnologies/transmute-framework/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Stars](https://img.shields.io/github/stars/masterleopold/transmute-framework)](https://github.com/masterleopold/transmute-framework/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/VoxTechnologies/transmute-framework)](https://github.com/VoxTechnologies/transmute-framework/stargazers)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
 
 **Turn a business plan into a deployed product — autonomously.**
@@ -30,7 +30,7 @@ In Claude Code, run:
 ```
 
 1. Navigate to the **Marketplaces** tab
-2. Select **Add marketplace** and enter: `masterleopold/transmute-framework`
+2. Select **Add marketplace** and enter: `VoxTechnologies/transmute-framework`
 3. Navigate to the **Discover** tab
 4. Find **transmuter** and install it
 
@@ -47,7 +47,7 @@ You can choose a scope during installation:
 ### Try It (one-time)
 
 ```bash
-git clone https://github.com/masterleopold/transmute-framework.git
+git clone https://github.com/VoxTechnologies/transmute-framework.git
 claude --plugin-dir ./transmute-framework
 ```
 
@@ -604,7 +604,7 @@ transmute-framework/
 
 ## Built With Transmute
 
-> Have you built something with Transmute? [Open an issue](https://github.com/masterleopold/transmute-framework/issues/new?template=feature_request.md&title=%5BShowcase%5D+) to get featured!
+> Have you built something with Transmute? [Open an issue](https://github.com/VoxTechnologies/transmute-framework/issues/new?template=feature_request.md&title=%5BShowcase%5D+) to get featured!
 
 ## Contributing
 

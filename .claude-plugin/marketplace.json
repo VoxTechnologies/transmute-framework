@@ -3,7 +3,7 @@
   "description": "Transmute Framework — AI-driven business plan to product pipeline",
   "owner": {
     "name": "Transmute",
-    "url": "https://github.com/masterleopold/transmute-framework"
+    "url": "https://github.com/VoxTechnologies/transmute-framework"
   },
   "plugins": [
     {
@@ -11,7 +11,7 @@
       "description": "AI-driven pipeline that transforms a business plan into a fully deployed product through 25 stages",
       "source": "./",
       "category": "productivity",
-      "homepage": "https://github.com/masterleopold/transmute-framework"
+      "homepage": "https://github.com/VoxTechnologies/transmute-framework"
     }
   ]
 }

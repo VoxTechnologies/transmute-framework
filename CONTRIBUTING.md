@@ -106,7 +106,7 @@ We welcome contributions in these areas:
 - **Template improvements** — better starter rules, more robust CLAUDE.md template
 - **Bug reports** — especially for specific tech stack + business plan combinations
 
-Look for issues labeled [`good first issue`](https://github.com/masterleopold/transmute-framework/labels/good%20first%20issue) or [`help wanted`](https://github.com/masterleopold/transmute-framework/labels/help%20wanted) for entry points.
+Look for issues labeled [`good first issue`](https://github.com/VoxTechnologies/transmute-framework/labels/good%20first%20issue) or [`help wanted`](https://github.com/VoxTechnologies/transmute-framework/labels/help%20wanted) for entry points.
 
 ## Reporting Issues
 
