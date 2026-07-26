@@ -122,3 +122,8 @@ complete.
   prompt file. Ambiguity in a skill prompt becomes non-determinism at run time.
 - The README changelog is unusually detailed by design: it records which audit
   pass changed each file, which is how template sync state is tracked.
+- The repository moved from `masterleopold/` to `VoxTechnologies/`, and all repo
+  URLs were rewritten accordingly. One `masterleopold` reference remains, in
+  `.github/FUNDING.yml`, and it is correct: that field takes a GitHub Sponsors
+  **username**, not a repo path. A repo-wide rename that "finishes the job"
+  there would redirect sponsorship to a different account.
