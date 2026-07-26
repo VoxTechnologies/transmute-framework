@@ -21,7 +21,7 @@ We are committed to making participation in this project a welcoming experience 
 
 Project maintainers are responsible for clarifying standards and taking appropriate action in response to unacceptable behavior.
 
-Instances of unacceptable behavior may be reported by opening a [private security advisory](https://github.com/masterleopold/transmute-framework/security/advisories/new).
+Instances of unacceptable behavior may be reported by opening a [private security advisory](https://github.com/VoxTechnologies/transmute-framework/security/advisories/new).
 
 ## Attribution
 

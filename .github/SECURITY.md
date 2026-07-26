@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in Transmute Framework, please report it responsibly.
 
-**Email**: Open a [private security advisory](https://github.com/masterleopold/transmute-framework/security/advisories/new) on GitHub.
+**Email**: Open a [private security advisory](https://github.com/VoxTechnologies/transmute-framework/security/advisories/new) on GitHub.
 
 Please include:
 - Description of the vulnerability
