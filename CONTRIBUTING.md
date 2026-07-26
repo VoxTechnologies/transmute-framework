@@ -73,6 +73,8 @@ transmute-framework/
 5. Add the stage row to `agents/transmute-pipeline.md` Stage Skills Map
 6. If the stage has complex instructions, add a `references/` subdirectory
 
+A stage also appears in the templates, README tables, and version metadata. See the full eight-place checklist in [docs/plugin-architecture.md](docs/plugin-architecture.md#the-consistency-invariant) before opening the PR.
+
 ## How to Modify an Existing Stage
 
 1. Read the full SKILL.md — understand what it does
