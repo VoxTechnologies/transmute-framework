@@ -48,16 +48,16 @@ Always read `CLAUDE.md` and `plancasting/tech-stack.md` for your project's actua
 
 **Package Manager**: Commands in this prompt use `bun run` as the default. Replace with your project's package manager as specified in `CLAUDE.md` (e.g., `npm run`, `pnpm run`, `yarn`).
 
-**⚠️ Component Library Rule**: If using a component library with built-in accessibility (React Aria, HeadlessUI, Radix, shadcn/ui, Untitled UI), many ARIA patterns are already handled. Do NOT add redundant ARIA attributes that conflict with the library's implementation — this can actually break accessibility. Check the library's documentation before adding ARIA attributes to library-provided components. Example: if the library already sets `role='button'` and `aria-pressed`, do NOT re-add those attributes. Additions are safe only if the library doesn't already handle that aspect.
+**⚠️ Component Library Rule**: If using a component library with built-in accessibility (React Aria, HeadlessUI, Radix, shadcn/ui, Untitled UI), many ARIA patterns are already handled. Do not add redundant ARIA attributes that conflict with the library's implementation — this can actually break accessibility. Check the library's documentation before adding ARIA attributes to library-provided components. Example: if the library already sets `role='button'` and `aria-pressed`, do not re-add those attributes. Additions are safe only if the library doesn't already handle that aspect.
 
 ## Known Failure Patterns
 
 Based on observed audit outcomes:
 
-1. **`aria-hidden="true"` to suppress violations**: Agent hides elements from the accessibility tree instead of fixing the underlying issue. NEVER use `aria-hidden` as a fix — only use it for genuinely decorative elements.
-2. **`role="button"` on `<div>` instead of using `<button>`**: Agent adds ARIA roles instead of using semantic HTML. ALWAYS prefer semantic elements over ARIA roles.
-3. **Focus style inconsistency**: NEVER invent new focus styles — use the project's established convention (documented in CLAUDE.md Part 2).
-4. **Layout breaks from semantic changes**: Changing `<div>` to `<section>` or `<nav>` can break CSS layouts. ALWAYS verify visual appearance after semantic HTML changes.
+1. **`aria-hidden="true"` to suppress violations**: Agent hides elements from the accessibility tree instead of fixing the underlying issue. never use `aria-hidden` as a fix — only use it for genuinely decorative elements.
+2. **`role="button"` on `<div>` instead of using `<button>`**: Agent adds ARIA roles instead of using semantic HTML. always prefer semantic elements over ARIA roles.
+3. **Focus style inconsistency**: never invent new focus styles — use the project's established convention (documented in CLAUDE.md Part 2).
+4. **Layout breaks from semantic changes**: Changing `<div>` to `<section>` or `<nav>` can break CSS layouts. always verify visual appearance after semantic HTML changes.
 5. **Missing `lang` attribute**: `<html lang="...">` is WCAG 3.1.1 (Level A) but is frequently missed in audits.
 
 ## Agent Team Architecture
@@ -77,7 +77,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Audit Teammates
 
-Spawn the following 3 teammates. Each teammate's spawn prompt MUST include the accessibility checklist and the target WCAG level. All 3 teammates may run in parallel. If semantic-structure-auditor changes a `<div>` to a semantic element, interactive-elements-auditor should re-check that element in Phase 3.
+Spawn the following 3 teammates. Each teammate's spawn prompt must include the accessibility checklist and the target WCAG level. All 3 teammates may run in parallel. If semantic-structure-auditor changes a `<div>` to a semantic element, interactive-elements-auditor should re-check that element in Phase 3.
 
 **Before spawning**: Replace all directory paths in teammate instructions below (`src/app/`, `src/components/`) with your project's actual paths per Stack Adaptation section above.
 
@@ -222,7 +222,7 @@ When done, message the lead with: issue count by category, fix count.
 
 If a violation cannot be fixed without architectural changes or would break another feature:
 1. Document the full conflict with evidence (what the violation is, what fixing it would break)
-2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do NOT attempt a fix that creates regressions
+2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do not attempt a fix that creates regressions
 3. Include a recommended approach and estimated effort in the report
 4. **If the violation is WCAG Level A**: mark as CRITICAL and flag as a potential launch blocker — Level A is the minimum legal compliance level in most jurisdictions
 5. Record unfixable WCAG Level A violations in `./plancasting/_audits/accessibility/unfixable-violations.md` AND summarize in the main report.md under a 'Blocking Issues' section.
@@ -272,7 +272,7 @@ After all teammates complete:
    - Fixes applied with code references
    - Automated test results (axe-core)
    - Remaining issues requiring manual testing (screen reader testing, cognitive review)
-   **Scope note**: Screen reader testing (with NVDA, JAWS, or VoiceOver) is NOT in scope for 6B — it is a runtime verification done in Stage 6V. Stage 6B focuses on code-level accessibility: semantic HTML, ARIA attributes, keyboard navigation, and color contrast via code review.
+   **Scope note**: Screen reader testing (with NVDA, JAWS, or VoiceOver) is not in scope for 6B — it is a runtime verification done in Stage 6V. Stage 6B focuses on code-level accessibility: semantic HTML, ARIA attributes, keyboard navigation, and color contrast via code review.
    - BRD NFR accessibility requirement compliance matrix
 
    ## Gate Decision
@@ -294,15 +294,15 @@ After all teammates complete:
 
 ## Critical Rules
 
-1. ALWAYS prefer semantic HTML over ARIA roles (`<button>` over `<div role="button">`).
-2. NEVER add `aria-hidden="true"` to suppress axe violations — fix the underlying issue.
-3. NEVER add ARIA attributes that conflict with React Aria's (or your component library's) built-in accessibility.
-4. ALWAYS use the project's focus ring convention from CLAUDE.md (e.g., Tailwind: `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`; CSS: check `src/styles/` for the `focus-visible` selector; styled-components: check theme tokens). Verify the focus ring token resolves correctly in your Tailwind version (Tailwind v4 uses CSS-first configuration — check your Tailwind config if focus ring tokens don't resolve). If CLAUDE.md doesn't specify, define one and document it.
-5. ALWAYS verify visual layout is preserved after semantic HTML changes.
-6. ALWAYS check `<html lang="...">` attribute matches the session language.
-7. ALWAYS verify `prefers-reduced-motion` media query is respected for animations.
-8. ALWAYS run the full test suite after accessibility changes.
+1. always prefer semantic HTML over ARIA roles (`<button>` over `<div role="button">`).
+2. never add `aria-hidden="true"` to suppress axe violations — fix the underlying issue.
+3. never add ARIA attributes that conflict with React Aria's (or your component library's) built-in accessibility.
+4. always use the project's focus ring convention from CLAUDE.md (e.g., Tailwind: `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`; CSS: check `src/styles/` for the `focus-visible` selector; styled-components: check theme tokens). Verify the focus ring token resolves correctly in your Tailwind version (Tailwind v4 uses CSS-first configuration — check your Tailwind config if focus ring tokens don't resolve). If CLAUDE.md doesn't specify, define one and document it.
+5. always verify visual layout is preserved after semantic HTML changes.
+6. always check `<html lang="...">` attribute matches the session language.
+7. always verify `prefers-reduced-motion` media query is respected for animations.
+8. always run the full test suite after accessibility changes.
 9. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).
 10. Reference Stage 5B output (`./plancasting/_audits/implementation-completeness/report.md`) to identify incomplete features — skip accessibility auditing for those features entirely. In the final report, list which features were skipped and why. Calculate compliance percentages based on audited features only (e.g., "Audited 12/15 features; 3 skipped as incomplete per Stage 5B").
-11. **Parallel execution**: This stage may run concurrently with 6A and 6C. Document required changes to shared config files (`next.config.ts`, `middleware.ts`, `tailwind.config.ts`, `globals.css`) in the report under a `## Pending Config Changes` section rather than modifying them directly — this prevents silent overwrites when parallel stages commit. If a Level A WCAG fix MUST modify a shared config file immediately (e.g., `<html lang>` attribute in layout file), commit the change immediately and note it prominently in the report under `## Pending Config Changes`.
+11. **Parallel execution**: This stage may run concurrently with 6A and 6C. Document required changes to shared config files (`next.config.ts`, `middleware.ts`, `tailwind.config.ts`, `globals.css`) in the report under a `## Pending Config Changes` section rather than modifying them directly — this prevents silent overwrites when parallel stages commit. If a Level A WCAG fix must modify a shared config file immediately (e.g., `<html lang>` attribute in layout file), commit the change immediately and note it prominently in the report under `## Pending Config Changes`.
 ````

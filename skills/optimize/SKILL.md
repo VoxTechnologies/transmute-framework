@@ -7,12 +7,14 @@ description: >-
   "fix Core Web Vitals", "reduce bundle size", "optimize queries",
   or "improve loading time",
   or when the transmute-pipeline agent reaches Stage 6C of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Performance Optimization — Stage 6C
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/optimize-detailed-guide.md` for the complete optimization procedures, teammate spawn prompts, benchmark patterns, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/optimize-detailed-guide.md` for the complete optimization procedures, teammate spawn prompts, benchmark patterns, and report templates.
 
 Lead a multi-agent performance optimization project. Audit the complete product against PRD performance budgets, identify bottlenecks, and implement optimizations.
 
@@ -54,7 +56,7 @@ Read `CLAUDE.md` Part 2 for project-specific conventions.
 
 ## Known Failure Patterns
 
-1. **Lighthouse in dev mode**: Always measure against production build, never dev server. NEVER measure against `localhost:3000` in development.
+1. **Lighthouse in dev mode**: Always measure against production build, never dev server. never measure against `localhost:3000` in development.
 2. **Premature React.memo**: Do not add to every component. Only use where expensive re-renders with unchanged props are measured.
 3. **Lazy loading above-the-fold content**: Do not defer critical content visible on initial render — this hurts LCP.
 4. **Over-aggressive .take(N)**: Do not truncate queries below the feature's actual data volume.
@@ -67,7 +69,7 @@ Read `CLAUDE.md` Part 2 for project-specific conventions.
 Complete these steps synchronously before spawning any teammates:
 
 1. Read `./CLAUDE.md`, `./plancasting/tech-stack.md`, and `./plancasting/prd/15-non-functional-specifications.md`.
-2. **Create the performance baseline** (MUST complete before spawning teammates — build production, measure, then spawn):
+2. **Create the performance baseline** (must complete before spawning teammates — build production, measure, then spawn):
    ```bash
    mkdir -p ./plancasting/_audits/performance
    bun run build && bun run start &
@@ -76,7 +78,7 @@ Complete these steps synchronously before spawning any teammates:
    # Repeat for other key pages
    kill $(lsof -ti:3000) 2>/dev/null
    ```
-   Record metrics in `./plancasting/_audits/performance/baseline.md`. Mark with: `<!-- ORIGINAL BASELINE — DO NOT RECREATE ON SUBSEQUENT 6C RUNS -->`. This file is permanent. NEVER measure against the dev server.
+   Record metrics in `./plancasting/_audits/performance/baseline.md`. Mark with: `<!-- ORIGINAL BASELINE — Do not recreate on subsequent 6C RUNS -->`. This file is permanent. never measure against the dev server.
 3. Extract all performance budgets from the PRD: page load targets, API response targets, bundle size budgets, Lighthouse score targets, Core Web Vitals targets (LCP, INP, CLS). If the PRD does not specify, use web.dev defaults: LCP < 2.5s, INP < 200ms, CLS < 0.1, Lighthouse Performance > 90.
 4. Write `./plancasting/_audits/performance/targets.md` with extracted targets. Document the source (PRD vs defaults).
 5. Create a task list for all teammates with dependency tracking.
@@ -139,7 +141,7 @@ When an issue cannot be fixed without architectural changes:
       - INP (Interaction to Next Paint): Target < 200ms. Note: INP is a real-user metric — Lighthouse cannot measure it directly. Use TBT (Total Blocking Time) < 200ms as lab proxy. TBT = main thread blocking during load; INP = responsiveness to user interactions.
       - CLS (Cumulative Layout Shift): Target < 0.1
    e. Use Lighthouse default throttling (simulated 4G), cold cache.
-   f. **Baseline Preservation**: On first 6C run, create baseline. On subsequent re-runs, do NOT recreate — always measure against the ORIGINAL baseline.
+   f. **Baseline Preservation**: On first 6C run, create baseline. On subsequent re-runs, do not recreate — always measure against the ORIGINAL baseline.
    g. Read PRD targets first; use web.dev Good thresholds only as defaults.
 3. Generate `./plancasting/_audits/performance/report.md` containing:
    - Performance budget compliance table (metric, target, actual, pass/fail)
@@ -161,12 +163,12 @@ When an issue cannot be fixed without architectural changes:
 
 ## Critical Rules
 
-1. NEVER optimize without measuring first — premature optimization adds complexity without benefit.
-2. NEVER convert Server Components to Client Components for optimization (Next.js). For non-SSR frameworks: do not convert server-rendered routes to client-only.
-3. NEVER run Lighthouse in development mode — always use production build and start commands.
-4. ALWAYS verify optimizations don't break functionality — run the full test suite.
-5. ALWAYS measure bundle size before and after changes using your framework's bundle analyzer.
-6. NEVER add `.take(N)` that is too small for the feature's actual data volume.
+1. never optimize without measuring first — premature optimization adds complexity without benefit.
+2. never convert Server Components to Client Components for optimization (Next.js). For non-SSR frameworks: do not convert server-rendered routes to client-only.
+3. never run Lighthouse in development mode — always use production build and start commands.
+4. always verify optimizations don't break functionality — run the full test suite.
+5. always measure bundle size before and after changes using your framework's bundle analyzer.
+6. never add `.take(N)` that is too small for the feature's actual data volume.
 7. Use commands from CLAUDE.md for testing.
 8. Reference Stage 5B output to avoid optimizing incomplete features.
 9. INP replaces FID (deprecated March 2024). Use TBT as lab proxy for INP. See Measurement Standards above.

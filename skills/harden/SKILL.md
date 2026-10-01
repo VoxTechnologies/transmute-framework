@@ -6,12 +6,14 @@ description: >-
   "add resilience", "handle network failures", "add retry logic",
   "add circuit breakers", "handle edge cases", or "improve error recovery"
   — or when the transmute-pipeline agent reaches Stage 6G of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Stage 6G: Error Handling, Network Failures, and Edge Cases
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/harden-detailed-guide.md` for the complete hardening procedures, teammate spawn prompts, error pattern catalogs, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/harden-detailed-guide.md` for the complete hardening procedures, teammate spawn prompts, error pattern catalogs, and report templates.
 
 Lead a multi-agent error resilience hardening project. Systematically review the COMPLETE product for error handling gaps, network failure scenarios, race conditions, and edge cases that individual feature implementations may have missed.
 
@@ -25,7 +27,7 @@ Stage 6A implements rate limiting for **AUTH endpoints** (login, signup, passwor
 
 ## Prerequisites
 
-**Prerequisite**: Stage 6E must have completed before 6G starts — 6G depends on refactored error handling patterns from 6E. Do NOT run 6E and 6G in parallel.
+**Prerequisite**: Stage 6E must have completed before 6G starts — 6G depends on refactored error handling patterns from 6E. Do not run 6E and 6G in parallel.
 
 Verify before starting:
 
@@ -39,17 +41,17 @@ Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate
 
 ## Stack Adaptation
 
-Source examples use Convex + Next.js. Adapt all paths and patterns to the actual tech stack: `convex/` becomes your backend directory, Convex OCC becomes your concurrency control, `src/app/` becomes your frontend pages, auto-generated directories (e.g., `convex/_generated/`, `prisma/generated/`) should NEVER be edited.
+Source examples use Convex + Next.js. Adapt all paths and patterns to the actual tech stack: `convex/` becomes your backend directory, Convex OCC becomes your concurrency control, `src/app/` becomes your frontend pages, auto-generated directories (e.g., `convex/_generated/`, `prisma/generated/`) should never be edited.
 
 ## Known Failure Patterns
 
-1. **Retry on non-idempotent operations**: Causes duplicate data. ALWAYS verify idempotency before adding retries. Also beware: incrementing counters, appending to logs, sending notifications are NOT idempotent even with 'set' operations.
-2. **Permanently open circuit breakers**: Never reset after transient outage. ALWAYS include a reset mechanism (time-based or health-check-based). States: CLOSED -> OPEN (after 5 consecutive failures) -> HALF-OPEN (after 60s cooldown, allow one probe request) -> success: CLOSED, failure: OPEN.
-3. **Error boundaries that lose state**: Form data lost when boundary catches error. ALWAYS preserve user input.
+1. **Retry on non-idempotent operations**: Causes duplicate data. always verify idempotency before adding retries. Also beware: incrementing counters, appending to logs, sending notifications are not idempotent even with 'set' operations.
+2. **Permanently open circuit breakers**: Never reset after transient outage. always include a reset mechanism (time-based or health-check-based). States: CLOSED -> OPEN (after 5 consecutive failures) -> HALF-OPEN (after 60s cooldown, allow one probe request) -> success: CLOSED, failure: OPEN.
+3. **Error boundaries that lose state**: Form data lost when boundary catches error. always preserve user input.
 4. **Over-aggressive timeouts**: 3-second timeouts on 10+ second operations. Match timeouts to actual characteristics.
 5. **Silent error swallowing**: Errors caught but logged silently. Every caught error must be re-thrown, logged with context, or communicated to the user.
 6. **Graceful degradation that hides features**: Show degraded state with explanation, not blank space.
-7. **Over-broad idempotency keys**: Adding idempotency keys to operations that should NOT be retried (one-time deletions, irreversible actions). Distinguish between "safe to retry" (create/update) and "unsafe to retry" (delete, decrement, send).
+7. **Over-broad idempotency keys**: Adding idempotency keys to operations that should not be retried (one-time deletions, irreversible actions). Distinguish between "safe to retry" (create/update) and "unsafe to retry" (delete, decrement, send).
 
 ## Phase 1: Lead Analysis and Planning
 
@@ -65,7 +67,7 @@ Complete BEFORE spawning teammates:
 
 ## Phase 2: Spawn Hardening Teammates
 
-**Shared Context — Idempotency Classification**: A mutation that increments a counter, appends to a log, or sends a notification is NOT idempotent even if it uses a 'set' operation — the side effect accumulates on retry. All teammates must classify mutations before adding retry logic.
+**Shared Context — Idempotency Classification**: A mutation that increments a counter, appends to a log, or sends a notification is not idempotent even if it uses a 'set' operation — the side effect accumulates on retry. All teammates must classify mutations before adding retry logic.
 
 ### Teammate 1: "backend-resilience"
 
@@ -76,7 +78,7 @@ Tasks:
 1. **External service failure handling**: For each external API call, verify try/catch, timeout configuration.
    - **Timeout baselines**: fast API calls: 3-5s; file operations: 30s; AI model calls: 60-120s; long-running workflows: per business SLA. Use measured latencies from performance report + 50% buffer if available.
    - **Retry with exponential backoff**: For transient failures (network errors, 5xx, 429). Formula: delay = min(2^attempt x 1000ms, 30000ms) + random(0, 1000ms) jitter, where attempt starts at 1. Retry 1: ~2-3s, retry 2: ~4-5s, retry 3: ~8-9s, then stop. For 429 responses, honor `Retry-After` header (both seconds-value and HTTP-date formats per RFC 7231, capped at 30s).
-   - **For backend mutations**: Verify idempotency FIRST. Only add automatic retries for idempotent mutations. Non-idempotent mutations MUST surface errors to the user with manual retry option.
+   - **For backend mutations**: Verify idempotency FIRST. Only add automatic retries for idempotent mutations. Non-idempotent mutations must surface errors to the user with manual retry option.
    - **Circuit breaker decision**: For serverless environments, use retry-with-exponential-backoff alone (recommended default). Only implement full circuit breakers if: long-running servers with persistent state, or specific external service has frequent prolonged outages. Circuit breakers on QUERY paths: return cached/fallback data. On mutation paths: return graceful error (NOT cached data). In serverless, persist state via database or key-value store.
    - Verify user receives meaningful error messages. Verify graceful degradation.
 
@@ -86,7 +88,7 @@ Tasks:
 
 4. **Rate limiting for data-mutation endpoints**: Check 6A report first. Implement DATA-MUTATION rate limiting only. Verify file uploads have server-side size limits.
 
-**Making non-idempotent mutations safe**: Identify natural deduplication key, add `idempotencyKey` parameter, check existence before inserting, return existing record if duplicate. If no natural key exists, do NOT add automatic retry.
+**Making non-idempotent mutations safe**: Identify natural deduplication key, add `idempotencyKey` parameter, check existence before inserting, return existing record if duplicate. If no natural key exists, do not add automatic retry.
 
 **API contract changes**: Document with before/after examples. Lead reconciles in Phase 3.
 
@@ -162,12 +164,12 @@ Request shutdown for all teammates. Verify all modifications are saved and commi
 
 ## Critical Rules
 
-1. NEVER add retry logic to non-idempotent mutations — fix idempotency first.
-2. NEVER swallow errors silently — re-throw, log with context, or communicate to user.
-3. NEVER add circuit breakers without a reset mechanism (time-based or health-check-based).
-4. Retry backoff MUST use exponential backoff with jitter: delay = min(2^attempt x 1000ms, 30000ms) + random(0, 1000ms). Maximum 3 retries. Maximum delay cap: 30s.
-5. ALWAYS preserve user input across error recovery.
-6. ALWAYS run the full test suite after resilience changes.
+1. never add retry logic to non-idempotent mutations — fix idempotency first.
+2. never swallow errors silently — re-throw, log with context, or communicate to user.
+3. never add circuit breakers without a reset mechanism (time-based or health-check-based).
+4. Retry backoff must use exponential backoff with jitter: delay = min(2^attempt x 1000ms, 30000ms) + random(0, 1000ms). Maximum 3 retries. Maximum delay cap: 30s.
+5. always preserve user input across error recovery.
+6. always run the full test suite after resilience changes.
 7. Match timeout values to actual operation characteristics — file uploads and AI operations need longer timeouts.
 8. Reference Stage 5B output to avoid hardening incomplete features.
 9. For long-running workflows: verify step failure handling, timeout handling, and resume-from-failure capability.

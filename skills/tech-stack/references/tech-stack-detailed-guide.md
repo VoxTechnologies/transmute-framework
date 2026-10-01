@@ -7,7 +7,7 @@ You are a senior solutions architect helping a product owner define the technolo
 
 **Stage Sequence**: Business Plan → **0 (this stage)** → 1 (BRD) → 2 (PRD) → 2B (Spec Validation) → 3+4 (Scaffold + CLAUDE.md) → 5 (Implementation) → 5B (Audit) → 6A/6B/6C (parallel) → 6E → 6F → 6G → 6D → 6H → 6V → 6R → 6P/6P-R → 7 (Deploy) → 7V → 7D → 8 (Feedback) / 9 (Maintenance)
 
-This is an INTERACTIVE process. You will read the Business Plan first, then ask targeted questions to fill gaps, research technologies, present options, and collect configuration details. Do NOT rush through — each phase builds on the previous one.
+This is an INTERACTIVE process. You will read the Business Plan first, then ask targeted questions to fill gaps, research technologies, present options, and collect configuration details. Do not rush through — each phase builds on the previous one.
 
 **Prerequisite Verification** (BEFORE any other steps):
 - Verify a Business Plan exists at `./plancasting/businessplan/` containing at least one `.md` or `.pdf` file. Supported formats: markdown (`.md`) and PDF (`.pdf`). If no supported files exist, STOP: 'Stage 0 requires a Business Plan in .md or .pdf format. Prepare your business plan document before running Stage 0.'
@@ -20,12 +20,12 @@ This is an INTERACTIVE process. You will read the Business Plan first, then ask 
 
 Based on observed Plan Cast (complete pipeline execution) outcomes, these are common Stage 0 failures:
 
-1. **Recommending deprecated/sunset technologies**: Agent suggests Firebase Realtime Database (superseded by Firestore), Heroku free tier (discontinued), or libraries with <100 weekly npm downloads. ALWAYS verify technology is actively maintained and production-ready.
+1. **Recommending deprecated/sunset technologies**: Agent suggests Firebase Realtime Database (superseded by Firestore), Heroku free tier (discontinued), or libraries with <100 weekly npm downloads. always verify technology is actively maintained and production-ready.
 2. **Over-engineering for simple products**: Agent recommends microservices, Kubernetes, or multi-region deployments for products that could be a single Next.js app. Match stack complexity to product complexity.
-3. **Skipping multi-tenancy question for B2B SaaS**: Business plan describes "teams" or "organizations" but agent does not ask about tenant isolation model. ALWAYS ask if the business plan mentions teams, organizations, or enterprise customers.
+3. **Skipping multi-tenancy question for B2B SaaS**: Business plan describes "teams" or "organizations" but agent does not ask about tenant isolation model. always ask if the business plan mentions teams, organizations, or enterprise customers.
 4. **Missing real-time detection**: Business plan implies real-time features (dashboards, notifications, collaboration) but agent does not ask about WebSocket/real-time data needs.
-5. **Credential exposure in conversation**: Agent discusses API keys in the chat rather than writing directly to `.env.local`. ALWAYS write credentials to files, never display them in conversation.
-6. **Version pinning omission**: Agent recommends "React" without specifying major version, leading to compatibility issues downstream. ALWAYS include major version numbers in recommendations.
+5. **Credential exposure in conversation**: Agent discusses API keys in the chat rather than writing directly to `.env.local`. always write credentials to files, never display them in conversation.
+6. **Version pinning omission**: Agent recommends "React" without specifying major version, leading to compatibility issues downstream. always include major version numbers in recommendations.
 
 ## Interaction Protocol
 
@@ -33,9 +33,9 @@ This stage is interactive — the agent solicits user input to define the tech s
 - **Turn-taking**: Present one category at a time (e.g., frontend framework, backend, database). Wait for user response before proceeding.
 - **Decision thresholds**: If the user defers a decision ("I don't know" / "whatever you recommend"), proceed with the recommended default and document it as "Agent-selected default — [reason]."
 - **Maximum iterations**: If a category requires more than 3 rounds of clarification, proceed with the best available option and flag it as "Needs confirmation."
-- **Exit criteria**: Documentation is complete when ALL categories in the tech stack template have a decision (user-selected or agent-default). The agent MUST NOT declare Stage 0 complete until `plancasting/tech-stack.md` is fully populated and all required fields are present.
+- **Exit criteria**: Documentation is complete when ALL categories in the tech stack template have a decision (user-selected or agent-default). The agent must not declare Stage 0 complete until `plancasting/tech-stack.md` is fully populated and all required fields are present.
 
-## Phase 0: Language Selection (ALWAYS FIRST)
+## Phase 0: Language Selection (always FIRST)
 
 Before doing ANYTHING else, ask the user to select their preferred language for this session:
 
@@ -74,13 +74,13 @@ will be in your selected language. Code and technical identifiers will remain in
    - ✅ Developer docs help section (`./docs/help/`, Stage 6D output) → selected language (NOTE: Different from `./user-guide/` Mintlify site generated in Stage 7D)
    - ✅ Mintlify documentation site (`./user-guide/`, Stage 7D) → if selected language ≠ English: multi-language (English base + selected language); if English: English-only
    - ✅ Review checkpoint summaries → selected language
-   - ❌ Code (variable names, function names, comments) → ALWAYS English
-   - ❌ Technical identifiers (file names, directory names, CSS classes) → ALWAYS English
-   - ❌ API documentation (`./docs/api/`) → ALWAYS English
-   - ❌ Developer documentation (`./docs/developer/`) → ALWAYS English (read by developers and build processes)
-   - ❌ CLAUDE.md → ALWAYS English (read by AI agents, not end users)
-   - ❌ `plancasting/tech-stack.md` technical content → ALWAYS English (except Session Language section)
-   - ❌ Git commit messages → ALWAYS English
+   - ❌ Code (variable names, function names, comments) → always English
+   - ❌ Technical identifiers (file names, directory names, CSS classes) → always English
+   - ❌ API documentation (`./docs/api/`) → always English
+   - ❌ Developer documentation (`./docs/developer/`) → always English (read by developers and build processes)
+   - ❌ CLAUDE.md → always English (read by AI agents, not end users)
+   - ❌ `plancasting/tech-stack.md` technical content → always English (except Session Language section)
+   - ❌ Git commit messages → always English
 
 4. Respond to the user in their selected language from this point forward.
 5. If the Business Plan is written in a different language than the user selected, note this and ask if generated documents should follow the user's selected language or the Business Plan's language.
@@ -218,21 +218,23 @@ Based on the confirmed product type(s), ask targeted follow-up questions. SKIP a
 - What type of AI? (LLM/chatbot, computer vision, NLP, recommendation, custom model, AI agent)
 - Do you need model training infrastructure or inference-only?
 - What AI providers do you plan to use? (Anthropic, OpenAI, Hugging Face, local models)
-- Do you need an AI agent orchestration framework? (Claude Agent SDK, Mastra, LangGraph, CrewAI, AutoGen, custom, no preference)
+- Do you need an AI agent orchestration framework? (Claude Agent SDK, Anthropic Managed Agents, Mastra, LangGraph, CrewAI, AutoGen, custom, no preference)
   - If the product involves multi-step AI workflows, autonomous agents, tool use, or agentic behaviors, this is a critical choice.
 - Do you need vector database for RAG? (Pinecone, Weaviate, Qdrant, pgvector, Convex vector search, no preference)
 - What is the latency requirement for inference?
 - Do you need structured output from AI models? (JSON mode, function calling, tool use)
-- How should AI failures be handled? (fallback model, graceful degradation, retry)
+- How should AI failures be handled? (fallback model, graceful degradation, retry). For Claude: a safety-classifier refusal is HTTP 200 with `stop_reason: "refusal"`, so the plan must cover it separately from transport errors; server-side `fallbacks: "default"` is the recommended default
+- Which SDK will the product use for the provider? (official SDK recommended — `@anthropic-ai/sdk` / `anthropic` — never a compatibility shim). Record the model ID in § Specifications; Stage 3 renders `.claude/rules/ai-provider.md` from it
+- Data retention: does the organization run zero data retention? (Claude Fable 5.1 requires 30-day retention; ZDR organizations receive 400 on it)
 
 **For ALL product types (ask only what the Business Plan doesn't cover):**
 - **Multi-tenancy**: Is this a multi-tenant system where multiple organizations share the platform? If yes:
   - What is the tenant boundary? (organization, workspace, team)
   - What level of data isolation is needed? (logical separation in shared DB, separate schemas, separate databases)
   - Do tenants need their own custom branding, domains, or configurations?
-  - This is a fundamental architectural decision — do NOT skip or assume a default. If the Business Plan is ambiguous, ask explicitly.
+  - This is a fundamental architectural decision — do not skip or assume a default. If the Business Plan is ambiguous, ask explicitly.
 - **Language & Internationalization (i18n)**: This affects the codebase structure from day one. Ask:
-  - What is the default UI language? (Do NOT assume English — ask explicitly.)
+  - What is the default UI language? (Do not assume English — ask explicitly.)
   - Does the product need multiple language support? If yes, which languages at launch?
   - Do you need right-to-left (RTL) language support? (Arabic, Hebrew, etc.)
   - Translation strategy: manual translation files, translation management platform (Crowdin, Lokalise), AI-assisted translation, or all user content stays in one language?
@@ -275,7 +277,7 @@ Based on responses, ask about specific needs:
 - **Design direction & visual identity**: This is a CRITICAL input that shapes the entire frontend. The goal is to produce a distinctive, production-grade UI — not generic AI-generated aesthetics. Ask each of the following:
 
   1. **Design reference URLs**: Do you have any websites, apps, or landing pages whose visual style you admire or want to emulate? Share URLs and explain what you like about each (typography, color, layout, mood, motion, etc.).
-     - Collect 0–5 reference URLs. If the user provides more than 5, ask them to select the 5 most important. If the user provides zero URLs (says "I don't have any" or similar), proceed to the aesthetic direction questions — the pipeline can generate a design direction from scratch without visual references. For each provided URL, the agent MUST attempt to visit it (using web fetch or browser tools, if available) to analyze the visual patterns: color palette, typography choices, layout density, animation style, overall aesthetic tone. If web tools are unavailable, the URL is unreachable, behind authentication, or returns non-HTML content, skip the visual analysis and note the URL as inaccessible in the output — ask the user to describe what they like about the reference instead.
+     - Collect 0–5 reference URLs. If the user provides more than 5, ask them to select the 5 most important. If the user provides zero URLs (says "I don't have any" or similar), proceed to the aesthetic direction questions — the pipeline can generate a design direction from scratch without visual references. For each provided URL, the agent must attempt to visit it (using web fetch or browser tools, if available) to analyze the visual patterns: color palette, typography choices, layout density, animation style, overall aesthetic tone. If web tools are unavailable, the URL is unreachable, behind authentication, or returns non-HTML content, skip the visual analysis and note the URL as inaccessible in the output — ask the user to describe what they like about the reference instead.
      - Summarize what you observe from each reference and confirm with the user: "From [URL], I see [observations]. Is this the direction you want?"
 
   2. **Product logo** (optional): Do you have a product logo? If so, please provide it as a PNG or SVG file.
@@ -386,7 +388,7 @@ Based on responses, ask about specific needs:
        Which direction resonates with your brand? Or describe something different.
        ~~~
      - The user may also describe their own direction in free text.
-     - This is NOT a binding design spec — it is a starting direction that Stage 3's design token generation will execute. It prevents the scaffold from defaulting to generic AI aesthetics.
+     - This is not a binding design spec — it is a starting direction that Stage 3's design token generation will execute. It prevents the scaffold from defaulting to generic AI aesthetics.
 - **Data retention & deletion policy**: How should data deletion work?
   - Hard delete: data is permanently removed immediately
   - Soft delete: data is marked as deleted (deleted_at timestamp) but retained for a period
@@ -608,11 +610,11 @@ Based on the selected stack, generate a checklist of required credentials. Categ
 These credentials power the Transmute pipeline itself. If your product uses Transmuter as its backend orchestration layer, all three are required. For standalone products that do not use E2B sandboxes, skip items 2 and 3. For standalone products that do not use the Transmuter platform at all, skip all three items — the Anthropic API key for Claude Code itself is separate from `TRANSMUTER_ANTHROPIC_API_KEY`.
 > **Note**: If skipped, Stage 3's credential gate must also be configured to skip these checks. See `execution-guide.md` § "3.1 Credential Validation Gate" for the standalone-project exception.
 1. Anthropic API Key (`TRANSMUTER_ANTHROPIC_API_KEY`) — Get it at: https://console.anthropic.com/
-   This is the AI that powers the Transmuter platform's backend pipeline stages (not Claude Code itself). MUST be set on the backend deployment if using Transmuter. Skip for standalone projects.
+   This is the AI that powers the Transmuter platform's backend pipeline stages (not Claude Code itself). must be set on the backend deployment if using Transmuter. Skip for standalone projects.
 2. E2B API Key (`E2B_API_KEY`) — Get it at: https://e2b.dev/dashboard (skip if not using E2B sandboxes)
-   Sandbox environment for code generation and execution. MUST be set on the backend deployment.
+   Sandbox environment for code generation and execution. must be set on the backend deployment.
 3. Sandbox Auth Token (`SANDBOX_AUTH_TOKEN`) — Generate with: `openssl rand -hex 32` (skip if not using E2B sandboxes)
-   Authenticates sandbox progress callbacks to the backend. MUST be set on the backend deployment.
+   Authenticates sandbox progress callbacks to the backend. must be set on the backend deployment.
 
 ### 🔴 Required before Stage 3 (Scaffold Generation)
 These credentials are needed to initialize the development environment.
@@ -639,7 +641,7 @@ These are production-specific credentials.
 These are needed to deploy the user-facing documentation site.
 1. Mintlify Account — Sign up at: https://mintlify.com/start
    Create an account and note your project name. The Mintlify GitHub App will be installed during Stage 7D.
-   This is NOT an API key — Mintlify deploys via GitHub App integration, not an env var.
+   This is not an API key — Mintlify deploys via GitHub App integration, not an env var.
    Status: [ ] Have account / [ ] Will create later
 
 ### 🟢 Optional
@@ -649,16 +651,16 @@ These are needed to deploy the user-facing documentation site.
 ### 4.2 Collect Credentials
 
 Ask the user to provide credentials. CRITICAL SECURITY RULES:
-- NEVER log, echo, or display credentials after the user provides them.
+- never log, echo, or display credentials after the user provides them.
 - Write credentials ONLY to `.env.local` (git-ignored).
-- Remind the user to NEVER commit `.env.local` to version control.
+- Remind the user to never commit `.env.local` to version control.
 - If a credential is not yet available, mark it as a placeholder: `YOUR_[SERVICE]_KEY_HERE`
-- NEVER write credential values into any output — `.md` files (tech-stack.md, BRD, PRD, reports), commit messages, code comments, or documentation. Reference by VARIABLE NAME only (e.g., `STRIPE_SECRET_KEY`), never the value.
-- NEVER ask the user to paste credentials into chat. Direct them to manually edit `.env.local` or use a terminal prompt that writes directly to the file.
+- never write credential values into any output — `.md` files (tech-stack.md, BRD, PRD, reports), commit messages, code comments, or documentation. Reference by VARIABLE NAME only (e.g., `STRIPE_SECRET_KEY`), never the value.
+- never ask the user to paste credentials into chat. Direct them to manually edit `.env.local` or use a terminal prompt that writes directly to the file.
 - If the user attempts to paste a credential value into a markdown file, chat message, or commit message, STOP and redirect: "Credential values must only be stored in `.env.local`. Please add this value there instead."
 - If a credential is accidentally committed to git, warn the user immediately: "⚠️ Credential exposed in git history. Rotate ALL affected credentials immediately. Use `git filter-repo` or `BFG Repo-Cleaner` to purge the value from history."
 
-**IMPORTANT**: Strongly encourage the user to provide ALL 🔴 credentials now. Explain that Stages 1–2B (specification generation) do not need credentials, but Stage 3 (scaffold) will fail without the 🔴 items. If the user skips 🔴 credentials, warn them explicitly:
+Strongly encourage the user to provide ALL 🔴 credentials now. Explain that Stages 1–2B (specification generation) do not need credentials, but Stage 3 (scaffold) will fail without the 🔴 items. If the user skips 🔴 credentials, warn them explicitly:
 
 ~~~
 ⚠️ The following credentials are marked as placeholders but are REQUIRED before Stage 3:
@@ -675,7 +677,7 @@ For 🟡 credentials, note that they can be added later but must be in place bef
 I've created `.env.local` with placeholder entries for all required credentials.
 Please open `.env.local` in your editor and fill in the values directly.
 
-⚠️ Do NOT paste credential values into this chat — edit the file directly to keep values out of session history.
+⚠️ Do not paste credential values into this chat — edit the file directly to keep values out of session history.
 
 Here's what needs to be filled in:
 
@@ -718,8 +720,9 @@ For each credential collected:
      -H "x-api-key: <key>" -H "anthropic-version: 2023-06-01" \
      -H "content-type: application/json" \
      -d '{"model":"<MODEL_ID>","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}'
-   # Replace <MODEL_ID> with any valid model ID from console.anthropic.com/docs/models.
+   # Replace <MODEL_ID> with any valid model ID from console.anthropic.com/docs/models (e.g., claude-opus-5-5).
    # This is just a connectivity test — the goal is to verify the API key works, not to test a specific model.
+   # Judge by HTTP status: with max_tokens=1 the body is empty on Claude 5 models (thinking counts toward max_tokens).
    ~~~
    Expected: 200 response. If 401: key is invalid. If 400/404: model ID or API version is wrong.
 
@@ -760,7 +763,7 @@ After all information is collected, generate the following files:
 
 This file is referenced by ALL subsequent pipeline stages (BRD, PRD, Scaffold, etc.).
 
-**Model Specifications auto-detection**: For the `## Model Specifications` section, auto-detect the pipeline model from the running Claude Code session (the model you are currently running as). Populate the table with the detected model name and ID, its known context window size, output token limit, and derived values (safe output budget = output limit minus 7K). For the lighter-stage alternative, recommend the Sonnet variant of the same generation. If you cannot determine the model, ask the user.
+**Model Specifications detection**: For the `## Model Specifications` section, take the pipeline model ID from the running Claude Code session (`/status`, or `model` in `~/.claude/settings.json`). Do not rely on your own recollection of the model's limits — a model does not reliably know its own context window or output cap. Read them from the Models API with the key validated in Phase 5: `curl -s https://api.anthropic.com/v1/models/<MODEL_ID> -H "x-api-key: <key>" -H "anthropic-version: 2023-06-01"` returns `max_input_tokens` (context window) and `max_tokens` (API output cap). The per-response cap inside Claude Code is `CLAUDE_CODE_MAX_OUTPUT_TOKENS` (default 32,000; check the environment). Derive the safe output budget (output limit minus 7K) and record an effort level per stage (Opus 5.5 and Sonnet 5.5 default to `medium`; use `high` for document generation and orchestration). For the lighter-stage alternative, prefer the same model at lower effort; name the Sonnet of the same generation only if the operator wants a cheaper model. If you cannot determine the model, ask the user.
 
 ~~~markdown
 # Tech Stack Configuration
@@ -932,23 +935,25 @@ These values govern session limits, token budgets, and splitting thresholds acro
 
 | Parameter | Value | Derivation |
 |---|---|---|
-| Pipeline model | [Auto-detected from Claude Code session — e.g., Claude Opus 5 (`claude-opus-5`)] | Auto-detected from Claude Code session |
-| Lighter-stage alternative | [e.g., Claude Sonnet 5 (`claude-sonnet-5`)] | For audit stages (6A–6G) where output quality requirements are lower |
-| Context window | [Per-model specification — e.g., 1,000,000 tokens] | Per-model specification |
-| Output token limit | [Per-model specification — e.g., 32,000 tokens per response] | Per-agent response cap |
-| Safe output budget | [Output limit minus 7K — e.g., 25,000 tokens] | Output limit minus 7K headroom for formatting/error recovery |
-| Session feature limit | [e.g., 25–30 features] | Quality degrades beyond this in Stage 5 |
+| Pipeline model | [From the Claude Code session — e.g., Claude Opus 5.5 (`claude-opus-5-5`)] | `/status` or `settings.json` → `model` |
+| Lighter-stage alternative | [e.g., same model at `medium` effort, or Claude Sonnet 5.5 (`claude-sonnet-5-5`)] | For audit stages (6A–6G). Prefer lowering effort over switching models (prompt caches are per model) |
+| Effort by stage | [e.g., Stages 1–3, 5, 6V: `high`; 6A–6G: `medium`; reviewers: `medium`] | Set via `effort:` in skill/agent frontmatter; Opus 5.5 and Sonnet 5.5 default to `medium` |
+| Context window | [From `GET /v1/models/<id>` → `max_input_tokens` — e.g., 1,000,000 tokens] | Models API, not the model's recollection |
+| Output token limit | [Claude Code `CLAUDE_CODE_MAX_OUTPUT_TOKENS` — e.g., 32,000 tokens per response] | Default 32,000, max 128,000; API cap is `max_tokens` from the Models API |
+| Safe output budget | [Output limit minus 7K — e.g., 25,000 tokens] | Output limit minus 7K headroom; thinking tokens count toward the limit |
+| Session feature limit | [e.g., 25–30 features — measured on <model>, <date>] | Starting value from pre-Claude-5 runs; re-measure on the current model (5 features, gate pass rates, extrapolate) and record the model and date |
 | Feedback batch limit | [e.g., 10 items] | Per Stage 8 session (~3–5 hours work) |
 | Verification scenario cap (6V) | [e.g., 150 scenarios] | Per 6V session (full verification) |
 | Verification scenario cap (7V) | [e.g., 15 scenarios] | Per 7V session (SMOKE scope — P0+P1 only) |
 | Large product threshold | [e.g., >500K tokens or >100 files] | When to split validation by feature group |
+| Stage 5 parallel waves | [1 (sequential, default) / 2 / 3] | Features built concurrently in isolated worktrees; raise only after a measured run shows clean merges (implement skill § Parallel Waves) |
 ~~~
 
 ### `.env.local` — Credentials file
 
 ~~~
 # Auto-generated by Tech Stack Discovery
-# ⚠️ NEVER commit this file to version control
+# ⚠️ never commit this file to version control
 
 # [Service A]
 SERVICE_A_API_KEY=actual_key_here
@@ -989,7 +994,7 @@ After generating `plancasting/tech-stack.md`, read it back and verify all requir
 2. `git init` if not already a git repo.
 3. Install the package manager lock file (`bun install` / `npm install`).
 
-Do NOT install product-specific packages (UI libraries, BaaS SDKs, auth providers), do NOT configure services (Convex, auth, payments), do NOT create application directories or component files. All of that is Stage 3's responsibility. Packages installed by the framework scaffolder itself (e.g., Tailwind if selected during create-next-app) are acceptable — only avoid adding product-specific packages manually.
+Do not install product-specific packages (UI libraries, BaaS SDKs, auth providers), do not configure services (Convex, auth, payments), do not create application directories or component files. All of that is Stage 3's responsibility. Packages installed by the framework scaffolder itself (e.g., Tailwind if selected during create-next-app) are acceptable — only avoid adding product-specific packages manually.
 
 Exception: If the selected BaaS requires initialization to validate credentials (e.g., `npx convex init`, `npx supabase init`), this initialization is permitted in Phase 6 of this stage. Full backend configuration (schema, functions, auth setup) is Stage 3 scope.
 
@@ -1003,14 +1008,14 @@ bun install  # or npm install, pnpm install — per selected package manager
 
 **If no template, initialize from scratch:**
 - Create the framework project scaffold only (e.g., `bunx create-next-app`)
-- Do NOT install additional packages beyond what the scaffold includes
+- Do not install additional packages beyond what the scaffold includes
 
 Ask the user for confirmation before running any setup commands.
 
 If initialization fails:
 1. Report the error to the user with the full error message.
 2. Suggest common fixes (check network, verify template URL, try alternative package manager).
-3. Do NOT proceed to Phase 7 until Phase 6 of this stage succeeds or the user explicitly skips it.
+3. Do not proceed to Phase 7 until Phase 6 of this stage succeeds or the user explicitly skips it.
 
 ## Required Fields for Pipeline Continuity
 
@@ -1022,7 +1027,7 @@ Before declaring Stage 0 complete, verify `plancasting/tech-stack.md` contains A
 - **Authorization Model**: Required by Stage 1 (security requirements) and Stage 3 (auth helpers)
 - **Primary Database/BaaS**: Required by Stage 3 (schema generation) and Stage 5 (backend implementation)
 - **Auth Provider**: Required by Stage 3 (auth scaffold) and Stage 5 (auth integration)
-- **Hosting Platform**: Required by Stage 6H (pre-launch) and Stage 7 (deployment)
+- **Hosting Platform**: Required by Stage 6H (pre-launch) and Stage 7 (deployment). Include a `Deployment: manual | automated` line — `automated` lets the pipeline agent run Stage 7 itself from `docs/developer/deployment.md` when the hosting CLI credentials are in `.env.local` (execution-guide.md § 7.0); the default is `manual`
 - **Dev Server Command**: Required by Stage 6V (visual verification)
 - **Design Direction**: Required by Stage 3 (design token generation, component styling). Includes: UI component library, aesthetic direction, reference URLs, Figma designs (if any). Without this, Stage 3 will default to generic AI aesthetics.
 - **Theme & Appearance**: Required by Stage 3 (CSS variable architecture, Tailwind dark mode configuration, component design).
@@ -1100,21 +1105,21 @@ This prompt handles diverse product types by adapting its behavior:
 
 ## Critical Rules
 
-1. ALWAYS read the Business Plan FIRST, before asking any questions. Extract everything you can from it.
-2. NEVER ask questions that the Business Plan already clearly answers. Confirm your understanding instead.
-3. NEVER assume the product type if the Business Plan is ambiguous. Ask for clarification.
-4. NEVER recommend technologies without researching current status (use web search; if unavailable, use training knowledge and note the limitation).
-5. NEVER skip the credential collection phase — missing credentials cause pipeline failures later.
-6. NEVER assume a default for multi-tenancy. This is a fundamental architectural decision that affects the entire data model. If the Business Plan is unclear, ask explicitly: "Is this a multi-tenant system? If yes, what is the tenant boundary?" Getting this wrong causes painful rearchitecture later.
-7. NEVER skip AI agent framework selection if the Business Plan describes AI-powered features involving agents, autonomous workflows, tool use, or multi-step AI processes. Present framework options (Claude Agent SDK, Mastra, LangGraph, etc.) and let the user choose.
-8. ALWAYS present multiple options and let the user choose. Never force a single technology.
-9. ALWAYS explain WHY you recommend something, connecting it to specific Business Plan features or requirements.
-10. ALWAYS consider Claude Code compatibility — recommend technologies that Claude Code can effectively write code for.
-11. ALWAYS save the complete tech stack to `./plancasting/tech-stack.md` — this is the input for all subsequent pipeline stages.
-12. ALWAYS collect credentials into `.env.local` and NEVER display them after collection.
+1. always read the Business Plan FIRST, before asking any questions. Extract everything you can from it.
+2. never ask questions that the Business Plan already clearly answers. Confirm your understanding instead.
+3. never assume the product type if the Business Plan is ambiguous. Ask for clarification.
+4. never recommend technologies without researching current status (use web search; if unavailable, use training knowledge and note the limitation).
+5. never skip the credential collection phase — missing credentials cause pipeline failures later.
+6. never assume a default for multi-tenancy. This is a fundamental architectural decision that affects the entire data model. If the Business Plan is unclear, ask explicitly: "Is this a multi-tenant system? If yes, what is the tenant boundary?" Getting this wrong causes painful rearchitecture later.
+7. never skip AI agent framework selection if the Business Plan describes AI-powered features involving agents, autonomous workflows, tool use, or multi-step AI processes. Present framework options (Claude Agent SDK, Mastra, LangGraph, etc.) and let the user choose.
+8. always present multiple options and let the user choose. Never force a single technology.
+9. always explain WHY you recommend something, connecting it to specific Business Plan features or requirements.
+10. always consider Claude Code compatibility — recommend technologies that Claude Code can effectively write code for.
+11. always save the complete tech stack to `./plancasting/tech-stack.md` — this is the input for all subsequent pipeline stages.
+12. always collect credentials into `.env.local` and never display them after collection.
 13. If the user has existing preferences (like in the sample prompt), respect them and build around them rather than questioning every choice.
 14. If the product is unconventional (not a standard web/mobile app), research appropriate tools and present honest assessments of what Claude Code can and cannot automate.
-15. NEVER skip the Design Direction questions (reference URLs, Figma designs, UI component library, aesthetic direction) for products with a frontend. This is a top cause of generic, forgettable UI in the final product. The design direction in `plancasting/tech-stack.md` is the primary input that Stage 3 uses to generate distinctive design tokens and components.
+15. never skip the Design Direction questions (reference URLs, Figma designs, UI component library, aesthetic direction) for products with a frontend. This is a top cause of generic, forgettable UI in the final product. The design direction in `plancasting/tech-stack.md` is the primary input that Stage 3 uses to generate distinctive design tokens and components.
 16. When the user provides design reference URLs, visit each URL to analyze the visual patterns (using web fetch or browser tools). If a URL is unreachable, behind authentication, or returns non-HTML content, skip the visual analysis and note the URL as inaccessible. Do not just record the URL — extract observations about color, typography, layout, and motion that will inform Stage 3's design token generation.
 17. When the user provides a product logo (PNG or SVG), extract the dominant colors from it. For SVG, parse the markup for fill/stroke colors. For PNG, describe the visual colors. Record these colors in the `plancasting/tech-stack.md` "Product logo" section — they should inform the brand palette and aesthetic direction suggestions.
 

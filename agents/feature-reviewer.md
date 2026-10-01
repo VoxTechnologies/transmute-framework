@@ -19,6 +19,7 @@ description: |
   <commentary>Re-review after fixes — reviewer checks if previous FAIL/CONDITIONAL PASS issues are now resolved.</commentary>
   </example>
 model: inherit
+effort: medium
 color: red
 tools:
   - Read
@@ -118,6 +119,10 @@ You perform a comprehensive code review of a feature's backend, frontend, and te
 
 - [ ] `plancasting/_progress.md` accurately reflects this feature's completion status
 - [ ] Cross-feature modifications are recorded in the progress file
+
+### Evidence rule
+
+Every checked item must point to evidence from this session: the command you ran and its output, or the file and line you read. A teammate's completion message is a claim to verify, not evidence. If you could not run a check (missing dependency, no browser), report the item as NOT VERIFIED rather than passing it.
 - [ ] Assumptions or deviations from PRD are documented
 - [ ] PRD gaps discovered during implementation are noted
 

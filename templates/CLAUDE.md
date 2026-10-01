@@ -7,7 +7,7 @@
 ## Pipeline Execution Guide
 
 <!-- This section is for pipeline execution only. After all stages complete,
-     it can be removed or collapsed — it is NOT needed for day-to-day development. -->
+     it can be removed or collapsed — it is not needed for day-to-day development. -->
 
 > **Canonical source**: `plancasting/transmute-framework/execution-guide.md` owns all definitions, prerequisites, credentials, per-stage warnings, gate thresholds, and recovery procedures. This section provides orientation and safety-critical rules only.
 
@@ -26,13 +26,14 @@ All stages follow the **Transmute Full-Build Approach**: every feature in the Bu
 
 ### Safety-Critical Rules
 
-- **Never skip** 5B, 6V, 6P/6P-R, or 7V. Always run exactly one of 6P or 6P-R (default: 6P). (5B catches the #1 cause of Stage 6 failures — frontend stubs and duplication that slip through fatigued quality gates.) Note: 5B uses four outcomes (PASS, CONDITIONAL PASS, FAIL-RETRY, FAIL-ESCALATE) — see execution-guide.md § "Gate Decision Outcomes" for thresholds and recovery actions.
+- **Never skip** 5B, 5V, 6V, 6P/6P-R, or 7V. Always run exactly one of 6P or 6P-R (default: 6P). (5V is the 6V prompt in `MODE: critical`, run right after 5B so a product that does not start is sent back to Stage 5 before the Stage 6 audits.) (5B catches the #1 cause of Stage 6 failures — frontend stubs and duplication that slip through late-queue quality gates.) Note: 5B uses four outcomes (PASS, CONDITIONAL PASS, FAIL-RETRY, FAIL-ESCALATE) — see execution-guide.md § "Gate Decision Outcomes" for thresholds and recovery actions.
 - **6P / 6P-R mutual exclusivity**: Run exactly one, never both. To switch: commit 6P work, `git revert` the 6P commit, then run 6P-R in a new session.
 - **6R skip conditions**: Skip 6R only if 6V returns PASS (zero issues) or CONDITIONAL PASS with only 6V-C issues (human-judgment items — architectural decisions, design trade-offs — that 6R cannot auto-fix). If 6V returns FAIL, resolve critical blocking issues (manually or by re-running relevant Stage 5/6 steps) and re-run 6V until it achieves PASS or CONDITIONAL PASS before proceeding to 6R. If skipped, 6P/6P-R uses the 6V report as input.
-- **Stage 3 prerequisite**: Stage 2B must PASS or CONDITIONAL PASS before Stage 3.
+- **Stage 3 prerequisite**: Stage 2B must PASS or CONDITIONAL PASS before Stage 3. Stage 4 (CLAUDE.md Part 2 populated, `.claude/rules/*.md` present) is an automated check performed by the pipeline agent and repeated by the gate hook before Stage 5; it is not an operator stop.
+- **Stage 1 stop condition**: if the BRD's assumption volume is ≥ 30% and `Operator reviewed: YES` is not set in `plancasting/brd/_review-log.md`, the pipeline stops after Stage 1 for the operator to revise the business plan or review the assumptions.
 - **Stage 7 prerequisites**: 6H READY + 6V PASS or CONDITIONAL PASS + 6R PASS/CONDITIONAL PASS (if run) + 6P or 6P-R PASS/CONDITIONAL PASS (one of 6P/6P-R always runs) + 6D complete (mandatory for software products; its output serves as Stage 7's deployment reference; skip 6D only if `tech-stack.md` has `developer-docs-needed: false` or the product is non-software). Note: 6D = developer/deployment docs (Stage 6); 7D = user guide (runs after Stage 7 deployment, optional). If 6D was skipped, refer to your hosting provider's documentation for deployment steps; no earlier stages need re-running.
 - **Stage 8 prerequisite**: Stage 7V must achieve PASS or CONDITIONAL PASS before starting Stage 8 (Feedback Loop). If Stage 7D was run, it must be PASS or WARN (non-blocking issues documented but not gate-failing; FAIL blocks Stage 8 until resolved). Note: Stage 7D uses PASS/WARN/FAIL instead of the universal PASS/CONDITIONAL PASS/FAIL because it produces documentation, not code — WARN indicates quality gaps that do not block proceeding to Stage 8.
-- **Stages 8 + 9**: **NEVER concurrent** — both modify `package.json`, lock files, and source code. Run one, commit, then the other.
+- **Stages 8 + 9**: **never concurrent** — both modify `package.json`, lock files, and source code. Run one, commit, then the other.
 - **Stage 9 prerequisite**: Stage 9 does not formally require 7V PASS — it can update dependencies at any point after Stage 5. However, if the product is deployed, re-run 7V after deploying updated dependencies.
 
 ### Cross-References
@@ -52,10 +53,10 @@ All stages follow the **Transmute Full-Build Approach**: every feature in the Bu
 
 ## Part 1: Immutable Transmute Framework Rules
 
-<!-- ⛔ DO NOT MODIFY OR DELETE ANYTHING IN PART 1 ⛔ -->
+<!-- ⛔ Do not modify or delete anything in Part 1 ⛔ -->
 <!-- These rules are core to the Transmute framework and must be preserved -->
 <!-- across all projects. Stage 3/4 may ADD project-specific rules in Part 2, -->
-<!-- but must NEVER remove, replace, or weaken any rule in Part 1. -->
+<!-- but must never remove, replace, or weaken any rule in Part 1. -->
 
 ### Reference Documents
 
@@ -89,26 +90,27 @@ Always read the relevant PRD/BRD files BEFORE implementing any feature:
 
 ### Component Rules (All Frameworks)
 
-1. ALWAYS implement all states: default, loading, empty, error, disabled.
-2. ALWAYS include ARIA attributes for interactive elements.
-3. ALWAYS support keyboard navigation.
-4. NEVER use inline styles. Use the project's CSS framework (Tailwind, etc.). Exception: dynamic runtime values that cannot be expressed as utility classes (e.g., `style={{ width: \`${progress}%\` }}`).
+1. always implement all states: default, loading, empty, error, disabled.
+2. always include ARIA attributes for interactive elements.
+3. always support keyboard navigation.
+4. never use inline styles. Use the project's CSS framework (Tailwind, etc.). Exception: dynamic runtime values that cannot be expressed as utility classes (e.g., `style={{ width: \`${progress}%\` }}`).
 5. Props interfaces must be explicitly typed and exported.
-6. NEVER use inline SVG `<path>` elements for standard UI icons. Use the project's icon library (see `plancasting/tech-stack.md` "Icon library" field and the project's icon registry file). If the project defines an icon registry (see Technology Stack table, 'Icon Registry' row), import all standard icons from that registry file. Inline SVGs are permitted ONLY for product logos, brand marks, or custom illustrations unavailable in any icon library.
+6. never use inline SVG `<path>` elements for standard UI icons. Use the project's icon library (see `plancasting/tech-stack.md` "Icon library" field and the project's icon registry file). If the project defines an icon registry (see Technology Stack table, 'Icon Registry' row), import all standard icons from that registry file. Inline SVGs are permitted ONLY for product logos, brand marks, or custom illustrations unavailable in any icon library.
 
 ### Design & Visual Identity
 
-<!-- ⛔ DO NOT DELETE THIS SECTION — it is critical for design quality ⛔ -->
+<!-- ⛔ Do not delete this section — it is critical for design quality ⛔ -->
 
-**CRITICAL**: Before writing ANY frontend code, use the design direction in the project's design token file (path defined in Part 2 Technology Stack table or `plancasting/tech-stack.md`) and the guidelines below as the primary design authority. If running in Anthropic's hosted cloud environment, also check `/mnt/skills/public/frontend-design/SKILL.md` for supplementary patterns (the local design token file remains the primary authority).
+Before writing ANY frontend code, use the design direction in the project's design token file (path defined in Part 2 Technology Stack table or `plancasting/tech-stack.md`) and the guidelines below as the primary design authority. If running in Anthropic's hosted cloud environment, also check `/mnt/skills/public/frontend-design/SKILL.md` for supplementary patterns (the local design token file remains the primary authority).
 
 **Design Direction**: This project has a defined design direction stored in the design token file (see Part 2 Technology Stack table for path; common locations: `src/styles/design-tokens.ts`, `src/lib/tokens.css`, `app/styles/tokens.ts`) and referenced in `plancasting/tech-stack.md` (Design Direction section from Stage 0). All UI code must follow this direction consistently. If the design direction does not yet exist, establish one before building components by:
 1. Reading the PRD product overview and persona definitions.
 2. Choosing a distinctive, opinionated aesthetic direction (not generic or safe) that matches the product's personality and target users.
 3. Documenting the direction in the design token file with CSS variables, color palettes, typography choices, spacing scales, and animation patterns. The format (TypeScript module, CSS file, or both) depends on the tech stack — see `plancasting/tech-stack.md` for the chosen approach.
 
-**Anti-Patterns — NEVER do these**:
-- Generic AI-generated aesthetics: defaulting to common font families without intentional selection, clichéd purple-on-white gradients, predictable card-grid layouts, cookie-cutter component styles. Choose fonts that match the product's personality — even widely-used fonts can work if deliberately chosen for a reason.
+**Anti-Patterns — avoid these**. A general "no generic AI look" instruction only swaps one default style for another; the model responds to patterns named concretely, so this list is the design authority's exclusion list. Extend it with whatever default the first generated screens fall back on:
+- Named default patterns: cream or off-white page backgrounds as the default surface; italic accent words inside headlines; numbered "01 / 02 / 03" section labels; monospace labels or eyebrows on non-technical products; pill-shaped buttons and pill badges everywhere; purple-on-white or indigo-to-violet gradients; three-column feature-card grids with an icon, a bold title and two lines of copy; identical card radii, shadows and padding on every surface; emoji as icons; centered hero + three cards + testimonial + CTA page skeletons.
+- Fonts chosen by default rather than for the product: Inter, Roboto, Arial or system-ui when the design direction did not ask for them. Choose fonts that match the product's personality — even widely-used fonts can work if deliberately chosen for a reason.
 - Default Tailwind without customization. Always configure the Tailwind theme (via `tailwind.config.ts` or `@theme` directive in CSS, per your Tailwind version) with custom colors, fonts, and spacing that match the design direction.
 - Uniform spacing and sizing everywhere. Use intentional variation — generous whitespace in some areas, controlled density in others.
 - Bland, evenly-distributed color palettes. Use dominant colors with sharp accents.
@@ -124,23 +126,23 @@ Always read the relevant PRD/BRD files BEFORE implementing any feature:
 
 ### API Contract Alignment
 
-<!-- ⛔ DO NOT DELETE THIS SECTION — prevents production type mismatch bugs ⛔ -->
+<!-- ⛔ Do not delete this section — prevents production type mismatch bugs ⛔ -->
 
-- Frontend types MUST match the ACTUAL backend response shape — NOT the database schema.
+- Frontend types must match the ACTUAL backend response shape — NOT the database schema.
 - Create SEPARATE types for projections (e.g., `OrganizationSummary` for list view, `Organization` for detail view).
-- NEVER use `as unknown as Type` casts to force type compatibility — use explicit field mapping.
-- When backend returns renamed or computed fields, frontend hooks MUST map them explicitly.
+- never use `as unknown as Type` casts to force type compatibility — use explicit field mapping.
+- When backend returns renamed or computed fields, frontend hooks must map them explicitly.
 - If the backend returns `orgId` but the frontend expects `_id`, the hook must transform — never cast.
 
 ### Scaffold Inventory
 
-<!-- ⛔ DO NOT DELETE THIS SECTION — prevents the duplication pattern ⛔ -->
+<!-- ⛔ Do not delete this section — prevents the duplication pattern ⛔ -->
 
-Before writing ANY code for a feature, the implementing agent MUST:
+Before writing ANY code for a feature, the implementing agent must:
 1. List ALL existing scaffold files for the feature (backend functions, components, pages, hooks).
 2. Read `plancasting/_scaffold-manifest.md` if it exists — it maps which components are used by which pages.
-3. EXTEND existing scaffold files. NEVER create duplicate files alongside them.
-4. If a page already imports `ComponentX` from the scaffold, do NOT create a new `ComponentXInline` inside the page.
+3. EXTEND existing scaffold files. never create duplicate files alongside them.
+4. If a page already imports `ComponentX` from the scaffold, do not create a new `ComponentXInline` inside the page.
 
 This prevents the "duplication pattern" where Stage 5 agents rebuild UI inline instead of using scaffold components, creating orphan files and bloated pages.
 
@@ -198,7 +200,7 @@ When the PRD does not provide enough detail for an implementation decision, docu
 
 ### Progress Tracking
 
-<!-- ⛔ DO NOT DELETE THIS SECTION — the Feature Orchestrator depends on it ⛔ -->
+<!-- ⛔ Do not delete this section — the Feature Orchestrator depends on it ⛔ -->
 
 Implementation progress is tracked in `./plancasting/_progress.md`. Update this file after completing each feature:
 
@@ -226,14 +228,14 @@ Valid status values: `⬜ Not Started`, `🔧 In Progress`, `✅ Done`, `🔄 Ne
 
 ### Path-Scoped Rules (`.claude/rules/`)
 
-<!-- ⛔ DO NOT DELETE THIS SECTION — enables self-evolving development knowledge ⛔ -->
+<!-- ⛔ Do not delete this section — enables self-evolving development knowledge ⛔ -->
 
-Claude Code natively reads `.claude/rules/` files and applies matching rules based on `globs` frontmatter. This section defines how the Transmute pipeline uses path-scoped rules to accumulate implementation knowledge across sessions.
+Claude Code natively reads `.claude/rules/` files and applies matching rules based on `paths` frontmatter (a rule file without `paths` loads for every session, so always scope rules). This section defines how the Transmute pipeline uses path-scoped rules to accumulate implementation knowledge across sessions.
 
 **What rules are**: Concise, actionable directives scoped to specific file paths. They complement CLAUDE.md (which holds universal project rules) with targeted, tech-stack-specific guidance that evolves as implementation proceeds.
 
 **Generation points**:
-- **Stage 3** (Scaffold): Generates **starter rules** from `tech-stack.md` using the templates in `plancasting/transmute-framework/rules-templates/` — known patterns, gotchas, and best practices for the selected stack. These are tech-stack knowledge (theoretical). Templates: `_backend-template.md`, `_frontend-template.md`, `_api-contracts-template.md`, `_auth-template.md`, `_data-model-template.md`, `_testing-template.md`.
+- **Stage 3** (Scaffold): Generates **starter rules** from `tech-stack.md` using the templates in `plancasting/transmute-framework/rules-templates/` — known patterns, gotchas, and best practices for the selected stack. These are tech-stack knowledge (theoretical). Templates: `_backend-template.md`, `_frontend-template.md`, `_api-contracts-template.md`, `_auth-template.md`, `_data-model-template.md`, `_testing-template.md`, and `_ai-provider-template.md` (rendered only when the stack includes an AI/LLM provider).
 - **Stage 5B** (Audit): Extracts **implementation lessons** from recurring audit findings — patterns that caused stubs, duplication, or gaps across 2+ features. These are observed patterns (empirical).
 - **Stage 6R** (Remediation): Captures **verified fix patterns** from successful 6V-A/B fixes — confirmed working solutions to runtime issues. These have the highest confidence (battle-tested).
 - **Stage 9** (Maintenance): Reviews existing rules for **staleness** — removes rules referencing deprecated APIs or resolved issues, updates rules with changed file paths, and prunes old candidates from `_rules-candidates.md`. Does not generate new rules but maintains rule quality.
@@ -258,7 +260,7 @@ Claude Code natively reads `.claude/rules/` files and applies matching rules bas
 ```markdown
 ---
 description: Brief description of what these rules cover
-globs: ["src/backend/**", "convex/**"]
+paths: ["src/backend/**", "convex/**"]
 ---
 
 # Backend Rules
@@ -292,16 +294,16 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `style`
 
 ### Universal Prohibitions
 
-- DO NOT omit required component states (default, loading, empty, error, disabled) — see Component Rules #1.
-- DO NOT implement a feature without first reading the corresponding PRD section.
-- DO NOT store secrets in code. Use environment variables.
-- DO NOT remove or weaken any rule in Part 1 of this file.
-- DO NOT rewrite this file from scratch. ONLY extend Part 2.
-- DO NOT log, commit, or share test credentials in reports — reference by name only (e.g., "the basic-tier test user from `e2e/constants.ts`").
-- DO NOT write credential values into any file other than `.env.local` (includes markdown, reports, code comments, commits). Reference by variable name only (e.g., `STRIPE_SECRET_KEY`).
-- DO NOT display, echo, log, or repeat credential values in output. Use non-revealing checks (e.g., `wc -c`) to verify presence without exposing values.
-- DO NOT copy credential values between files — each service reads from `.env.local` or the hosting platform's environment variable configuration.
-- DO NOT use `console.log(process.env)` or log entire config/env objects in application code — log only specific non-sensitive fields. Error handlers MUST sanitize connection strings and tokens before logging.
+- Do not omit required component states (default, loading, empty, error, disabled) — see Component Rules #1.
+- Do not implement a feature without first reading the corresponding PRD section.
+- Do not store secrets in code. Use environment variables.
+- Do not remove or weaken any rule in Part 1 of this file.
+- Do not rewrite this file from scratch. ONLY extend Part 2.
+- Do not log, commit, or share test credentials in reports — reference by name only (e.g., "the basic-tier test user from `e2e/constants.ts`").
+- Do not write credential values into any file other than `.env.local` (includes markdown, reports, code comments, commits). Reference by variable name only (e.g., `STRIPE_SECRET_KEY`).
+- Do not display, echo, log, or repeat credential values in output. Use non-revealing checks (e.g., `wc -c`) to verify presence without exposing values.
+- Do not copy credential values between files — each service reads from `.env.local` or the hosting platform's environment variable configuration.
+- Do not use `console.log(process.env)` or log entire config/env objects in application code — log only specific non-sensitive fields. Error handlers must sanitize connection strings and tokens before logging.
 - For implementation patterns on credential handling, see `.claude/rules/backend.md` § Environment Variables and `.claude/rules/auth.md` § Auth Error Handling (available after Stage 3).
 
 ---
@@ -317,7 +319,7 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `style`
 ## Part 2: Project-Specific Configuration
 
 <!-- ⚠️ TEMPLATE: Bracketed values below ([PROJECT_NAME], [N], [e.g., ...]) are placeholders.
-     Stage 3 MUST fill ALL bracketed placeholders in Part 2, including those inside code blocks
+     Stage 3 must fill ALL bracketed placeholders in Part 2, including those inside code blocks
      and table cells. Stage 4 will grep for remaining brackets (`grep -nE '\[[A-Z_]+\]'`).
      If reading this in a project and placeholders are still present, run Stage 4 verification. -->
 
@@ -414,7 +416,7 @@ bun run seed:reset       # Clear all data and re-seed
 ### Project-Specific Prohibitions
 
 <!-- Stage 3: Add stack-specific prohibitions extending Part 1 as bullet-point directives.
-     Example: "- DO NOT use [deprecated API] — use [replacement] instead." -->
+     Example: "- Do not use [deprecated API] — use [replacement] instead." -->
 
 ### Key Reference Documents
 
@@ -436,7 +438,7 @@ See `plancasting/_progress.md` for feature tracking.
 
 Stage 3 replaces all `[PLACEHOLDER]` values below with actual project paths and rule counts.
 
-| Rule File | Globs | Generated By | Rule Count |
+| Rule File | Paths | Generated By | Rule Count |
 |---|---|---|---|
 | `.claude/rules/backend.md` | `[BACKEND_DIR]/**` | Stage 3 | [N] |
 | `.claude/rules/frontend.md` | `[FRONTEND_DIR]/**` | Stage 3 | [N] |

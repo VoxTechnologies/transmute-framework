@@ -6,12 +6,14 @@ description: >-
   "configure technology stack", "select technologies", "run Stage 0",
   "start tech stack discovery", "define the stack", or "set up the project stack",
   or when the transmute-pipeline agent reaches Stage 0 of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Transmute — Tech Stack Discovery & Configuration (Stage 0)
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/tech-stack-detailed-guide.md` for the complete procedure, technology category tables, credential checklists, product type adaptation rules, and supported product types.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/tech-stack-detailed-guide.md` for the complete procedure, technology category tables, credential checklists, product type adaptation rules, and supported product types.
 
 ## Prerequisites
 
@@ -21,7 +23,7 @@ Before starting, verify:
 
 ## Overview
 
-This is an INTERACTIVE, multi-phase process. Do NOT rush through — each phase builds on the previous one. The output (`plancasting/tech-stack.md`) is referenced by every subsequent pipeline stage.
+This is an INTERACTIVE, multi-phase process. Do not rush through — each phase builds on the previous one. The output (`plancasting/tech-stack.md`) is referenced by every subsequent pipeline stage.
 
 ## Supported Product Types
 
@@ -143,7 +145,7 @@ Generate a credentials checklist categorized by pipeline stage and credential ti
 - **Before Stage 7D**: Mintlify account (if documentation site selected)
 
 Collect credentials with strict security rules:
-- NEVER log, echo, or display credentials after collection
+- never log, echo, or display credentials after collection
 - Write ONLY to `.env.local` (git-ignored)
 - Strongly encourage ALL red-tier credentials now
 - Warn about placeholders that will block Stage 3
@@ -176,7 +178,7 @@ Generate these files:
 - Credentials Reference (purposes only, NOT values)
 - Starter Template
 
-**`.env.local`** — Credentials file (NEVER commit to version control)
+**`.env.local`** — Credentials file (never commit to version control)
 
 **`.env.local.example`** — Template for other developers
 
@@ -191,7 +193,7 @@ If applicable, perform ONLY:
 2. `git init` if not already a git repo
 3. Install package manager lock file
 
-Do NOT install product-specific packages, configure services, or create application directories. That is Stage 3's responsibility.
+Do not install product-specific packages, configure services, or create application directories. That is Stage 3's responsibility.
 
 ### Step 10: Handoff (Phase 7)
 
@@ -217,16 +219,16 @@ If any field cannot be determined, mark as `> ⚠️ ASSUMPTION: [assumed value]
 
 ## Critical Rules
 
-1. ALWAYS read the Business Plan FIRST. NEVER ask questions it already answers.
-2. NEVER assume product type if ambiguous. Ask for clarification.
-3. NEVER recommend technologies without researching current status via web search.
-4. NEVER skip credential collection — missing credentials cause pipeline failures.
-5. NEVER assume a default for multi-tenancy — this is a fundamental architectural decision.
-6. NEVER skip AI agent framework selection if AI features involve agents or multi-step workflows.
-7. ALWAYS present multiple options and let the user choose.
-8. ALWAYS explain WHY you recommend something, connecting to Business Plan features.
-9. ALWAYS consider Claude Code compatibility.
-10. NEVER skip Design Direction questions for products with a frontend.
+1. always read the Business Plan FIRST. never ask questions it already answers.
+2. never assume product type if ambiguous. Ask for clarification.
+3. never recommend technologies without researching current status via web search.
+4. never skip credential collection — missing credentials cause pipeline failures.
+5. never assume a default for multi-tenancy — this is a fundamental architectural decision.
+6. never skip AI agent framework selection if AI features involve agents or multi-step workflows.
+7. always present multiple options and let the user choose.
+8. always explain WHY you recommend something, connecting to Business Plan features.
+9. always consider Claude Code compatibility.
+10. never skip Design Direction questions for products with a frontend.
 11. When the user provides design reference URLs, visit each to analyze visual patterns.
 12. When the user provides a product logo, extract dominant colors.
 

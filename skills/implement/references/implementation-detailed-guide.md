@@ -25,23 +25,37 @@ After this stage completes, Stage 5B (Implementation Completeness Audit) will sc
 - Inline page bloat (pages implementing UI instead of composing scaffold components)
 
 To minimize rework in 5B:
-1. ALWAYS implement all component states (loading, error, empty, data)
-2. NEVER use hardcoded mock data in components that should query the backend
-3. NEVER leave onClick/onSubmit handlers as no-ops (`onClick={() => {}}`)
-4. ALWAYS import and compose scaffold components — do NOT rebuild UI inline in pages
-5. NEVER create orphan components — verify each component is imported before moving to the next feature
+1. always implement all component states (loading, error, empty, data)
+2. never use hardcoded mock data in components that should query the backend
+3. never leave onClick/onSubmit handlers as no-ops (`onClick={() => {}}`)
+4. always import and compose scaffold components — do not rebuild UI inline in pages
+5. never create orphan components — verify each component is imported before moving to the next feature
 
-**Clarification**: "Full-build" means ALL features ship — there is no "Phase 1 MVP" within a session. However, context window management (splitting work across multiple sessions) is a *session-level* concern, not a feature-level concern. If a feature requires creating or substantially modifying more than ~15 files total, split it into sub-features for manageability — but ALL sub-features must still be completed. **Timing**: During Phase 0 (before spawning any teammates), the lead reviews each feature's PRD scope. If a feature requires 15+ files total (backend + frontend + tests), mark it for sub-splitting in `_progress.md` BEFORE creating feature briefs. Sub-features should be tracked as separate rows in `plancasting/_progress.md` with IDs like `FEAT-003a`, `FEAT-003b`. Each sub-feature goes through the full Step 1–5 cycle independently. The parent feature is marked Done only when all sub-features are Done. **Sub-feature tracking**: If a feature is split (e.g., FEAT-003a + FEAT-003b), each sub-feature gets its own row in `_progress.md` with the parent noted in the Notes column. The parent feature (FEAT-003) is marked ✅ Done only when ALL sub-features are ✅ Done. If a sub-feature (e.g., FEAT-003a) is blocked, mark it ⏸ separately — the parent status follows: if any sub is ⏸ or 🔧, the parent is 🔧; only when all subs are ✅ is the parent ✅. **Splitting strategy**: Split by screen if the feature has 3+ distinct screens (e.g., TaskList + TaskDetail + TaskCreate = 3 sub-features), by layer if backend is complex (e.g., query logic + mutations as separate sub-features), or by user journey if the feature spans workflows. If you discover mid-implementation that a feature needs 15+ files, pause and notify the lead — do NOT self-split during execution.
+**Clarification**: "Full-build" means ALL features ship — there is no "Phase 1 MVP" within a session. However, context window management (splitting work across multiple sessions) is a *session-level* concern, not a feature-level concern. If a feature requires creating or substantially modifying more than ~15 files total, split it into sub-features for manageability — but ALL sub-features must still be completed. **Timing**: During Phase 0 (before spawning any teammates), the lead reviews each feature's PRD scope. If a feature requires 15+ files total (backend + frontend + tests), mark it for sub-splitting in `_progress.md` BEFORE creating feature briefs. Sub-features should be tracked as separate rows in `plancasting/_progress.md` with IDs like `FEAT-003a`, `FEAT-003b`. Each sub-feature goes through the full Step 1–5 cycle independently. The parent feature is marked Done only when all sub-features are Done. **Sub-feature tracking**: If a feature is split (e.g., FEAT-003a + FEAT-003b), each sub-feature gets its own row in `_progress.md` with the parent noted in the Notes column. The parent feature (FEAT-003) is marked ✅ Done only when ALL sub-features are ✅ Done. If a sub-feature (e.g., FEAT-003a) is blocked, mark it ⏸ separately — the parent status follows: if any sub is ⏸ or 🔧, the parent is 🔧; only when all subs are ✅ is the parent ✅. **Splitting strategy**: Split by screen if the feature has 3+ distinct screens (e.g., TaskList + TaskDetail + TaskCreate = 3 sub-features), by layer if backend is complex (e.g., query logic + mutations as separate sub-features), or by user journey if the feature spans workflows. If you discover mid-implementation that a feature needs 15+ files, pause and notify the lead — do not self-split during execution.
+
+## Parallel Waves (opt-in)
+
+The default feature cycle is sequential. `plancasting/tech-stack.md` § Model Specifications "Stage 5 parallel waves" can raise the number of features in flight. The rules, which the lead applies during Phase 0 queue construction:
+
+1. A wave holds at most N features, chosen in priority order from the features whose dependencies are all ✅ Done.
+2. Exclude from a wave any feature whose brief lists a `UI reference` or `Workflow` integration point to another feature in the same wave, and any feature that updates shared UI (navigation, dashboard, shared layout, notification surfaces). Those run alone, between waves. `Data-only` integration is fine in parallel.
+3. Sub-features of one parent never share a wave.
+4. Each feature in a wave gets its own git worktree and branch: `git worktree add ../<project>-FEAT-NNN -b feat/FEAT-NNN`. Every teammate prompt for that feature names the worktree directory, and all reads, writes, and test runs happen inside it. The teammates for one feature share that one worktree.
+5. The Step 5 quality gate runs inside the worktree first. On PASS, the lead merges the branch into the main working tree (`git merge --no-ff feat/FEAT-NNN`), runs the full typecheck, lint, test and E2E suites on the merged tree, and marks the feature Done only when they pass. Conflicts are resolved by the lead, never by a teammate; after resolving, re-run the suite.
+6. A wave ends when every feature in it is merged or marked ⏸ Blocked; the next wave starts from the updated queue. Remove merged worktrees (`git worktree remove`).
+7. `plancasting/_progress.md` records the wave number in the Notes column so a resumed session can tell which features were in flight.
+
+Keep the setting at 1 until one measured run shows the merges stay clean for the project's stack; raise it to 2 or 3 after that. The parallel gain is large (Stage 5 is the longest stage) and the failure mode is specific (shared files), which is what rule 2 guards.
 
 ## Known Failure Patterns
 
 Based on observed Plan Cast outcomes:
 
-1. **Frontend stubs surviving quality gates**: As the session progresses and context window fills, frontend components become progressively shallower. The last 5-10 features are most at risk. ALWAYS apply the anti-stub quality gates even when fatigued. **Quality gate criteria**: (1) Zero `⚠️ STUB:` markers or TODO comments in new code, (2) all components have loading/error/empty states, (3) all hooks are used (no orphans), (4) all tests pass, (5) no TypeScript or linter errors. Document the gate result (PASS/FAIL) in the feature brief before marking feature done.
-2. **Hook data shape mismatch**: Frontend hook expects `{ organizations: [] }` but backend returns `{ items: [] }`. ALWAYS verify the hook's return type matches the actual backend response.
-3. **Missing empty/error states**: Agent implements the happy-path render but skips loading, empty, and error states. The quality gate at Step 5 MUST catch these BEFORE marking the feature done — do NOT defer to Stage 5B.
-4. **Context window degradation**: Degradation onset occurs around the session feature limit (see tech-stack.md § Model Specifications). Monitor quality gate pass rates — if the last 3+ features show increasing stub rates or missing states, end the session and resume fresh. **Quality degradation threshold**: If 3+ consecutive features have >5 stub/TODO markers each, or if quality gate FAIL occurs twice in sequence, end the session. Degradation threshold: a feature exceeds this if it has >5 stub/TODO markers, >2 missing component states (loading/error/empty), or test failure rate >10%. Start a fresh session and re-paste the prompt — the orchestrator will resume from `_progress.md`. **Session recovery**: The orchestrator maintains `./plancasting/_progress.md` with feature status. When starting a new session, it reads this file, skips ✅ Done features, and resumes from the first incomplete feature. Commit `_progress.md` after each feature completion for clean recovery.
-5. **Inline page code instead of component composition**: Frontend teammate writes all UI directly in page.tsx instead of importing scaffold components. ALWAYS check scaffold files before writing new code.
+1. **Frontend stubs surviving quality gates**: Late in a long feature queue, frontend components tend to come back shallower. The last 5-10 features are most at risk, so apply the anti-stub quality gates with the same rigor to the last feature as to the first. **Quality gate criteria**: (1) Zero `⚠️ STUB:` markers or TODO comments in new code, (2) all components have loading/error/empty states, (3) all hooks are used (no orphans), (4) all tests pass, (5) no TypeScript or linter errors. Document the gate result (PASS/FAIL) in the feature brief before marking feature done.
+2. **Hook data shape mismatch**: Frontend hook expects `{ organizations: [] }` but backend returns `{ items: [] }`. always verify the hook's return type matches the actual backend response.
+3. **Missing empty/error states**: Agent implements the happy-path render but skips loading, empty, and error states. The quality gate at Step 5 must catch these BEFORE marking the feature done — do not defer to Stage 5B.
+4. **Late-queue quality drift**: Quality can drift as the feature queue gets long, independent of how much context remains (context is compacted automatically — do not monitor context usage, do not stop or suggest a new session on account of it). Monitor quality gate pass rates instead — if the last 3+ features show increasing stub rates or missing states, end the session and resume fresh. **Quality degradation threshold**: If 3+ consecutive features have >5 stub/TODO markers each, or if quality gate FAIL occurs twice in sequence, end the session. Degradation threshold: a feature exceeds this if it has >5 stub/TODO markers, >2 missing component states (loading/error/empty), or test failure rate >10%. Start a fresh session and re-paste the prompt — the orchestrator will resume from `_progress.md`. **Session recovery**: The orchestrator maintains `./plancasting/_progress.md` with feature status. When starting a new session, it reads this file, skips ✅ Done features, and resumes from the first incomplete feature. Commit `_progress.md` after each feature completion for clean recovery.
+5. **Inline page code instead of component composition**: Frontend teammate writes all UI directly in page.tsx instead of importing scaffold components. always check scaffold files before writing new code.
 6. **Orphan scaffold components**: Frontend teammate creates new inline components in page files instead of implementing existing scaffold components (see `plancasting/_scaffold-manifest.md` if it exists, otherwise refer to the scaffold directory listing). Result: duplicate UI code and orphan files that Stage 5B must detect.
 7. **Backend function signature mismatch**: Backend teammate implements a mutation with different argument names than what the PRD API spec defines — frontend teammate then writes hooks using the PRD names, causing runtime type errors.
 8. **Missing cross-feature regression tests**: Feature B depends on Feature A's data, but no regression test verifies Feature A still works after Feature B modifies shared state.
@@ -56,7 +70,7 @@ Based on observed Plan Cast outcomes:
 - **Business Plan**: `./plancasting/businessplan/` (for domain context when needed)
 - **Tech Stack**: `./plancasting/tech-stack.md` (for technology-specific patterns and constraints)
 - **Existing Codebase**: The project scaffolding already exists in [your backend directory] (e.g., `./convex/`), [your frontend directory] (e.g., `./src/`), and `./e2e/`.
-- **Project Rules**: `./CLAUDE.md` (MUST be read and followed for all code generation)
+- **Project Rules**: `./CLAUDE.md` (must be read and followed for all code generation)
 - **Progress Tracker**: `./plancasting/_progress.md` (tracks ALL features — every one must reach ✅ Done)
 - **Code Generation Context**: `./plancasting/_codegen-context.md` (Stage 3's code generation map — should always exist for Stage 3+ projects)
 - **Scaffold Manifest**: `./plancasting/_scaffold-manifest.md` (Stage 3's component-to-page mapping — if it exists)
@@ -67,10 +81,10 @@ Based on observed Plan Cast outcomes:
 2. Verify `./plancasting/tech-stack.md` exists. If missing → STOP: "Stage 5 requires `plancasting/tech-stack.md` from Stage 0."
 3. Verify `./plancasting/_progress.md` exists (created by Stage 3 scaffold). If missing → STOP: "Stage 5 requires Stage 3 scaffolding. Run Stage 3 first."
 4. Verify `./CLAUDE.md` exists and Part 2 is populated (Stage 4). If Part 2 still contains only placeholder text → STOP: "Stage 5 requires Stage 4 CLAUDE.md setup."
-5. Verify `./plancasting/_scaffold-manifest.md` exists and contains a "Backend Functions" section and a "Components → Page Mapping" section (Stage 3 output). If missing → STOP: "Stage 5 requires the scaffold manifest from Stage 3. Run Stage 3 first or create the manifest manually." If the manifest exists but is incomplete (e.g., missing the Components → Page Mapping section) → WARN and extend it by scanning project directories: list all component files and map them to the pages that import them. Append to the existing manifest — do NOT regenerate from scratch, as that would lose Stage 3's original component list and cause Stage 5B's orphan detection to miss genuinely orphaned files.
-6. Verify `./plancasting/_codegen-context.md` exists (Stage 3 output). If missing → WARN: "Code generation context not found — scaffold manifest will be used as fallback for file mapping." Do not STOP; proceed using `_scaffold-manifest.md` as the primary file structure reference.
+5. Verify `./plancasting/_scaffold-manifest.md` exists and contains a "Backend Functions" section and a "Components → Page Mapping" section (Stage 3 output). If missing → STOP: "Stage 5 requires the scaffold manifest from Stage 3. Run Stage 3 first or create the manifest manually." If the manifest exists but is incomplete (e.g., missing the Components → Page Mapping section) → WARN and extend it by scanning project directories: list all component files and map them to the pages that import them. Append to the existing manifest — do not regenerate from scratch, as that would lose Stage 3's original component list and cause Stage 5B's orphan detection to miss genuinely orphaned files.
+6. Verify `./plancasting/_codegen-context.md` exists (Stage 3 output). If missing → WARN: "Code generation context not found — scaffold manifest will be used as fallback for file mapping." Do not stop; proceed using `_scaffold-manifest.md` as the primary file structure reference.
 
-**Stage 5B Gate**: After Stage 5 completes, Stage 5B (Implementation Completeness Audit) will audit ALL features for stubs, missing states, and integration gaps. Features that fail 5B may be marked `🔄 Needs Re-implementation` in `_progress.md`, requiring you to re-run Stage 5 for those specific features. Stage 5 features are NOT "done" until 5B audits them.
+**Stage 5B Gate**: After Stage 5 completes, Stage 5B (Implementation Completeness Audit) will audit ALL features for stubs, missing states, and integration gaps. Features that fail 5B may be marked `🔄 Needs Re-implementation` in `_progress.md`, requiring you to re-run Stage 5 for those specific features. Stage 5 features are not "done" until 5B audits them.
 
 **Session Limit**: A single session can handle the number of features specified in tech-stack.md § Model Specifications "Session feature limit" (default: 25 features if not specified in tech-stack.md) before quality degrades. If the product exceeds that limit, plan for multiple Stage 5 sessions. After each session: commit `_progress.md`, exit, start a fresh `claude --dangerously-skip-permissions` session, and paste this prompt again — the orchestrator will resume from the first incomplete feature.
 
@@ -86,7 +100,7 @@ Stage 5 generates the following artifacts:
 
 If resuming from a prior incomplete Stage 5 session:
 1. Read `./plancasting/_progress.md` — skip all `✅ Done` features
-2. Resume using **positional scan** (top-to-bottom, NOT status-priority): scan `_progress.md` from top to bottom, skip `✅ Done` and `⏸ Blocked` features. The first non-skippable feature encountered is processed: `🔧` = resume from incomplete layer, `🔄` = rebuild from scratch, `⬜` = start fresh. Do NOT search all `🔧` before all `🔄` — process them in the order they appear.
+2. Resume using **positional scan** (top-to-bottom, NOT status-priority): scan `_progress.md` from top to bottom, skip `✅ Done` and `⏸ Blocked` features. The first non-skippable feature encountered is processed: `🔧` = resume from incomplete layer, `🔄` = rebuild from scratch, `⬜` = start fresh. Do not search all `🔧` before all `🔄` — process them in the order they appear.
 3. If `./plancasting/_implementation-report.md` exists from a prior session, append to it (do not overwrite)
 
 For full session recovery procedure, see the "Session Recovery" section at the end of this document.
@@ -112,7 +126,7 @@ Always read `CLAUDE.md` Part 2 (Backend Rules, Frontend Rules) for your project'
 
 1. Read `./CLAUDE.md` — internalize all conventions, naming rules, and patterns.
 2. Read `./plancasting/tech-stack.md` — understand the technology stack and its constraints. Check the `Session Language` setting — use this language for all user-facing output (progress summaries, review checkpoint messages, implementation reports). Code and code comments remain in English.
-3. **Credential validation**: Check `.env.local` for any remaining placeholder values (`YOUR_*_HERE`, `TODO_*`, `CHANGE_ME`, `PLACEHOLDER`). If ANY placeholder credentials exist, STOP immediately and list which credentials are missing. Do NOT proceed with feature implementation until all credentials are real values — features that connect to external services (auth, database, email, payments, AI) will fail with placeholders.
+3. **Credential validation**: Check `.env.local` for any remaining placeholder values (`YOUR_*_HERE`, `TODO_*`, `CHANGE_ME`, `PLACEHOLDER`). If ANY placeholder credentials exist, STOP immediately and list which credentials are missing. Do not proceed with feature implementation until all credentials are real values — features that connect to external services (auth, database, email, payments, AI) will fail with placeholders.
 4. **Spec validation gate**: Verify `./plancasting/_audits/spec-validation/report.md` exists and shows PASS or CONDITIONAL PASS (Stage 2B gate). If missing or FAIL, STOP: "Stage 2B must pass before implementation."
 5. **Scaffold validation**: Verify `./plancasting/_scaffold-manifest.md` exists (created by Stage 3). If missing, STOP: "Stage 3 scaffold not found — run Stage 3 before Stage 5."
    Verify `./plancasting/_briefs/` directory exists. If missing, create it: `mkdir -p ./plancasting/_briefs/`.
@@ -195,7 +209,7 @@ When analyzing a feature's dependencies on existing features, classify each inte
 
 For each integration point, note the level and affected files. Level 2+ integrations require explicit coordination between backend and frontend teammates.
 
-**Cross-feature testing requirements by level**: (1) Level 1 — backend teammate writes a query test verifying data from the prior feature is readable via the new feature's queries. (2) Level 2 — backend teammate writes tests for any new hooks/mutations the prior feature's UI needs; frontend teammate verifies the prior feature's UI renders the new data. (3) Level 3 — E2E teammate writes a test verifying workflow state changes (conditional rendering, navigation, feature unlock). These tests MUST pass before marking the feature done.
+**Cross-feature testing requirements by level**: (1) Level 1 — backend teammate writes a query test verifying data from the prior feature is readable via the new feature's queries. (2) Level 2 — backend teammate writes tests for any new hooks/mutations the prior feature's UI needs; frontend teammate verifies the prior feature's UI renders the new data. (3) Level 3 — E2E teammate writes a test verifying workflow state changes (conditional rendering, navigation, feature unlock). These tests must pass before marking the feature done.
 
 Create the `./plancasting/_briefs/` directory if it does not exist, then save the brief to `./plancasting/_briefs/<feature-id>.md` for reference.
 Format: Markdown with YAML frontmatter containing `featureId`, `featureName`, `priority`, `status`, and `dependencies`.
@@ -215,7 +229,7 @@ Your tasks:
 0. SCAFFOLD INVENTORY (MANDATORY — do this BEFORE writing any code):
    - List ALL existing scaffold files for this feature in your backend directory (e.g., `convex/<domain>.ts` and `convex/_internal/<domain>.ts`).
    - Read each file. Note which functions already have scaffold bodies vs. which are empty.
-   - Your job is to implement business logic INSIDE these existing files. Do NOT create new files for functions that already have scaffold files. Do NOT rewrite function signatures that are already correct.
+   - Your job is to implement business logic INSIDE these existing files. Do not create new files for functions that already have scaffold files. Do not rewrite function signatures that are already correct.
    - If the scaffold manifest exists at `./plancasting/_scaffold-manifest.md`, read the "Backend Functions" section for this feature to see exactly which files and function names were generated.
    - If `./plancasting/_scaffold-manifest.md` does not exist (manifest was not generated during Stage 3 — fallback to manual directory scanning), manually scan the backend directory (e.g., `ls convex/` or equivalent for your backend) to discover existing scaffold files before writing new ones.
    - Only create NEW files if a function is genuinely missing from the scaffold (not listed in the manifest).
@@ -223,9 +237,9 @@ Your tasks:
 1. SCHEMA CHANGES: If the brief requires new tables or indexes, update your schema file (e.g., `convex/schema.ts`).
    - Add new defineTable entries or modify existing ones.
    - Add indexes for all query patterns needed by this feature's screens.
-   - Do NOT remove or rename existing tables/fields — this is additive only.
+   - Do not remove or rename existing tables/fields — this is additive only.
    - If adding fields to existing tables that are used by already-completed features, verify that existing functions still work with the schema change.
-   - **Crash recovery**: If you are a re-spawned teammate resuming after a crash, first scan the schema file for any tables/fields you were assigned to add. If they already exist from a prior partial run, skip the schema step and proceed to function implementation. Do NOT re-create existing tables — this causes deployment errors.
+   - **Crash recovery**: If you are a re-spawned teammate resuming after a crash, first scan the schema file for any tables/fields you were assigned to add. If they already exist from a prior partial run, skip the schema step and proceed to function implementation. Do not re-create existing tables — this causes deployment errors.
 
 2. BACKEND FUNCTIONS: Implement or update functions in your backend directory (e.g., `convex/<domain>.ts`).
    - For each API endpoint listed in the brief:
@@ -252,8 +266,8 @@ Your tasks:
    **General rules (a, d, g, m):**
 
    a. **Module map**: If a `[backend-dir]/__tests__/backend-modules.test-utils.ts` (e.g., `convex/__tests__/convex-modules.test-utils.ts`) file exists
-      with an explicit module map, ALWAYS import `modules` from it and pass to
-      `convexTest(schema, modules)`. NEVER call `convexTest(schema)` without the module
+      with an explicit module map, always import `modules` from it and pass to
+      `convexTest(schema, modules)`. never call `convexTest(schema)` without the module
       map — `import.meta.glob` is unavailable in Vitest's node environment.
 
    d. **Skip vs test classification**: NOT all Convex functions are testable in
@@ -266,18 +280,18 @@ Your tasks:
       the return shape from PRD descriptions alone.
 
    m. **Quota rollback on failure**: If an operation increments a usage counter (e.g.,
-      `planCastsUsed`) BEFORE executing the actual work, it MUST decrement on failure.
+      `planCastsUsed`) BEFORE executing the actual work, it must decrement on failure.
       Otherwise, failed attempts consume quota and eventually block the user. Either:
       (a) increment AFTER success, or (b) wrap in try/catch and decrement in the catch.
 
    **Data rules (b, e):**
 
    b. **Soft-delete filter compatibility**: When inserting test data directly via
-      `ctx.db.insert()`, ALWAYS include `deletedAt: null` for any table that uses
+      `ctx.db.insert()`, always include `deletedAt: null` for any table that uses
       soft-delete filters (`q.eq(q.field("deletedAt"), null)`). Omitting `deletedAt`
-      gives the field value `undefined`, which does NOT match the `null` filter.
+      gives the field value `undefined`, which does not match the `null` filter.
 
-   e. **Schema-first test data**: ALWAYS read your schema file (e.g., `convex/schema.ts`) to get valid enum
+   e. **Schema-first test data**: always read your schema file (e.g., `convex/schema.ts`) to get valid enum
       values, required fields, and index definitions before writing test data
       factories. Never invent plausible values.
 
@@ -300,12 +314,12 @@ Your tasks:
    **External API rules (h, i, j, k, l):**
 
    h. **OAuth redirect_uri consistency**: If implementing OAuth flows (GitHub, Vercel,
-      Google, etc.), the `redirect_uri` MUST be identical in BOTH the authorization
+      Google, etc.), the `redirect_uri` must be identical in BOTH the authorization
       initiation code AND the callback handler code. Even a trailing `/callback` suffix
       mismatch will cause the provider to reject the request. Use the SAME variable or
       utility function to construct the redirect_uri in both places.
 
-   i. **External API identifiers**: NEVER invent API model IDs, endpoint URLs, or
+   i. **External API identifiers**: never invent API model IDs, endpoint URLs, or
       version strings. Always reference the official API documentation. Common mistake:
       using an outdated or hallucinated model ID instead of the current one listed in
       the provider's documentation. Model IDs change with new releases — always verify
@@ -313,19 +327,19 @@ Your tasks:
       the provider's docs before using them in code.
 
    j. **Error logging for external calls**: Every `fetch()` to an external API that
-      handles a non-ok response MUST log the response status and body (via
+      handles a non-ok response must log the response status and body (via
       `console.error`) BEFORE returning a user-friendly fallback message. Silent error
       swallowing makes production debugging impossible.
 
    k. **Environment variable naming consistency**: Before reading `process.env.SOME_KEY`,
       grep the codebase for every other file that reads the same logical secret (e.g.,
-      the Anthropic API key). ALL references MUST use the EXACT same variable name.
+      the Anthropic API key). ALL references must use the EXACT same variable name.
       Common failure: one file reads `ANTHROPIC_API_KEY` while every other file reads
       `TRANSMUTER_ANTHROPIC_API_KEY` — the mismatch returns an empty string silently
       and the feature fails only in production. Cross-check against `.env.local.example`
       or `.env.production.example` for the canonical variable names.
 
-   l. **Third-party service limits**: NEVER hardcode timeout, size, or rate values
+   l. **Third-party service limits**: never hardcode timeout, size, or rate values
       without verifying the provider's actual limits. Common failure: setting an E2B
       sandbox timeout to 2 hours when the free tier max is 1 hour → API returns 400.
       Always check the provider's documentation for tier-specific constraints, and add
@@ -357,7 +371,7 @@ Spawn a teammate with the Feature Implementation Brief AND the backend teammate'
 You are implementing the frontend for feature [FEATURE_ID]: [FEATURE_NAME].
 This is feature [N] of [TOTAL] in a full-product build. ALL features will be implemented.
 
-CRITICAL: Before writing any code, read these in order:
+Before writing any code, read these in order:
 1. CLAUDE.md (especially the "Design & Visual Identity" section)
 2. Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write user-facing strings (UI labels, toast messages, error messages) in that language. Code and comments remain in English.
 3. tech-stack.md "Design Direction" section — for the selected UI component library, aesthetic direction, design reference URLs, and Figma designs. These are the authoritative design inputs from the user.
@@ -372,7 +386,7 @@ DESIGN GUIDELINES (follow throughout all frontend work):
 - Color: Use dominant colors with sharp accents — not evenly-distributed palettes. Follow the palette in design-tokens.ts.
 - Motion: Apply purposeful animations — CSS transitions on hover/focus, staggered reveals on page load, smooth state changes.
 - Spatial composition: Use intentional layout choices — asymmetry, generous negative space, controlled density.
-- NEVER produce generic AI aesthetics: no default Tailwind colors, no cookie-cutter card grids, no purple-on-white gradients.
+- never produce generic AI aesthetics: no default Tailwind colors, no cookie-cutter card grids, no purple-on-white gradients.
 
 The backend teammate has completed their work. Here are the backend functions available: [PASTE BACKEND COMPLETION MESSAGE]. Copy the backend teammate's completion message verbatim — include function signatures, return types, error codes, and integration notes.
 
@@ -386,9 +400,9 @@ Your tasks:
    - If the scaffold manifest exists at `./plancasting/_scaffold-manifest.md`, read the sections for this feature to see:
      - Which component files were generated and which PAGE imports them
      - Which hooks were generated and which components consume them
-   - If the manifest does NOT exist (e.g., Stage 3 was run with an older prompt version), manually scan the directories: `ls src/components/features/`, `ls src/hooks/`, `ls src/app/` to discover existing scaffold files before writing new ones.
-   - YOUR RULE: Implement business logic INSIDE the existing scaffold component files. Do NOT rebuild UI inline in page files when a scaffold component already exists for that purpose. The page's job is to COMPOSE components, not to contain all the UI logic.
-   - Only create NEW component files if a UI element is genuinely missing from the scaffold (not listed in the manifest). If you create a new file, it MUST be imported by a page.
+   - If the manifest does not exist (e.g., Stage 3 was run with an older prompt version), manually scan the directories: `ls src/components/features/`, `ls src/hooks/`, `ls src/app/` to discover existing scaffold files before writing new ones.
+   - YOUR RULE: Implement business logic INSIDE the existing scaffold component files. Do not rebuild UI inline in page files when a scaffold component already exists for that purpose. The page's job is to COMPOSE components, not to contain all the UI logic.
+   - Only create NEW component files if a UI element is genuinely missing from the scaffold (not listed in the manifest). If you create a new file, it must be imported by a page.
    - If a scaffold file exists but the page ALSO has inline UI for the same purpose (duplication from a previous run), DELETE the inline page UI and use the scaffold component instead.
 
 1. CUSTOM HOOKS: Create or update hooks in [your hooks directory] (e.g., `src/hooks/`).
@@ -407,9 +421,9 @@ Your tasks:
      b. Apply micro-interactions: CSS transitions on hover/focus states, smooth state changes, subtle entrance animations.
      c. Skeleton screens for loading states must match the actual component layout and use the design system's colors.
      d. Empty states must be visually composed with illustrations or icons — not just text saying "No items found."
-     e. Icons: ALWAYS use the project's icon library (specified in `plancasting/tech-stack.md` "Icon library" field). Import from the barrel file at `src/components/ui/icons.ts` or directly from the library package. NEVER use inline SVG `<path>` elements for standard UI icons (navigation arrows, action buttons, status indicators, empty states, etc.). The only acceptable inline SVGs are: product logos, brand marks, or custom illustrations that don't exist in any icon library.
+     e. Icons: always use the project's icon library (specified in `plancasting/tech-stack.md` "Icon library" field). Import from the barrel file at `src/components/ui/icons.ts` or directly from the library package. never use inline SVG `<path>` elements for standard UI icons (navigation arrows, action buttons, status indicators, empty states, etc.). The only acceptable inline SVGs are: product logos, brand marks, or custom illustrations that don't exist in any icon library.
      f. Error states must be styled and helpful — not raw error strings.
-     g. NEVER produce generic AI-looking UI: no default Tailwind colors, no Inter/Roboto fonts, no uniform card grids, no purple-on-white gradients.
+     g. never produce generic AI-looking UI: no default Tailwind colors, no Inter/Roboto fonts, no uniform card grids, no purple-on-white gradients.
      h. Every component must be visually consistent with already-completed features. Check existing components for patterns.
 
 3. CROSS-FEATURE UI UPDATES: If the brief lists integration notes:
@@ -429,7 +443,7 @@ Your tasks:
 5. FEATURE FLAGS: If this feature has ops/experiment/permission flags:
    - Wrap appropriate components with <FeatureGate>.
    - Implement fallback UIs.
-   - Remember: these are NOT release gates. The feature ships enabled. Flags are for kill switches, A/B tests, or role gating.
+   - Remember: these are not release gates. The feature ships enabled. Flags are for kill switches, A/B tests, or role gating.
 
 6. COMPONENT TESTS: Write tests in [your test directory]/<feature-name>/ (e.g., `src/__tests__/components/<feature-name>/`).
    - Test all component states.
@@ -478,13 +492,13 @@ Your tasks:
 7. STUB ELIMINATION (CRITICAL — non-negotiable):
    Your job is to REPLACE scaffold stubs with functional implementations. Before declaring completion:
    a. Grep every file you created/modified for: `implementation pending`, `pending feature build`, `⚠️ STUB`, `TODO [Stage 5]`, `Coming soon`, `Not yet implemented`, `PLACEHOLDER`.
-      If ANY matches remain, you are NOT done. Replace them with real implementations.
+      If ANY matches remain, you are not done. Replace them with real implementations.
    b. Every component must import and use hooks or receive real data via props — not `useState("")` with no data source.
    c. Every component must render meaningful interactive UI — not a single `<p>` tag with a description.
-   d. Every component file you create MUST be imported by at least one page. If you create `src/components/features/foo/Bar.tsx`, verify that a page imports and renders `<Bar />`. Orphan files are forbidden.
-   e. If a scaffold component file exists AND the page implements that same UI inline (duplication), ALWAYS preserve the scaffold component FILE (its path and exports). If the page's inline version has better code, move that code INTO the scaffold component file. Then refactor the page to import the scaffold component. The goal is: the scaffold file path is the canonical location; the best available code lives there.
+   d. Every component file you create must be imported by at least one page. If you create `src/components/features/foo/Bar.tsx`, verify that a page imports and renders `<Bar />`. Orphan files are forbidden.
+   e. If a scaffold component file exists AND the page implements that same UI inline (duplication), always preserve the scaffold component FILE (its path and exports). If the page's inline version has better code, move that code INTO the scaffold component file. Then refactor the page to import the scaffold component. The goal is: the scaffold file path is the canonical location; the best available code lives there.
 
-8. I18N: Check `plancasting/tech-stack.md` for i18n configuration. If i18n is enabled: use translation keys (`t('key')`) for all user-facing strings — never hardcode display text directly. Add all new keys to the messages file(s). If i18n is NOT enabled: use hardcoded strings but follow naming and formatting conventions from the design tokens.
+8. I18N: Check `plancasting/tech-stack.md` for i18n configuration. If i18n is enabled: use translation keys (`t('key')`) for all user-facing strings — never hardcode display text directly. Add all new keys to the messages file(s). If i18n is not enabled: use hardcoded strings but follow naming and formatting conventions from the design tokens.
 
 9. VERIFICATION: After implementation, run:
    (Replace `bun run` with your project's package manager from CLAUDE.md throughout this list.)
@@ -492,7 +506,7 @@ Your tasks:
    - `bun run lint` — no lint errors.
    - `bun run test -- [your test directory]/<feature-name>/` (e.g., `src/__tests__/components/<feature-name>/`) — new tests pass.
    - `bun run test -- [your test directory]/` (e.g., `src/__tests__/components/`) — ALL existing component tests still pass.
-   - Stub scan: `grep -rn --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" "implementation pending\|pending feature build\|⚠️ STUB\|TODO \[Stage 5\]\|Coming soon\|Not yet implemented\|PLACEHOLDER" [your components directory]/<feature-name>/ | grep -v 'placeholder="\|Placeholder='` (e.g., `src/components/features/<feature-name>/`) — MUST return zero results.
+   - Stub scan: `grep -rn --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" "implementation pending\|pending feature build\|⚠️ STUB\|TODO \[Stage 5\]\|Coming soon\|Not yet implemented\|PLACEHOLDER" [your components directory]/<feature-name>/ | grep -v 'placeholder="\|Placeholder='` (e.g., `src/components/features/<feature-name>/`) — must return zero results.
    Fix any errors before marking your task as complete.
 
 When done, message the lead with:
@@ -593,7 +607,7 @@ After all 3 teammates complete their tasks for this feature:
    - Record any PRD gaps discovered
    - Update completion count: "X of Y features complete"
 11. **Shutdown teammates** for this feature cycle.
-12. **Proceed to next feature** in the queue — do NOT stop at any priority boundary. Continue through P0 → P1 → P2 → P3 until ALL features are done.
+12. **Proceed to next feature** in the queue — do not stop at any priority boundary. Continue through P0 → P1 → P2 → P3 until ALL features are done.
 
 ---
 
@@ -604,7 +618,7 @@ After all 3 teammates complete their tasks for this feature:
 - If unresolvable, spawn a "debugger" teammate.
 
 **Test failures (regression)**: If a previously passing test fails:
-- Do NOT skip or delete the test.
+- Do not skip or delete the test.
 - Diagnose: intentional change (update test) or bug (fix implementation).
 - Document the resolution.
 
@@ -666,7 +680,7 @@ Your tasks:
 4. Run the complete E2E suite and report results.
 
 5. Priority order for fixes and escalations:
-   (1) Flag but do NOT fix data model inconsistencies — these require schema changes and a Stage 5 backend re-run.
+   (1) Flag but do not fix data model inconsistencies — these require schema changes and a Stage 5 backend re-run.
    (2) Flag navigation gaps but do not add links (page structure is final).
    (3) Fix simple integration issues (e.g., missing data flow between two working features).
    List any issues requiring Stage 5 re-run as 'Integration Blockers' in the audit report.
@@ -692,7 +706,7 @@ Your tasks:
 
 #### 4. Performance Validation
 
-This is a lightweight sanity check — not a substitute for Stage 6C. Do NOT implement optimizations here; only flag critical blockers (e.g., page fails to load within 10s, bundle exceeds budget by 2x+). All optimization work happens in Stage 6C. (These thresholds are defaults — override with values from PRD `15-non-functional-specifications.md` if available.)
+This is a lightweight sanity check — not a substitute for Stage 6C. Do not implement optimizations here; only flag critical blockers (e.g., page fails to load within 10s, bundle exceeds budget by 2x+). All optimization work happens in Stage 6C. (These thresholds are defaults — override with values from PRD `15-non-functional-specifications.md` if available.)
 
 Spawn a "performance-auditor" teammate:
 
@@ -711,10 +725,10 @@ Your tasks:
 5. Report findings using these explicit thresholds:
    - **Critical blockers requiring immediate fix before Stage 6**: (1) any page load >10s on 4G throttle, (2) bundle >100% over stated budget. Flag to lead immediately.
    - **Minor issues** (5–10s load, 50–100% over budget) → log in audit report for Stage 6C.
-   - Do NOT implement optimization fixes in this stage — Stage 6C handles all optimization.
+   - Do not implement optimization fixes in this stage — Stage 6C handles all optimization.
 ~~~
 
-**Post-Audit Gate**: After all auditor teammates complete, review their findings. If any auditor reports critical issues (broken cross-feature flows, failing E2E tests, or performance budgets exceeded by >50%), fix the issues before proceeding to the Final Implementation Report — spawn targeted fix teammates if needed. Critical blockers (>10s load, >100% over budget) should be investigated for root cause (e.g., missing code splitting, accidentally bundled large dependency). Fix the root cause if it's a clear implementation bug. Do NOT perform general optimization — that's Stage 6C. If only minor issues are found, document them in the report's Known Issues section.
+**Post-Audit Gate**: After all auditor teammates complete, review their findings. If any auditor reports critical issues (broken cross-feature flows, failing E2E tests, or performance budgets exceeded by >50%), fix the issues before proceeding to the Final Implementation Report — spawn targeted fix teammates if needed. Critical blockers (>10s load, >100% over budget) should be investigated for root cause (e.g., missing code splitting, accidentally bundled large dependency). Fix the root cause if it's a clear implementation bug. Do not perform general optimization — that's Stage 6C. If only minor issues are found, document them in the report's Known Issues section.
 
 #### 5. Final Implementation Report
 
@@ -765,33 +779,33 @@ If a feature cannot proceed due to missing dependencies or external blockers:
 
 ## Critical Rules for the Lead
 
-1. NEVER skip a feature. Every feature in the PRD must be implemented. There is no "good enough" stopping point.
-2. NEVER skip the Feature Analysis step. Every feature must have a brief.
-3. NEVER spawn the frontend teammate until the backend teammate confirms completion.
-4. NEVER spawn the E2E teammate until the frontend teammate confirms completion.
-5. NEVER proceed to the next feature until the quality gate passes (including regression tests).
-6. NEVER proceed past a cross-feature break. Fix it immediately.
-7. ALWAYS read CLAUDE.md at startup and ensure every teammate reads it. NEVER modify Part 1 (Immutable Framework Rules) of CLAUDE.md. If project-specific rules need updating, modify Part 2 only.
-8. ALWAYS update `plancasting/_progress.md` after each feature cycle.
-9. ALWAYS run the FULL test suite (not just the current feature's tests) at each quality gate.
+1. never skip a feature. Every feature in the PRD must be implemented. There is no "good enough" stopping point.
+2. never skip the Feature Analysis step. Every feature must have a brief.
+3. never spawn the frontend teammate until the backend teammate confirms completion.
+4. never spawn the E2E teammate until the frontend teammate confirms completion.
+5. never proceed to the next feature until the quality gate passes (including regression tests).
+6. never proceed past a cross-feature break. Fix it immediately.
+7. always read CLAUDE.md at startup and ensure every teammate reads it. never modify Part 1 (Immutable Framework Rules) of CLAUDE.md. If project-specific rules need updating, modify Part 2 only.
+8. always update `plancasting/_progress.md` after each feature cycle.
+9. always run the FULL test suite (not just the current feature's tests) at each quality gate.
 10. If a feature requires creating or substantially modifying more than ~15 files total, split into sub-features and implement sequentially. See the Feature Splitting rule above (§ Full-Build Approach) for the canonical definition including timing, sub-feature tracking, and splitting strategy. **Quick reference**: (1) Identify logical sub-features from user stories. (2) Each sub-feature should be independently testable. (3) Update `_progress.md` with IDs like `FEAT-003a`, `FEAT-003b`. (4) Parent feature is marked Done only when all sub-features are Done.
-11. After ALL features are complete, ALWAYS run the Full-Product Completion Sequence (cross-feature audit, onboarding audit, performance audit) before generating the final report. The Full-Product Completion Sequence MUST run at least once, even if interrupted previously. If `plancasting/_implementation-report.md` exists but lacks a "Launch Readiness Assessment" section, re-run the Full-Product Completion Sequence.
+11. After ALL features are complete, always run the Full-Product Completion Sequence (cross-feature audit, onboarding audit, performance audit) before generating the final report. The Full-Product Completion Sequence must run at least once, even if interrupted previously. If `plancasting/_implementation-report.md` exists but lacks a "Launch Readiness Assessment" section, re-run the Full-Product Completion Sequence.
 12. The final report must show 100% PRD coverage. If it doesn't, identify gaps and implement them before declaring completion.
 
 ## Anti-Stub Quality Gates (CRITICAL)
 
-The scaffold phase (Stage 3) creates files with placeholder bodies like `"implementation pending feature build"`. Stage 5's job is to REPLACE these with functional implementations. A feature is NOT done if any of its components still contain scaffold-quality code.
+The scaffold phase (Stage 3) creates files with placeholder bodies like `"implementation pending feature build"`. Stage 5's job is to REPLACE these with functional implementations. A feature is not done if any of its components still contain scaffold-quality code.
 
 ### Stub Detection Rules
 
-Before marking ANY feature as ✅ Done, the lead MUST verify the following for every file created or modified:
+Before marking ANY feature as ✅ Done, the lead must verify the following for every file created or modified:
 
-1. **No placeholder text patterns**: Grep all files touched by this feature for these patterns. If ANY match, the feature is NOT done:
+1. **No placeholder text patterns**: Grep all files touched by this feature for these patterns. If ANY match, the feature is not done:
    - `implementation pending`
    - `pending feature build`
    - `// ⚠️ STUB`
    - `// TODO [Stage 5]`
-   - `Coming soon` (only acceptable as a user-facing UI label in components that the PRD explicitly defines as showing a "coming soon" state. It is NOT acceptable as a placeholder for unimplemented functionality). Verify by grepping PRD files: `grep -ri 'coming soon\|planned\|future phase' ./plancasting/prd/`. If no match, the "Coming soon" label is a stub — fix it.
+   - `Coming soon` (only acceptable as a user-facing UI label in components that the PRD explicitly defines as showing a "coming soon" state. It is not acceptable as a placeholder for unimplemented functionality). Verify by grepping PRD files: `grep -ri 'coming soon\|planned\|future phase' ./plancasting/prd/`. If no match, the "Coming soon" label is a stub — fix it.
    - `Not yet implemented`
    - `PLACEHOLDER` (excluding HTML placeholder attributes like `placeholder="Enter name"`)
    - Components that return only a single trivial element (e.g., a heading or paragraph with just a name/description string) with no interactive elements or real UI structure
@@ -816,7 +830,7 @@ At each quality gate (Step 5), run this scan BEFORE marking the feature as done:
 ~~~bash
 # NOTE: `⚠️ STUB` markers are EXPECTED in scaffold code from Stage 3. Your job is to REPLACE
 # every `⚠️ STUB:` marker with a functional implementation. After completing a feature, this
-# scan across that feature's files MUST return zero results — all stubs must be resolved.
+# scan across that feature's files must return zero results — all stubs must be resolved.
 
 # Scan for stub patterns in modified files
 grep -rn --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" "implementation pending\|pending feature build\|⚠️ STUB\|TODO \[Stage 5\]\|Coming soon\|Not yet implemented\|PLACEHOLDER" <modified-files> | grep -v 'placeholder="\|Placeholder='
@@ -831,7 +845,7 @@ for file in <new-component-files>; do
 done
 ~~~
 
-If either scan finds issues, the feature MUST be sent back to the frontend teammate for completion. Do NOT mark it as ✅ Done.
+If either scan finds issues, the feature must be sent back to the frontend teammate for completion. Do not mark it as ✅ Done.
 
 ### Pre-existing vs. New Errors
 
@@ -840,9 +854,9 @@ If typecheck/lint errors are introduced by THIS feature's new code, fix them bef
 ### Quality Gate Failure Escalation
 
 If a teammate produces scaffold-quality output (stub components, placeholder text, unconnected hooks):
-1. Do NOT accept the work. Send it back with specific instructions on what needs to be functional.
+1. Do not accept the work. Send it back with specific instructions on what needs to be functional.
 2. If the teammate cannot produce functional code (e.g., missing backend dependency), mark the feature as `⏸ Blocked` with the blocker description in the Notes column.
-3. NEVER mark a feature as ✅ Done to "move on" — this creates false progress that compounds into a broken product.
+3. never mark a feature as ✅ Done to "move on" — this creates false progress that compounds into a broken product.
 
 ## Note on Stage 5B (Implementation Completeness Audit)
 
@@ -851,7 +865,7 @@ After this stage completes, Stage 5B will run a FRESH full-codebase audit specif
 1. **Stub pattern**: Frontend components remain as scaffolds with placeholder text — caused by quality gate relaxation in long implementation sessions (sessions beyond the tech-stack.md § Model Specifications "Session feature limit" show measurable quality decline). ~80% of issues.
 2. **Duplication pattern**: Frontend teammate builds UI inline in page files instead of implementing inside existing scaffold component files — creating orphan components that are never imported. This is caused by the teammate not inventorying scaffold files before writing code.
 
-This audit is NOT a reason to relax quality gates — it is a safety net. The mandatory SCAFFOLD INVENTORY step (Step 0 in frontend/backend teammate instructions) is the PRIMARY defense against both patterns. If you detect your context window is becoming saturated (late in a long feature queue), end the session and resume fresh rather than degrading quality. If a session must end before all features complete, prioritize BACKEND completeness — backend stubs are harder to fix in 5B. Frontend stubs are addressed by Stage 5B's dedicated frontend-stub-fixer — but this is a last-resort triage, not a reason to deprioritize frontend completeness during Stage 5.
+This audit is not a reason to relax quality gates — it is a safety net. The mandatory SCAFFOLD INVENTORY step (Step 0 in frontend/backend teammate instructions) is the PRIMARY defense against both patterns. If the quality-gate pass rate drops late in a long feature queue (see Known Failure Pattern 4), end the session and resume fresh rather than degrading quality — judge by gate results, not by context usage, which is managed automatically. If a session must end before all features complete, prioritize BACKEND completeness — backend stubs are harder to fix in 5B. Frontend stubs are addressed by Stage 5B's dedicated frontend-stub-fixer — but this is a last-resort triage, not a reason to deprioritize frontend completeness during Stage 5.
 
 ## Gate Decision
 

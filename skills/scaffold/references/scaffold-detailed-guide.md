@@ -22,31 +22,31 @@ The scaffolding is the skeleton of the entire product. Nothing is deferred.
 Based on observed Plan Cast outcomes, these are common scaffolding failures:
 
 1. **Over-generating files**: Creating 200+ files when the product needs 80. Every file must trace to a PRD screen spec, API endpoint, or data model entity — no speculative files.
-2. **Auth provider mismatch**: Scaffold uses Clerk/Auth0 patterns when `plancasting/tech-stack.md` specifies WorkOS or Convex Auth. ALWAYS read `plancasting/tech-stack.md` for the actual auth provider.
-3. **Dependency version conflicts**: Installing packages with incompatible peer dependencies. ALWAYS verify compatibility before adding dependencies.
+2. **Auth provider mismatch**: Scaffold uses Clerk/Auth0 patterns when `plancasting/tech-stack.md` specifies WorkOS or Convex Auth. always read `plancasting/tech-stack.md` for the actual auth provider.
+3. **Dependency version conflicts**: Installing packages with incompatible peer dependencies. always verify compatibility before adding dependencies.
 4. **Wrong directory structure**: Creating `pages/` router structure when `plancasting/tech-stack.md` specifies App Router, or vice versa.
 5. **Missing config files**: Forgetting `postcss.config.js`, `tailwind.config.ts`, or environment-specific configs that the framework requires.
 6. **Schema without indexes**: Generating the schema file with tables/models but no indexes, forcing Stage 5 to retroactively add them.
 7. **Monolithic page files**: Creating page files that will inevitably become 300+ lines because no child components were scaffolded. Every page should have at least 2-3 child component files.
    **Decomposition rubric**: If a page's logic exceeds 150 lines or has 3+ distinct concerns (data fetching, form handling, side effects), split into child components. Extract a custom hook when the same logic is reused across 2+ pages OR exceeds 80 lines. Avoid over-splitting — a form with 5 inputs is one component, not five.
    Scaffold child components when: (a) the page has multiple UI sections (header, form, list, sidebar) — each gets a component; (b) the page's business logic would exceed 150 lines if written inline; (c) a UI pattern (e.g., card, modal, form) is used by multiple pages. Single-section pages (e.g., login form) should have at least one wrapper component (e.g., `LoginForm.tsx` containing the form logic), preventing page files from becoming monolithic. Every page should have at least 1 child component file.
-8. **Ignoring design direction from `plancasting/tech-stack.md`**: Stage 0 collects design reference URLs, Figma designs, UI component library selection, and aesthetic direction. Stage 3 MUST read the "Design Direction" section in `plancasting/tech-stack.md` and use it as the primary input for design token generation. Ignoring this section produces generic AI aesthetics that don't match the user's vision.
+8. **Ignoring design direction from `plancasting/tech-stack.md`**: Stage 0 collects design reference URLs, Figma designs, UI component library selection, and aesthetic direction. Stage 3 must read the "Design Direction" section in `plancasting/tech-stack.md` and use it as the primary input for design token generation. Ignoring this section produces generic AI aesthetics that don't match the user's vision.
 9. **Environment variable naming inconsistency**: Using `ANTHROPIC_API_KEY` in one file but `TRANSMUTER_ANTHROPIC_API_KEY` in another. Establish canonical env var names in `.env.local.example` during scaffolding and ensure ALL code references use the exact same names. This mismatch silently returns empty strings and only fails in production.
-10. **OAuth callback missing session persistence**: Generating an OAuth callback page that completes the backend authentication (code exchange) but does NOT store the session client-side. The callback page MUST: (a) call the token exchange backend function, (b) handle intermediate auth states (email verification, MFA), (c) persist the session in ALL required storage locations (see `_auth-template.md` § OAuth), and (d) THEN navigate to the post-login destination. Missing step (c) causes the user to bounce back to login immediately. This is the #1 most common OAuth integration bug because the callback page is generated separately from the login/signup hooks that already handle session storage correctly.
+10. **OAuth callback missing session persistence**: Generating an OAuth callback page that completes the backend authentication (code exchange) but does not store the session client-side. The callback page must: (a) call the token exchange backend function, (b) handle intermediate auth states (email verification, MFA), (c) persist the session in ALL required storage locations (see `_auth-template.md` § OAuth), and (d) THEN navigate to the post-login destination. Missing step (c) causes the user to bounce back to login immediately. This is the #1 most common OAuth integration bug because the callback page is generated separately from the login/signup hooks that already handle session storage correctly.
 
-## Pre-Scaffold Credential Gate (MUST verify before proceeding)
+## Pre-Scaffold Credential Gate (must verify before proceeding)
 
 Before generating any code, verify that all required credentials exist and are valid. First verify `.env.local` exists — if missing, STOP: "Stage 0 did not generate `.env.local`. Run Stage 0 first." Then read `.env.local` and check:
 
 1. **No placeholders**: `grep -E 'YOUR_.*_HERE|TODO_.*|CHANGE_ME|PLACEHOLDER|^[A-Z_]+=\s*$|^[A-Z_]+=""$|^[A-Z_]+='"'"''"'"'$' .env.local` must return empty. Check for common placeholder patterns: YOUR_*, TODO_*, CHANGE_ME, PLACEHOLDER, empty values (`API_KEY=`), or empty-string values (`API_KEY=""`). If any 🔴 credentials are placeholders, STOP and request them from the user.
 2. **Pipeline infrastructure**: The backend deployment must have `TRANSMUTER_ANTHROPIC_API_KEY`, `E2B_API_KEY`, and `SANDBOX_AUTH_TOKEN` set. These power the Transmute pipeline — without them, subsequent stages will fail silently. **Exception**: If `plancasting/tech-stack.md` indicates a standalone project (no Transmuter platform), pipeline infrastructure credentials (`TRANSMUTER_ANTHROPIC_API_KEY`, `E2B_API_KEY`, `SANDBOX_AUTH_TOKEN`) may be absent — exclude them from validation.
-3. **Canonical env var names**: When generating code that reads `process.env.*`, ALWAYS reference the variable names exactly as they appear in `.env.local.example`. Never invent alternative names (e.g., `ANTHROPIC_API_KEY` when the canonical name is `TRANSMUTER_ANTHROPIC_API_KEY`).
+3. **Canonical env var names**: When generating code that reads `process.env.*`, always reference the variable names exactly as they appear in `.env.local.example`. Never invent alternative names (e.g., `ANTHROPIC_API_KEY` when the canonical name is `TRANSMUTER_ANTHROPIC_API_KEY`).
 4. **Third-party service limits**: When configuring timeouts, batch sizes, or rate limits for external services (E2B, AI APIs, email providers), check the provider's documentation for tier-specific constraints. Never hardcode values that exceed the service tier's limits (e.g., E2B free tier max timeout is 1 hour).
 5. **Auth provider dashboard alignment**: When the auth provider (per `plancasting/tech-stack.md`) requires dashboard configuration (redirect URIs, OAuth connections, API keys), document the required dashboard settings in a `docs/auth-provider-setup.md` file during scaffolding. This file should list: (a) required redirect URIs and their expected values, (b) which OAuth connections to enable, (c) which environment (staging/production) the credentials belong to, and (d) a `curl` command to verify the API key works (e.g., `curl -s -H "Authorization: Bearer $API_KEY" https://api.<provider>.com/<verify-endpoint>`).
 
-If any check fails, report the specific missing/placeholder credentials and STOP execution. Output the list of issues and instruct: "Fix these credential issues, populate `.env.local` with real values, and re-run Stage 3." Do NOT proceed with partial credentials. Recovery: the operator fixes `.env.local`, then starts a new Claude Code session and re-pastes the Stage 3 prompt.
+If any check fails, report the specific missing/placeholder credentials and STOP execution. Output the list of issues and instruct: "Fix these credential issues, populate `.env.local` with real values, and re-run Stage 3." Do not proceed with partial credentials. Recovery: the operator fixes `.env.local`, then starts a new Claude Code session and re-pastes the Stage 3 prompt.
 
-**Tier clarification**: This stage validates 🔴 (pipeline infrastructure) credentials only. 🟡 product-service credentials are validated before Stage 5; 🟠 deployment credentials are validated before Stage 7. Do NOT fail the credential gate because 🟡 or 🟠 credentials are missing or placeholder — those are expected to be absent at this point.
+**Tier clarification**: This stage validates 🔴 (pipeline infrastructure) credentials only. 🟡 product-service credentials are validated before Stage 5; 🟠 deployment credentials are validated before Stage 7. Do not fail the credential gate because 🟡 or 🟠 credentials are missing or placeholder — those are expected to be absent at this point.
 
 ## Stack Context
 
@@ -70,7 +70,7 @@ These principles apply to your chosen backend. The examples below use Convex syn
 1. Backend code lives in the `convex/` directory. Each file exports query/mutation/action functions that become API endpoints named `api.<filename>.<exportName>`.
 2. Schema is defined in `convex/schema.ts` using `defineSchema`, `defineTable`, and `v` validators. Migrations are automatic on deploy — no SQL migration files.
 3. Queries are reactive and automatically re-run when dependent data changes. Mutations are transactional with serializable isolation.
-4. Actions can call external APIs and perform side effects but are NOT transactional. Use actions for third-party integrations, AI calls, etc.
+4. Actions can call external APIs and perform side effects but are not transactional. Use actions for third-party integrations, AI calls, etc.
 5. Internal functions (`internalQuery`, `internalMutation`, `internalAction`) are not exposed as public API — use for server-to-server logic, cron jobs, and scheduled functions.
 6. Arguments and return values are validated using `v` validators (`v.string()`, `v.number()`, `v.id("tableName")`, `v.optional(...)`, `v.object({...})`, `v.array(...)`, `v.union(...)`, etc.).
 7. Use `ctx.db.query("tableName")` for reads, `ctx.db.insert()`, `ctx.db.patch()`, `ctx.db.replace()`, `ctx.db.delete()` for writes.
@@ -109,9 +109,9 @@ The examples and file paths in this prompt use Convex + Next.js as the reference
 | `src/app/` | `[frontend-pages-dir]/` | Your frontend pages directory (e.g., `src/app/`, `src/pages/`, `app/`) |
 | `api.<file>.<fn>` | Backend function reference | Your API reference pattern |
 
-Always read `CLAUDE.md` for your project's conventions. Note: At Stage 3, `CLAUDE.md` Part 2 (Project-Specific Configuration) placeholder text is populated by the scaffold generator with actual project details. Stage 4 verifies this population was correct. Use `plancasting/tech-stack.md` as the primary source for project-specific conventions during scaffolding. Stage 3 MUST populate Part 2 before completing (see Phase 4 step 5).
+Always read `CLAUDE.md` for your project's conventions. Note: At Stage 3, `CLAUDE.md` Part 2 (Project-Specific Configuration) placeholder text is populated by the scaffold generator with actual project details. Stage 4 verifies this population was correct. Use `plancasting/tech-stack.md` as the primary source for project-specific conventions during scaffolding. Stage 3 must populate Part 2 before completing (see Phase 4 step 5).
 
-**CLAUDE.md Part 2 population**: Stage 3 MUST populate CLAUDE.md Part 2 (Project-Specific Configuration) with actual project details derived from the scaffold: project name, technology stack table, architecture description, commands, backend rules, frontend rules, and key reference documents. Replace ALL `[PLACEHOLDER]` markers. Stage 4 (manual verification) confirms Part 2 was correctly populated — it does not do the population itself. If Stage 3 leaves Part 2 with unfilled placeholders, Stage 4 (manual verification) will catch them. The operator must then manually populate the missing fields using Stage 0 outputs and `plancasting/tech-stack.md` before proceeding to Stage 5.
+**CLAUDE.md Part 2 population**: Stage 3 must populate CLAUDE.md Part 2 (Project-Specific Configuration) with actual project details derived from the scaffold: project name, technology stack table, architecture description, commands, backend rules, frontend rules, and key reference documents. Replace ALL `[PLACEHOLDER]` markers. Stage 4 (manual verification) confirms Part 2 was correctly populated — it does not do the population itself. If Stage 3 leaves Part 2 with unfilled placeholders, Stage 4 (manual verification) will catch them. The operator must then manually populate the missing fields using Stage 0 outputs and `plancasting/tech-stack.md` before proceeding to Stage 5.
 
 **Package Manager**: Commands in this prompt use `bun` as the default (e.g., `bun install`, `bun run`). Replace with your project's package manager as specified in `CLAUDE.md` (e.g., `npm install` / `npm run`, `pnpm install` / `pnpm run`, `yarn`).
 
@@ -150,12 +150,12 @@ As the team lead, complete the following BEFORE spawning any teammates:
      - Components: PascalCase (e.g., `UserProfileCard.tsx`)
      - Hooks: camelCase with `use` prefix (e.g., `useUserProfile.ts`)
      - Types: PascalCase with no suffix (e.g., `UserProfile`)
-   - **Shared interface contracts** (CRITICAL for teammate coordination): Define the TypeScript interfaces for all cross-teammate dependencies BEFORE spawning teammates. Include: shared component prop interfaces (e.g., `FeatureGate` props), hook return type signatures, backend function argument/return types, and error type definitions. All teammates MUST conform to these contracts — this prevents interface mismatches when teammates generate code that imports from each other's outputs.
+   - **Shared interface contracts** (CRITICAL for teammate coordination): Define the TypeScript interfaces for all cross-teammate dependencies BEFORE spawning teammates. Include: shared component prop interfaces (e.g., `FeatureGate` props), hook return type signatures, backend function argument/return types, and error type definitions. All teammates must conform to these contracts — this prevents interface mismatches when teammates generate code that imports from each other's outputs.
    - Error handling conventions
    - PRD ID → Code file mapping table (COMPLETE — every PRD artifact mapped)
    - A note: "This scaffolding covers the COMPLETE product. All features are represented."
 5. **Figma design token extraction**: If Figma designs are referenced in `plancasting/tech-stack.md`, verify Figma MCP tools are available by attempting a test call. If unavailable, manually extract design tokens from the Figma URL (colors, spacing, typography, border radii) and include them in Teammate 3's spawn prompt.
-6. Create the initial `plancasting/_scaffold-manifest.md` template as a markdown table with the expected file structure. Teammates append their generated files to this manifest as they work. The lead validates completeness and finalizes the manifest during Phase 4 (see Assignment note below). Include the instruction at the top: "Teammates: append your generated files below as you work." Use this format — the `File Path` column MUST use full relative paths from the project root (Stage 5B uses grep against this file for orphan detection; incomplete paths cause false positives):
+6. Create the initial `plancasting/_scaffold-manifest.md` template as a markdown table with the expected file structure. Teammates append their generated files to this manifest as they work. The lead validates completeness and finalizes the manifest during Phase 4 (see Assignment note below). Include the instruction at the top: "Teammates: append your generated files below as you work." Use this format — the `File Path` column must use full relative paths from the project root (Stage 5B uses grep against this file for orphan detection; incomplete paths cause false positives):
 
    | File Path | Type | Feature | Imported By (pages/components) |
    |---|---|---|---|
@@ -163,11 +163,11 @@ As the team lead, complete the following BEFORE spawning any teammates:
    | src/hooks/useAuth.ts | Hook | FEAT-001 | LoginForm, SignupForm |
 7. Create a task list for all teammates with dependency tracking.
 
-**Middleware route registry**: Before spawning teammates, the lead MUST include the COMPLETE route list (derived from PRD `07-information-architecture.md`) in Teammate 4's spawn prompt. This prevents Teammate 4 from depending on Teammate 2's output for route protection rules. If Teammate 2 adds routes beyond the PRD IA (e.g., utility routes), the lead reconciles them with the middleware during Phase 4 integration.
+**Middleware route registry**: Before spawning teammates, the lead must include the COMPLETE route list (derived from PRD `07-information-architecture.md`) in Teammate 4's spawn prompt. This prevents Teammate 4 from depending on Teammate 2's output for route protection rules. If Teammate 2 adds routes beyond the PRD IA (e.g., utility routes), the lead reconciles them with the middleware during Phase 4 integration.
 
-**Shared config file ownership**: `next.config.ts` (or framework equivalent) is owned by Teammate 5 (Test Infrastructure & Configuration). If Teammate 4 needs configuration entries (CSP headers, auth redirects, i18n aliases), Teammate 4 documents them in a separate file (e.g., `plancasting/_next-config-additions.md`) and the lead merges them into `next.config.ts` during Phase 4. Teammate 4 MUST NOT directly write to `next.config.ts`. The lead resolves all config file conflicts during Phase 4 integration.
+**Shared config file ownership**: `next.config.ts` (or framework equivalent) is owned by Teammate 5 (Test Infrastructure & Configuration). If Teammate 4 needs configuration entries (CSP headers, auth redirects, i18n aliases), Teammate 4 documents them in a separate file (e.g., `plancasting/_next-config-additions.md`) and the lead merges them into `next.config.ts` during Phase 4. Teammate 4 must not directly write to `next.config.ts`. The lead resolves all config file conflicts during Phase 4 integration.
 
-**Assignment**: The lead is responsible for creating and populating `_scaffold-manifest.md` during Phase 4 (Structural Integration). The lead collects file inventories from all teammates and assembles the manifest before declaring Stage 3 complete. **BLOCKING**: Stage 3 MUST NOT declare completion until `_scaffold-manifest.md` is written to disk and covers all generated files. This manifest is the primary defense against Stage 5's duplication failure pattern — without it, Stage 5 agents will rebuild scaffold components inline.
+**Assignment**: The lead is responsible for creating and populating `_scaffold-manifest.md` during Phase 4 (Structural Integration). The lead collects file inventories from all teammates and assembles the manifest before declaring Stage 3 complete. **BLOCKING**: Stage 3 must not declare completion until `_scaffold-manifest.md` is written to disk and covers all generated files. This manifest is the primary defense against Stage 5's duplication failure pattern — without it, Stage 5 agents will rebuild scaffold components inline.
 
 **CLAUDE.md Part 2 population**: The lead populates CLAUDE.md Part 2 during Phase 4 (after all teammates complete), using outputs from all teammates: Teammate 1's backend patterns → Backend Rules, Teammate 2's page structure → Architecture, Teammate 3's component patterns → Frontend Rules, Teammate 4's schema and API patterns → Data Model notes, Teammate 5's test setup → Commands section. Replace ALL `[PLACEHOLDER]` markers. This is a Phase 4 task, not a teammate task.
 
@@ -180,7 +180,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Specialized Teammates
 
-Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
+Spawn the following 5 teammates. Each teammate's spawn prompt must include:
 - The instruction: "Read CLAUDE.md Part 1 (immutable rules). Follow its conventions. Ignore Part 2 (project-specific configuration) — it contains placeholders that will be populated after scaffold generation."
 - The instruction: "Check `./plancasting/tech-stack.md` for the `Session Language` setting. Code, file names, and code comments remain in English. Feature names in `_progress.md` match the PRD language."
 - The full content of `./plancasting/_codegen-context.md`
@@ -200,7 +200,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 - COMPLETE schema derived from `./plancasting/prd/11-data-model.md` — ALL entities, ALL tables/models, ALL indexes
 - For each entity in the PRD data model (no exceptions):
   - Define the table/model with all fields using appropriate type validators
-  - Add indexes for all query patterns explicitly mentioned in PRD (screen specs, API specs, user flows). Do NOT speculate on indexes for hypothetical future queries
+  - Add indexes for all query patterns explicitly mentioned in PRD (screen specs, API specs, user flows). Do not speculate on indexes for hypothetical future queries
   - Include field-level comments referencing PRD entity definitions
 - The schema must be designed for the complete product from day one. No tables or fields are deferred.
 - Example structure (Convex — adapt to your backend's schema syntax):
@@ -259,7 +259,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 
 #### Teammate 2: "frontend-pages-and-routing"
 **Domain**: Frontend pages, layouts, and routing (e.g., Next.js App Router, Remix routes, SvelteKit routes)
-**Scope boundary**: Do NOT generate `src/middleware.ts` — Teammate 4 owns this file exclusively.
+**Scope boundary**: Do not generate `src/middleware.ts` — Teammate 4 owns this file exclusively.
 **Files to generate**:
 
 **`[frontend-pages-dir]/` directory structure** (e.g., `src/app/` for Next.js App Router)
@@ -315,23 +315,23 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 
 **Spawn prompt must emphasize**: The routing structure must include pages for ALL features — the complete product's navigation. The root layout navigation must accommodate all features without future restructuring. Every route from the PRD's information architecture must exist. Include onboarding/guided tour routes if the PRD specifies progressive disclosure for the full product.
 
-**⚠️ CRITICAL — Middleware ownership**: Do NOT generate a middleware file (`src/middleware.ts` or equivalent) — Teammate 4 owns middleware exclusively. If pages need middleware behavior (route protection, locale detection), document the requirements in a comment and Teammate 4 will implement them.
+**⚠️ CRITICAL — Middleware ownership**: Do not generate a middleware file (`src/middleware.ts` or equivalent) — Teammate 4 owns middleware exclusively. If pages need middleware behavior (route protection, locale detection), document the requirements in a comment and Teammate 4 will implement them.
 
 ---
 
 #### Teammate 3: "ui-components"
 **Domain**: Design direction, reusable UI components, hooks, and utilities
-**Primary deliverable**: Generate `src/styles/design-tokens.ts` (or equivalent path per tech-stack.md) with CSS custom properties, color palette, typography, spacing scale, and animation tokens derived from `plancasting/tech-stack.md` § Design Direction and `plancasting/prd/01-product-overview.md` persona definitions. This file MUST be generated before any component code.
+**Primary deliverable**: Generate `src/styles/design-tokens.ts` (or equivalent path per tech-stack.md) with CSS custom properties, color palette, typography, spacing scale, and animation tokens derived from `plancasting/tech-stack.md` § Design Direction and `plancasting/prd/01-product-overview.md` persona definitions. This file must be generated before any component code.
 
 **CRITICAL FIRST STEP — Design Direction Intake**: Before writing ANY component code, follow this sequence:
 
-1. **Read `plancasting/tech-stack.md` "Design Direction" section** — this contains the user's choices from Stage 0. **If this section is missing** (e.g., Stage 0 was skipped): (a) Read `plancasting/prd/01-product-overview.md` for product personality and target users, (b) Choose a bold aesthetic direction matching the product type, (c) Document the direction in `src/styles/design-tokens.ts` with CSS variables, color palettes, typography. Do NOT proceed with generic defaults. The section contains:
+1. **Read `plancasting/tech-stack.md` "Design Direction" section** — this contains the user's choices from Stage 0. **If this section is missing** (e.g., Stage 0 was skipped): (a) Read `plancasting/prd/01-product-overview.md` for product personality and target users, (b) Choose a bold aesthetic direction matching the product type, (c) Document the direction in `src/styles/design-tokens.ts` with CSS variables, color palettes, typography. Do not proceed with generic defaults. The section contains:
    - **UI Component Library**: The selected library (e.g., Untitled UI React, shadcn/ui, Radix UI). All components must be built with this library. If a library was selected, read its documentation for component APIs, theming patterns, and styling conventions.
    - **Aesthetic direction**: The user's chosen visual tone (e.g., "Refined Editorial", "Technical Precision"). This is your design brief — execute it with precision.
    - **Product logo**: If a logo file path is recorded (e.g., `./design/logo.svg`), read the file. This logo will be used to generate all brand assets (favicon, app icons, header logo). If dominant colors were extracted from the logo during Stage 0, use them as the primary input for the brand palette — they take precedence over generic color choices. If a dark mode variant path is provided, use it for dark theme contexts.
    - **Design reference URLs**: URLs the user provided as visual inspiration. If URLs are listed and web fetch is available to you, visit them to extract patterns. Otherwise, note the URLs as comments in design-tokens.ts for human reference. Translate any observations into concrete design tokens: color usage, typography choices, spacing rhythm, animation style, layout composition. If web fetch is unavailable or URLs are inaccessible, proceed with the aesthetic direction text and any other available inputs (logo, Figma, typography preferences).
    - **Figma designs**: If a Figma URL or `.fig` file path is provided, extract design tokens directly from the Figma file (colors, typography, spacing, component patterns). Figma designs are the highest-authority source — they override aesthetic direction suggestions. If Figma MCP tools are available to you (note: spawned teammates may not have MCP access — if unavailable, the lead should extract Figma tokens in Phase 1 and pass them to you via the spawn prompt), use them to read the Figma file. If only a URL is recorded and no MCP tools are available, note it for manual reference and proceed with the aesthetic direction.
-   - **Typography & color direction**: Use the user's stated preferences as constraints. If they said "serif display + sans body", do NOT choose two sans-serif fonts.
+   - **Typography & color direction**: Use the user's stated preferences as constraints. If they said "serif display + sans body", do not choose two sans-serif fonts.
    - **Icon library**: The selected icon library and its framework-specific import pattern (e.g., `lucide-react`, `@heroicons/vue`). All UI icons must use this library — never inline SVG paths. If these fields are missing from tech-stack.md (older Stage 0 version), default to Lucide (install the framework-appropriate variant: `lucide-react`, `lucide-vue-next`, or `lucide-svelte`) and record the choice in tech-stack.md.
 
 2. **Follow the Frontend Design Guidelines** (inlined below — these guide ALL visual design decisions):
@@ -358,7 +358,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 - `design-tokens.ts` defines token values as TypeScript constants. These are consumed by `tailwind.config.ts` for theme extension AND referenced in `globals.css` as CSS custom properties.
 - Read the "Design Direction" section in `plancasting/tech-stack.md` for the user's aesthetic choices, reference URLs, and Figma designs.
 - Read the PRD product overview (`./plancasting/prd/01-product-overview.md`) to understand the product's personality, target users, and brand positioning.
-- Execute the aesthetic direction specified in `plancasting/tech-stack.md`. If `plancasting/tech-stack.md` specifies an aesthetic (e.g., "Refined Editorial"), implement it faithfully. If it says "to be determined by Stage 3", choose a BOLD, DISTINCTIVE direction that matches the product personality. DO NOT default to "clean and modern" — that produces generic AI output.
+- Execute the aesthetic direction specified in `plancasting/tech-stack.md`. If `plancasting/tech-stack.md` specifies an aesthetic (e.g., "Refined Editorial"), implement it faithfully. If it says "to be determined by Stage 3", choose a BOLD, DISTINCTIVE direction that matches the product personality. Do not default to "clean and modern" — that produces generic AI output.
 - Define and export:
   - Color palette: primary, secondary, accent, background, surface, text colors as CSS variables. Use dominant colors with sharp accents — not evenly-distributed palettes.
   - Typography: Select 2 distinctive fonts (display + body). Font imports via `next/font` (or equivalent) should be placed in the root layout file (e.g., `src/app/layout.tsx`), NOT in `design-tokens.ts`. Reference the font CSS variable names (e.g., `--font-display`, `--font-body`) in `design-tokens.ts` and `tailwind.config.ts`. Choose fonts intentionally — if using system fonts or Inter, ensure they align with the project's stated aesthetic direction.
@@ -392,7 +392,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 
 **`src/styles/globals.css`** (CRITICAL — Tailwind v4 config bridge. Skip this section for Tailwind v3 projects.)
 - The instructions below apply to Next.js App Router. For other frameworks (Remix, SvelteKit, Vite + React, etc.), adapt the CSS file location, metadata patterns, and config bridge syntax. The core principle (Tailwind v4 requires `@config` bridge for `tailwind.config.ts`) applies to all frameworks.
-- **MUST include `@config` directive** (Tailwind v4+ only): Tailwind CSS v4 uses CSS-first configuration. Unlike v3, the JS config file (`tailwind.config.ts`) is NOT automatically loaded. You MUST add `@config "../../tailwind.config.ts";` immediately after `@import "tailwindcss";` in `globals.css`. Without this, ALL custom theme extensions (colors, fonts, spacing, animations, shadows, border-radius) defined in `tailwind.config.ts` will be silently ignored — no error, no warning — and every custom Tailwind utility class (`bg-primary-500`, `font-display`, `text-text-heading`, `p-space-4`, etc.) will produce zero CSS output. The result is an unstyled UI with only raw CSS variable fallbacks working. This is the #1 cause of "my Tailwind v4 styles aren't working" bugs.
+- **must include `@config` directive** (Tailwind v4+ only): Tailwind CSS v4 uses CSS-first configuration. Unlike v3, the JS config file (`tailwind.config.ts`) is not automatically loaded. You must add `@config "../../tailwind.config.ts";` immediately after `@import "tailwindcss";` in `globals.css`. Without this, ALL custom theme extensions (colors, fonts, spacing, animations, shadows, border-radius) defined in `tailwind.config.ts` will be silently ignored — no error, no warning — and every custom Tailwind utility class (`bg-primary-500`, `font-display`, `text-text-heading`, `p-space-4`, etc.) will produce zero CSS output. The result is an unstyled UI with only raw CSS variable fallbacks working. This is the #1 cause of "my Tailwind v4 styles aren't working" bugs.
   ~~~css
   @import "tailwindcss";
   @config "../../tailwind.config.ts";
@@ -450,7 +450,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
   - **Ant Design Icons**: `@ant-design/icons` (flat import — icon names use a `Outlined`/`Filled`/`TwoTone` suffix, e.g., `DeleteOutlined`, `SearchOutlined`).
   - **Phosphor Icons**: `@phosphor-icons/react` (React), `@phosphor-icons/vue` (Vue) — flat import with weight variants via props (e.g., `<Trash weight="bold" />`). For Svelte, use `phosphor-svelte` (community wrapper — verify the package exists on npm before installing, as community packages may change).
 - If the icon library requires configuration (e.g., default size, stroke width), set it up in the root layout or a provider component.
-- **NEVER use inline SVG paths** (`<svg><path d="..."/></svg>`) for standard UI icons. Always import from the icon library.
+- **never use inline SVG paths** (`<svg><path d="..."/></svg>`) for standard UI icons. Always import from the icon library.
 
 **`src/components/` directory**
 - Organized by domain/feature — ALL features represented:
@@ -501,7 +501,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 **`src/lib/` directory**
 - `utils.ts`, `constants.ts`, `validators.ts`, `types.ts` — all covering the COMPLETE product
 
-**Spawn prompt must emphasize**: READ `plancasting/tech-stack.md` "Design Direction" section FIRST — it contains the user's selected UI component library, aesthetic direction, design reference URLs, and Figma designs from Stage 0. These are your design brief. If reference URLs are listed, visit them to extract visual patterns. If a Figma URL is provided and Figma MCP tools are available, extract design tokens from the Figma file. If Figma URL is provided in tech-stack.md but your MCP tools cannot access it, DO NOT generate generic UI. The lead will provide pre-extracted design tokens in this prompt. If no tokens are provided and no Figma access is available, STOP and message the lead: 'Figma MCP unavailable and no pre-extracted tokens provided. Cannot generate design-accurate UI.' Establish the design direction in `design-tokens.ts` and `tailwind.config.ts` BEFORE creating any components — these must reflect the user's choices, not generic defaults. **CRITICAL for Tailwind v4**: `globals.css` MUST include `@config "../../tailwind.config.ts";` right after `@import "tailwindcss";` — without this single line, the entire theme (colors, fonts, spacing, animations) is silently ignored and all components render unstyled. Components must be created for ALL features using the selected UI component library. The design system must be visually distinctive and cohesive — matching the aesthetic direction from `plancasting/tech-stack.md`. Avoid generic AI aesthetics where possible — choose fonts intentionally (if using Inter or system fonts, ensure they match the stated aesthetic direction), avoid clichéd color schemes (purple-on-white gradients), and avoid cookie-cutter layouts. Custom hooks must cover ALL domains. Cross-feature hooks are important. Every component must follow the established design direction with zero exceptions.
+**Spawn prompt must emphasize**: READ `plancasting/tech-stack.md` "Design Direction" section FIRST — it contains the user's selected UI component library, aesthetic direction, design reference URLs, and Figma designs from Stage 0. These are your design brief. If reference URLs are listed, visit them to extract visual patterns. If a Figma URL is provided and Figma MCP tools are available, extract design tokens from the Figma file. If Figma URL is provided in tech-stack.md but your MCP tools cannot access it, Do not generate generic UI. The lead will provide pre-extracted design tokens in this prompt. If no tokens are provided and no Figma access is available, STOP and message the lead: 'Figma MCP unavailable and no pre-extracted tokens provided. Cannot generate design-accurate UI.' Establish the design direction in `design-tokens.ts` and `tailwind.config.ts` BEFORE creating any components — these must reflect the user's choices, not generic defaults. **CRITICAL for Tailwind v4**: `globals.css` must include `@config "../../tailwind.config.ts";` right after `@import "tailwindcss";` — without this single line, the entire theme (colors, fonts, spacing, animations) is silently ignored and all components render unstyled. Components must be created for ALL features using the selected UI component library. The design system must be visually distinctive and cohesive — matching the aesthetic direction from `plancasting/tech-stack.md`. Avoid generic AI aesthetics where possible — choose fonts intentionally (if using Inter or system fonts, ensure they match the stated aesthetic direction), avoid clichéd color schemes (purple-on-white gradients), and avoid cookie-cutter layouts. Custom hooks must cover ALL domains. Cross-feature hooks are important. Every component must follow the established design direction with zero exceptions.
 
 ---
 
@@ -532,7 +532,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 - Declarative component for conditional rendering
 - Props: `flag`, `fallback`, `children`
 
-**`src/middleware.ts`** (Teammate 4 owns this file exclusively — Teammate 2 must NOT generate a middleware file)
+**`src/middleware.ts`** (Teammate 4 owns this file exclusively — Teammate 2 must not generate a middleware file)
 - Frontend middleware (e.g., Next.js middleware) for:
   - Route protection (authenticated vs public routes) for ALL routes
   - Permission-flag-based route access for ALL gated features
@@ -551,7 +551,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 - `.env.local.example` with ALL required environment variables
 - `.env.production.example`
 
-**Spawn prompt must emphasize**: Feature flags are NOT for phased rollout. All features ship enabled. Flags are for: (1) kill switches to disable problematic features, (2) A/B experiments, (3) permission/role gating. The middleware must handle route protection for the COMPLETE product's route structure. Auth permissions must cover ALL features' access patterns.
+**Spawn prompt must emphasize**: Feature flags are not for phased rollout. All features ship enabled. Flags are for: (1) kill switches to disable problematic features, (2) A/B experiments, (3) permission/role gating. The middleware must handle route protection for the COMPLETE product's route structure. Auth permissions must cover ALL features' access patterns.
 
 ---
 
@@ -569,7 +569,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 
 **Test Infrastructure Files (CRITICAL — generate at scaffold time to prevent Stage 5 failures)**:
 
-These files MUST be created during scaffolding. Missing test infrastructure causes cascading
+These files must be created during scaffolding. Missing test infrastructure causes cascading
 failures in Stage 5 that are expensive to debug.
 
 1. **`src/test/setup.ts`** — Vitest setup file with:
@@ -579,20 +579,20 @@ failures in Stage 5 that are expensive to debug.
    - Canvas prototype stub for axe-core: `HTMLCanvasElement.prototype.getContext = vi.fn()`
    - Any `resolve.alias` needed in vitest.config.ts for ESM-incompatible packages
 
-2. **`[backend-dir]/__tests__/backend-modules.test-utils.ts`** (e.g., `convex/__tests__/convex-modules.test-utils.ts`) — Explicit module map for backend tests (if required by your test framework, e.g., convex-test). MUST list ALL generated backend function files. Include a header comment:
+2. **`[backend-dir]/__tests__/backend-modules.test-utils.ts`** (e.g., `convex/__tests__/convex-modules.test-utils.ts`) — Explicit module map for backend tests (if required by your test framework, e.g., convex-test). must list ALL generated backend function files. Include a header comment:
    ~~~typescript
    /**
     * HOW TO KEEP IN SYNC: When adding a new backend function file ([backend-dir]/<name>.[ext]),
     * add an import and entry to this module map. Tests will fail if a module is missing.
     */
    ~~~
-   MUST be kept in sync as new backend function files are added in Stage 5.
+   must be kept in sync as new backend function files are added in Stage 5.
 
 3. **`[backend-dir]/__tests__/setup.test-utils.ts`** (e.g., `convex/__tests__/setup.test-utils.ts`) — Shared test utilities:
    - `setupTestContext()` that initializes the test environment for your backend
    - `mockIdentity()`, `mockProject()`, etc. — test data factories
    - `expectBackendError()` helper for asserting backend error codes (e.g., `expectConvexError()` for Convex)
-   - All test data factories MUST include `deletedAt: null` for tables that use soft-delete filters
+   - All test data factories must include `deletedAt: null` for tables that use soft-delete filters
 
 These files prevent the most common Stage 5 test failures:
 - `.glob is not a function` (missing module map, Convex-specific) — very common
@@ -624,7 +624,7 @@ These files prevent the most common Stage 5 test failures:
 
 **`next.config.ts` — Deployment-Critical Configuration (Next.js only — skip for other frameworks)** (the following rules apply only if the frontend framework is Next.js — check `plancasting/tech-stack.md`; these cause real production failures if missed):
 
-1. **Content-Security-Policy (CSP)**: If generating security headers with CSP, do NOT include `'strict-dynamic'` in `script-src` unless you also implement nonce-based CSP. `'strict-dynamic'` causes browsers to **ignore** both `'self'` and `'unsafe-inline'`, which blocks ALL Next.js chunk loading from `/_next/static/`. To use `'strict-dynamic'` safely:
+1. **Content-Security-Policy (CSP)**: If generating security headers with CSP, do not include `'strict-dynamic'` in `script-src` unless you also implement nonce-based CSP. `'strict-dynamic'` causes browsers to **ignore** both `'self'` and `'unsafe-inline'`, which blocks ALL Next.js chunk loading from `/_next/static/`. To use `'strict-dynamic'` safely:
    - Create a Next.js middleware that generates a per-request nonce via `crypto.randomUUID()`
    - Add the nonce to the CSP header: `script-src 'nonce-{value}' 'strict-dynamic'`
    - Pass the nonce to all `<Script>` components
@@ -645,7 +645,7 @@ These files prevent the most common Stage 5 test failures:
    ~~~
    Turbopack requires **relative paths** (absolute paths cause "server relative imports are not implemented yet" errors). Webpack requires **absolute paths** (use `path.resolve`).
 
-3. **Environment Variables for Hosting Providers**: If deploying to Vercel, Netlify, or similar, remember that `.env.local` is NOT automatically synced to the hosting provider. All environment variables must be explicitly configured on the hosting platform. Generate a `.env.local.example` with clear documentation of which variables are required for production deployment.
+3. **Environment Variables for Hosting Providers**: If deploying to Vercel, Netlify, or similar, remember that `.env.local` is not automatically synced to the hosting provider. All environment variables must be explicitly configured on the hosting platform. Generate a `.env.local.example` with clear documentation of which variables are required for production deployment.
 
 **`README.md`** (project root):
 - Setup instructions
@@ -705,7 +705,7 @@ After all teammates complete their tasks:
 
    ~~~markdown
    # Scaffold Manifest
-   ## Generated by Stage 3 — DO NOT DELETE until Stage 5B completes (used by both Stage 5 and Stage 5B audit)
+   ## Generated by Stage 3 — Do not delete until Stage 5B completes (used by both Stage 5 and Stage 5B audit)
 
    ### Components → Page Mapping
    | Component File | Target Page | Purpose |
@@ -763,17 +763,17 @@ After all teammates complete their tasks:
    - If `CLAUDE.md` does not exist: if the project was cloned from the Transmute Framework Template, use `./CLAUDE.md` (already at project root). If fresh project (not cloned from the template), copy the CLAUDE.md template from the Transmute Framework Template repository to the project root as `./CLAUDE.md` before populating Part 2. Then fill in all Part 2 `[PLACEHOLDER]` values with actual project values from `tech-stack.md` and the codebase.
 6. **Generate `.claude/rules/` starter rules**:
    - Create the `.claude/rules/` directory.
-   - Read the rule templates from `./plancasting/transmute-framework/rules-templates/` (6 template files: `_backend-template.md`, `_frontend-template.md`, `_api-contracts-template.md`, `_auth-template.md`, `_testing-template.md`, `_data-model-template.md`).
+   - Read the rule templates from `./plancasting/transmute-framework/rules-templates/` (6 template files always: `_backend-template.md`, `_frontend-template.md`, `_api-contracts-template.md`, `_auth-template.md`, `_testing-template.md`, `_data-model-template.md`; plus `_ai-provider-template.md` when `tech-stack.md` § Specifications names an AI/LLM provider — LLM request shapes change between model generations and the shape remembered from training data is the one most likely to be rejected, so these rules must exist before Stage 5 writes the first AI call).
    - For each template, render it into a real rule file by:
-     a. Replacing **directory placeholders** (`[BACKEND_DIR]`, `[FRONTEND_DIR]`, `[AUTH_DIR]`, `[SCHEMA_DIR]`, `[TEST_DIR]`, `[HOOKS_DIR]`) with actual project paths from `tech-stack.md`.
+     a. Replacing **directory placeholders** (`[BACKEND_DIR]`, `[FRONTEND_DIR]`, `[AUTH_DIR]`, `[SCHEMA_DIR]`, `[TEST_DIR]`, `[HOOKS_DIR]`, and for `_ai-provider-template.md` `[AI_DIR]`, `[AI_SDK]`, `[AI_MODEL_ENV]`, `[AI_MODEL_ID]`, `[AI_INTEGRATION_TEST_ENV]`) with actual project paths and values from `tech-stack.md`.
      b. Replacing **tech-stack-specific placeholders** (e.g., `[VALIDATOR_SYSTEM]`, `[ERROR_TYPE]`, `[AUTH_HELPER]`, `[LOADING_COMPONENT]`, `[SESSION_PATTERN]`, `[DATABASE]`, `[TIMESTAMP_FORMAT]`, etc.) with actual values derived from `tech-stack.md`. Read each template's TODO comments for context on what each placeholder expects. For example: if the backend is Convex, `[VALIDATOR_SYSTEM]` → `v validators`, `[ERROR_TYPE]` → `ConvexError`, `[AUTH_HELPER]` → `ctx.auth.getUserIdentity()`; if Next.js App Router, add rules about server/client component boundaries and `use client` directives.
-     c. Adding the correct `globs` frontmatter for each file based on actual project paths.
+     c. Adding the correct `paths` frontmatter for each file based on actual project paths (Claude Code scopes rules by `paths`; a rule file without it loads in every session).
      d. Setting `Source: Stage 3` and `Evidence: tech-stack.md` on each rule.
      e. Removing all `<!-- TODO: Stage 3 — ... -->` comments and the template banner (`> **This is a template.**...`) from the rendered output.
-   - Write the rendered files to `.claude/rules/backend.md`, `.claude/rules/frontend.md`, `.claude/rules/api-contracts.md`, `.claude/rules/auth.md`, `.claude/rules/testing.md`, `.claude/rules/data-model.md`.
+   - Write the rendered files to `.claude/rules/backend.md`, `.claude/rules/frontend.md`, `.claude/rules/api-contracts.md`, `.claude/rules/auth.md`, `.claude/rules/testing.md`, `.claude/rules/data-model.md`, and (AI products only) `.claude/rules/ai-provider.md`.
    - Respect limits from CLAUDE.md § 'Path-Scoped Rules': max 15 rules per file, max 8 files total.
    - Create `./plancasting/_rules-candidates.md` with a header explaining the staging workflow, candidate format, and confidence criteria (see CLAUDE.md § 'Path-Scoped Rules' for the specification). This file starts with zero candidates — Stages 5B and 6R will populate it.
-   - Update the **Path-Scoped Rules** table in CLAUDE.md Part 2 with the actual rule files just generated (file paths, globs, rule counts).
+   - Update the **Path-Scoped Rules** table in CLAUDE.md Part 2 with the actual rule files just generated (file paths, `paths` patterns, rule counts).
 7. Fix any inconsistencies.
 8. Output a final summary:
    - File counts: backend functions, frontend pages, components, hooks, tests
@@ -801,7 +801,7 @@ After all teammates complete their tasks:
 
 ### Token Budget Management
 
-Each spawned agent has an output token limit per response (see tech-stack.md § Model Specifications "Output token limit"). The pipeline model's context window means input is NOT the bottleneck — the output limit per agent response is the binding constraint. Scaffolding is file-heavy — a single teammate generating 40+ files can hit this limit. The lead MUST estimate output size during Phase 1.
+Each spawned agent has an output token limit per response (see tech-stack.md § Model Specifications "Output token limit"). The pipeline model's context window means input is not the bottleneck — the output limit per agent response is the binding constraint. Scaffolding is file-heavy — a single teammate generating 40+ files can hit this limit. The lead must estimate output size during Phase 1.
 
 **Estimation heuristics**:
 - Each backend function file (with validators, auth, logic, JSDoc): ~200–400 tokens
@@ -832,7 +832,7 @@ If this session was started to RESUME a previously interrupted scaffold generati
 1. Check which files already exist in `./[backend-dir]/` (e.g., `./convex/`), `./src/`, and `./e2e/`.
 2. Check if `plancasting/_codegen-context.md` and `plancasting/_progress.md` exist (indicates Phase 1+ was completed).
 3. Check if `ARCHITECTURE.md` exists (indicates Phase 4 was reached).
-4. Resume from the earliest incomplete phase. Do NOT regenerate files that already exist unless they are incomplete.
+4. Resume from the earliest incomplete phase. Do not regenerate files that already exist unless they are incomplete.
 5. If some teammates completed but others didn't, only respawn the incomplete teammates. To identify which teammates completed: check which files exist per teammate assignment (defined in Phase 2). Only respawn teammates whose assigned files are missing or incomplete.
 6. **Cleanup before re-spawning**: If a teammate's previous run was incomplete (partial files exist), delete any incomplete files from that teammate's previous run to avoid merge conflicts. Reset that teammate's `plancasting/_progress.md` columns to ⬜ Not Started. To identify incomplete files: check if the file has a complete traceability header comment AND at least one exported function/component. Files that are empty, contain only imports, or have no exports are likely incomplete from a prior interrupted run.
 7. Re-spawned teammates must regenerate all their assigned files from scratch (not merge with partial outputs) and append to `plancasting/_scaffold-manifest.md`, same as in initial generation.
@@ -876,7 +876,7 @@ If this session was started to RESUME a previously interrupted scaffold generati
    - Avoid generic fonts (Inter, Roboto, Arial), default Tailwind colors, or predictable card-grid layouts where possible — if using them, ensure they align with the project's stated aesthetic direction.
    - Apply purposeful motion, intentional spatial composition, and visual depth.
    - Every UI element must feel distinctively designed for this product — not AI-generated.
-   - **Tailwind v4 `@config` bridge**: If using Tailwind CSS v4 (`@import "tailwindcss"` syntax), the global CSS file MUST include `@config` with the correct relative path from the CSS file to `tailwind.config.ts` (e.g., `@config "../../tailwind.config.ts";` for `src/styles/globals.css`). Tailwind v4 does NOT auto-load JS config files — without `@config`, all custom theme extensions are silently dropped and utility classes produce no output.
+   - **Tailwind v4 `@config` bridge**: If using Tailwind CSS v4 (`@import "tailwindcss"` syntax), the global CSS file must include `@config` with the correct relative path from the CSS file to `tailwind.config.ts` (e.g., `@config "../../tailwind.config.ts";` for `src/styles/globals.css`). Tailwind v4 does not auto-load JS config files — without `@config`, all custom theme extensions are silently dropped and utility classes produce no output.
    - **Tailwind v4 semantic color tokens**: If using Tailwind v4, semantic utilities like `border-border`, `ring-ring`, `bg-card` require matching entries in the `colors` palette (NOT in `borderColor`/`ringColor`). In v3, `borderColor.DEFAULT` was enough for `border-border`. In v4, you must add `border: "var(--color-border)"` etc. directly to `theme.extend.colors`. Without this, borders render as white (browser default) — a silent failure with no build error.
    - **Dark mode variant testing**: For every component with variants (Button, Badge, Card, Alert, etc.), verify that borders and background colors work in BOTH light and dark themes. Common mistake: using `border-primary-500` on secondary/outline buttons — looks subtle in light mode but becomes a harsh bright line in dark mode. Use `border-border` (the neutral border token) for secondary/outline variants instead.
 7. **Error Handling**:
@@ -893,6 +893,6 @@ If this session was started to RESUME a previously interrupted scaffold generati
     - Example: A query function should include the database call and return shape, but may skip complex business rule validation or edge-case handling — mark those with `// ⚠️ STUB: [description]`.
     - These markers are expected in scaffold code. Stage 5's job is to replace ALL of them with functional implementations. Stage 5B scans for any remaining stubs as quality failures.
 12. **No Phase References**: Do not include any phase-related logic, comments, or gating. All features are active. The only conditional rendering is via operational/experiment/permission feature flags.
-13. **CLAUDE.md Protection**: If `CLAUDE.md` already exists, NEVER rewrite it from scratch. ONLY modify Part 2 (Project-Specific Configuration). Part 1 (Immutable Framework Rules) must be preserved exactly as-is, including the Design & Visual Identity section, Progress Tracking section, Traceability Rules, and all other framework rules.
+13. **CLAUDE.md Protection**: If `CLAUDE.md` already exists, never rewrite it from scratch. ONLY modify Part 2 (Project-Specific Configuration). Part 1 (Immutable Framework Rules) must be preserved exactly as-is, including the Design & Visual Identity section, Progress Tracking section, Traceability Rules, and all other framework rules.
 14. **Scaffold Manifest**: Every **component, hook, backend function, and page** file you generate must be listed in `plancasting/_scaffold-manifest.md`. Test files, configuration files, and CI/CD pipelines are excluded from the manifest. This manifest is the handoff contract between Stage 3 and Stage 5. If a component file is not in the manifest, Stage 5 will not know it exists and may rebuild the UI inline in the page — creating duplication. The manifest must include: (a) which page imports each component, (b) which hook each component consumes, (c) which backend functions each hook wraps.
 ````

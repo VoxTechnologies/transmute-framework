@@ -40,7 +40,7 @@ Based on observed Plan Cast outcomes, these are common PRD generation failures:
 3. **API specs with no error responses**: Only happy-path 200 responses documented. Every endpoint must define error responses (400, 401, 403, 404, 409, 500) with response body shapes.
 4. **Data model missing query indexes**: Schema defines tables but not the indexes needed by the query patterns described in the API specs. Every query pattern must have a supporting index.
 5. **Happy-path-only user flows**: Error paths, cancellation paths, and edge case flows not documented. Every flow must include at least one error path.
-6. **Screen specs referencing wrong UI library** or generic component names. ALWAYS check `plancasting/tech-stack.md` for the UI library and use that library's actual component names (e.g., if using Untitled UI React, reference `DialogPanel` not generic 'Modal'; if using shadcn/ui, reference `Dialog` not 'Modal'). Generic component names cause confusion during Stage 5 implementation.
+6. **Screen specs referencing wrong UI library** or generic component names. always check `plancasting/tech-stack.md` for the UI library and use that library's actual component names (e.g., if using Untitled UI React, reference `DialogPanel` not generic 'Modal'; if using shadcn/ui, reference `Dialog` not 'Modal'). Generic component names cause confusion during Stage 5 implementation.
 7. **Feature flags misused as phased rollout**: Creating feature flags to "release features in phases" contradicts the full-build approach. Feature flags are for operational kill switches only. Acceptable feature flag use cases in a full-build product: (1) **Kill switches** — disable a feature if it causes production issues without redeploying, (2) **A/B testing** — test variations of a feature with different user segments, (3) **Permission gating** — show features based on plan tier or role (e.g., Pro-only features), (4) **Operational toggles** — enable maintenance mode, toggle analytics collection. Unacceptable: using flags to "release features in phases" or to hide incomplete features from users. (See Critical Framing: Full-Build Approach, above, for the correct use of feature flags in this context.)
 
 ## Input
@@ -59,7 +59,7 @@ The PRD structure should adapt based on the product type in `plancasting/tech-st
 
 Always read `plancasting/tech-stack.md` to determine which adaptations apply.
 
-**Language**: All prose content is generated in the Session Language specified in `./plancasting/tech-stack.md` § "Session Language". This is the canonical language setting — it is NOT read from BRD documents (though BRD uses the same setting). Technical identifiers (US-xxx, SC-xxx, API-xxx IDs, endpoint paths, error codes, file names, code) remain in English regardless of Session Language. Code identifiers (US-xxx, SC-xxx, API-xxx, FEAT-xxx) are always in English regardless of Session Language.
+**Language**: All prose content is generated in the Session Language specified in `./plancasting/tech-stack.md` § "Session Language". This is the canonical language setting — it is not read from BRD documents (though BRD uses the same setting). Technical identifiers (US-xxx, SC-xxx, API-xxx IDs, endpoint paths, error codes, file names, code) remain in English regardless of Session Language. Code identifiers (US-xxx, SC-xxx, API-xxx, FEAT-xxx) are always in English regardless of Session Language.
 
 ## Output
 
@@ -95,16 +95,16 @@ Expected output: 21 files always (18 specification files + `README.md`, `_contex
 
 ## Critical Rules
 
-1. NEVER weaken or de-scope BRD requirements — PRD must maintain or enhance all BRD specifications.
-2. NEVER add new features not derived from BRD functional requirements — PRD translates, it does not invent.
-3. NEVER skip features from the Feature Decomposition Map — all BRD features must appear in the PRD.
-4. ALWAYS maintain traceability: every user story must trace to a BRD requirement (BR/FR/NFR/BRL/etc.).
-5. NEVER remove cross-feature interactions documented in the BRD — preserve them in user flows, screen specs, and API specs.
-6. NEVER use generic component names — always reference the actual UI library components from `plancasting/tech-stack.md`.
-7. NEVER create acceptance criteria that merely restate the user story — each criterion must be independently testable with specific, observable outcomes.
-8. NEVER omit error responses from API specifications — every endpoint must define 400, 401, 403, 404, 409, and 500 responses with body shapes.
-9. NEVER create feature flags for phased rollout — flags are for kill switches, A/B tests, and permission gating only.
-10. ALWAYS include at least one error path for every user flow.
+1. never weaken or de-scope BRD requirements — PRD must maintain or enhance all BRD specifications.
+2. never add new features not derived from BRD functional requirements — PRD translates, it does not invent.
+3. never skip features from the Feature Decomposition Map — all BRD features must appear in the PRD.
+4. always maintain traceability: every user story must trace to a BRD requirement (BR/FR/NFR/BRL/etc.).
+5. never remove cross-feature interactions documented in the BRD — preserve them in user flows, screen specs, and API specs.
+6. never use generic component names — always reference the actual UI library components from `plancasting/tech-stack.md`.
+7. never create acceptance criteria that merely restate the user story — each criterion must be independently testable with specific, observable outcomes.
+8. never omit error responses from API specifications — every endpoint must define 400, 401, 403, 404, 409, and 500 responses with body shapes.
+9. never create feature flags for phased rollout — flags are for kill switches, A/B tests, and permission gating only.
+10. always include at least one error path for every user flow.
 
 ---
 
@@ -125,15 +125,15 @@ This stage assumes Stage 1 (BRD Generation) is complete. Verify `./plancasting/b
 
 1. Read and fully internalize all files in `./plancasting/brd/`, `./plancasting/businessplan/`, and `./plancasting/tech-stack.md`.
 
-**BRD Quality Issues**: If BRD gaps are found during PRD generation (e.g., an FR with no acceptance criteria, contradictory FRs, or missing negative requirements), document them in `./plancasting/prd/_brd-issues.md` and generate PRD content using this decision tree: (1) If clarification is obvious from context (e.g., related FRs), assume that context and proceed. (2) If clarification requires business judgment, mark assumption with `> ⚠️ ASSUMPTION:` and note in `_brd-issues.md`. (3) If blocking (cannot proceed without clarification), escalate in status message to lead. Do NOT modify BRD files — that is Stage 2B's responsibility. If CRITICAL BRD issues are found, proceed with PRD generation using best interpretation, document all issues in `_brd-issues.md`, and flag in the Final Summary that Stage 2B must address them before proceeding to Stage 3.
+**BRD Quality Issues**: If BRD gaps are found during PRD generation (e.g., an FR with no acceptance criteria, contradictory FRs, or missing negative requirements), document them in `./plancasting/prd/_brd-issues.md` and generate PRD content using this decision tree: (1) If clarification is obvious from context (e.g., related FRs), assume that context and proceed. (2) If clarification requires business judgment, mark assumption with `> ⚠️ ASSUMPTION:` and note in `_brd-issues.md`. (3) If blocking (cannot proceed without clarification), escalate in status message to lead. Do not modify BRD files — that is Stage 2B's responsibility. If CRITICAL BRD issues are found, proceed with PRD generation using best interpretation, document all issues in `_brd-issues.md`, and flag in the Final Summary that Stage 2B must address them before proceeding to Stage 3.
 
-After PRD generation, if `_brd-issues.md` contains CRITICAL or HIGH issues, include them in the Final Summary: "BRD quality issues detected — see `./plancasting/prd/_brd-issues.md` for details. Stage 2B will address these during cross-validation." Do NOT auto-remediate BRD files and do NOT halt — Stage 2B is specifically designed to fix BRD issues identified during PRD generation.
+After PRD generation, if `_brd-issues.md` contains CRITICAL or HIGH issues, include them in the Final Summary: "BRD quality issues detected — see `./plancasting/prd/_brd-issues.md` for details. Stage 2B will address these during cross-validation." Do not auto-remediate BRD files and do not halt — Stage 2B is specifically designed to fix BRD issues identified during PRD generation.
 
 **BRD Issue Classification**:
 - **BLOCKING**: BRD files exist but are empty, corrupted, or contain no parseable requirements (zero FR-xxx, zero BR-xxx detected) → STOP: 'BRD files appear to be empty or corrupted. Re-run Stage 1 before proceeding.'
-- **CRITICAL-BUT-RECOVERABLE**: A specific PRD file cannot be fully generated due to a BRD gap (e.g., data model undefined, core FR missing), but PRD generation can continue using context from related BRD requirements → Continue with PRD generation using best interpretation and documented assumptions. Do NOT halt. Document all CRITICAL-BUT-RECOVERABLE issues in `_brd-issues.md` and flag them prominently in the Final Summary for operator review. Every assumption added during PRD generation due to BRD gaps must be marked with both `> ⚠️ ASSUMPTION:` in the PRD file AND cross-referenced in `_brd-issues.md` so Stage 2B can validate it.
+- **CRITICAL-BUT-RECOVERABLE**: A specific PRD file cannot be fully generated due to a BRD gap (e.g., data model undefined, core FR missing), but PRD generation can continue using context from related BRD requirements → Continue with PRD generation using best interpretation and documented assumptions. Do not halt. Document all CRITICAL-BUT-RECOVERABLE issues in `_brd-issues.md` and flag them prominently in the Final Summary for operator review. Every assumption added during PRD generation due to BRD gaps must be marked with both `> ⚠️ ASSUMPTION:` in the PRD file AND cross-referenced in `_brd-issues.md` so Stage 2B can validate it.
 - **NON-BLOCKING**: Incomplete but can work around with assumptions → Continue with assumptions, document all in `./plancasting/prd/_brd-issues.md`, Stage 2B will resolve
-- **No issues found**: If the BRD has no quality issues, do NOT create `_brd-issues.md`. Note in the Final Summary: "No BRD quality issues detected."
+- **No issues found**: If the BRD has no quality issues, do not create `_brd-issues.md`. Note in the Final Summary: "No BRD quality issues detected."
 
    **Severity mapping to Stage 2B**: These BRD issue classifications map to Stage 2B's severity levels as follows: BLOCKING = CRITICAL (Stage 2B), CRITICAL-BUT-RECOVERABLE = HIGH (Stage 2B), NON-BLOCKING = MEDIUM or LOW (Stage 2B). This mapping ensures consistent prioritization across stages.
 
@@ -175,7 +175,7 @@ After PRD generation, if `_brd-issues.md` contains CRITICAL or HIGH issues, incl
 
 ### Phase 2: Spawn Specialized Teammates
 
-Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
+Spawn the following 5 teammates. Each teammate's spawn prompt must include:
 - The instruction: "Read CLAUDE.md Part 1 (immutable rules) if it exists in the project root. Follow its conventions, including § Design & Visual Identity. Ignore Part 2 (project-specific configuration) — it is not yet populated at this stage. Note: CLAUDE.md Part 2 does not exist yet at Stage 2. Use Part 1 design guidelines as the reference; Part 2 is populated by Stage 3."
 - The instruction: "Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate all PRD content and user-facing output in the specified language. Code, technical identifiers, and file names remain in English."
 - The full content of `./plancasting/prd/_context.md`
@@ -247,7 +247,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
   - Decision points and branching logic clearly annotated
   - Entry points and exit points for each flow
 
-**Spawn prompt must emphasize**: EVERY BRD functional requirement must have at least one user story. Every user story MUST include a Dependencies field listing other US-xxx IDs. If no dependencies, write "None". This includes requirements originally derived from later phases of the Business Plan. Pay special attention to cross-feature user flows — journeys that touch features from different parts of the product that would traditionally be built at different times. These integrated flows are a key benefit of the full-build approach. Some user stories may implement non-functional requirements, business rules, or UX best practices rather than direct FRs. Flag these in your output with an 'Orphan Story' classification and rationale (e.g., 'Implements NFR-003 indirectly' or 'UX best practice — no direct FR'). Stage 2B will validate these using its Orphan Story Decision Tree.
+**Spawn prompt must emphasize**: EVERY BRD functional requirement must have at least one user story. Every user story must include a Dependencies field listing other US-xxx IDs. If no dependencies, write "None". This includes requirements originally derived from later phases of the Business Plan. Pay special attention to cross-feature user flows — journeys that touch features from different parts of the product that would traditionally be built at different times. These integrated flows are a key benefit of the full-build approach. Some user stories may implement non-functional requirements, business rules, or UX best practices rather than direct FRs. Flag these in your output with an 'Orphan Story' classification and rationale (e.g., 'Implements NFR-003 indirectly' or 'UX best practice — no direct FR'). Stage 2B will validate these using its Orphan Story Decision Tree.
 
 ---
 
@@ -290,7 +290,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 **Files to generate**:
 - `10-system-architecture.md`
   - Architecture for the COMPLETE product (mermaid diagram)
-  - Technology stack implementation rationale (confirming choices from plancasting/tech-stack.md — do NOT recommend different technologies)
+  - Technology stack implementation rationale (confirming choices from plancasting/tech-stack.md — do not recommend different technologies)
   - Service/module decomposition sized for the full feature set
   - Infrastructure requirements for full-load from day one (referencing BRD NFRs)
   - Authentication and authorization architecture (covering all role types across all features)
@@ -377,7 +377,7 @@ Spawn the following 5 teammates. Each teammate's spawn prompt MUST include:
 
 ### Token Budget Management
 
-Each spawned agent has an output token limit per response (see tech-stack.md § Model Specifications "Output token limit"). A single agent generating a heavy file (e.g., 04-epics-and-user-stories.md with 200+ user stories, or 08-screen-specifications.md with 200+ screens) will hit this limit and fail. The team lead MUST proactively split heavy workloads BEFORE spawning agents. Note: the pipeline model's context window (see tech-stack.md § Model Specifications) means input context is NOT the bottleneck — the output token limit per agent response is the binding constraint.
+Each spawned agent has an output token limit per response (see tech-stack.md § Model Specifications "Output token limit"). A single agent generating a heavy file (e.g., 04-epics-and-user-stories.md with 200+ user stories, or 08-screen-specifications.md with 200+ screens) will hit this limit and fail. The team lead must proactively split heavy workloads BEFORE spawning agents. Note: the pipeline model's context window (see tech-stack.md § Model Specifications) means input context is not the bottleneck — the output token limit per agent response is the binding constraint.
 
 #### Estimation Heuristics
 
@@ -422,8 +422,8 @@ If a teammate fails (crashes, times out, or produces truncated output):
 1. Check which files were successfully written to `./plancasting/prd/`.
 2. For missing files: re-spawn with the same context and file assignments.
 3. For truncated files: re-spawn, instructing the agent to complete from the last complete section.
-4. If a re-spawned teammate's output is still truncated after reducing scope, split further per the Split Spawn Protocol above. Do NOT retry the same scope more than once.
-5. Do NOT proceed to Phase 4 until all teammates have completed.
+4. If a re-spawned teammate's output is still truncated after reducing scope, split further per the Split Spawn Protocol above. Do not retry the same scope more than once.
+5. Do not proceed to Phase 4 until all teammates have completed.
 
 #### Known Heavy Files (likely to need splitting)
 
@@ -459,8 +459,8 @@ While teammates are working:
    - When Teammate 2 finalizes user story IDs → write them to `./plancasting/prd/_context.md`
    - When Teammate 3 finalizes screen specs → write them to `./plancasting/prd/_context.md`
    - When Teammate 4 finalizes API specs → write them to `./plancasting/prd/_context.md`
-   - **Note**: Since teammates run in parallel, they cannot read each other's outputs during execution. All cross-teammate dependencies (Feature Decomposition Map, data entity list, ID ranges) MUST be provided in each teammate's spawn prompt context. Updates to `_context.md` are for Phase 4 integration and downstream stage consumption — NOT for inter-teammate communication during Phase 2 execution.
-   - **Screen ↔ API dependency resolution**: Teammate 3 (screen-specs) and Teammate 4 (api-and-technical) have a bidirectional dependency: screens need to know what data APIs provide, and APIs need to know what screens require. Resolution: The lead MUST include a preliminary data entity list (extracted from BRD data requirements `brd/09-data-requirements.md`) in BOTH teammates' spawn prompts. For BaaS architectures (Convex, Firebase, Supabase), also include preliminary function signatures (query/mutation names and their expected arguments/returns) in the entity list — BRD data entities alone are insufficient since BaaS APIs are defined by function signatures, not REST endpoints. This gives each teammate enough context to work independently. The lead reconciles any screen↔API mismatches during Phase 4 integration. If Teammate 3 invents data not in the BRD entity list, flag it for lead review — classify as a BRD gap (recommend adding DR-xxx) rather than silently discarding. If Teammate 4 creates endpoints not referenced by any screen, flag for removal or documentation as internal-only APIs.
+   - **Note**: Since teammates run in parallel, they cannot read each other's outputs during execution. All cross-teammate dependencies (Feature Decomposition Map, data entity list, ID ranges) must be provided in each teammate's spawn prompt context. Updates to `_context.md` are for Phase 4 integration and downstream stage consumption — NOT for inter-teammate communication during Phase 2 execution.
+   - **Screen ↔ API dependency resolution**: Teammate 3 (screen-specs) and Teammate 4 (api-and-technical) have a bidirectional dependency: screens need to know what data APIs provide, and APIs need to know what screens require. Resolution: The lead must include a preliminary data entity list (extracted from BRD data requirements `brd/09-data-requirements.md`) in BOTH teammates' spawn prompts. For BaaS architectures (Convex, Firebase, Supabase), also include preliminary function signatures (query/mutation names and their expected arguments/returns) in the entity list — BRD data entities alone are insufficient since BaaS APIs are defined by function signatures, not REST endpoints. This gives each teammate enough context to work independently. The lead reconciles any screen↔API mismatches during Phase 4 integration. If Teammate 3 invents data not in the BRD entity list, flag it for lead review — classify as a BRD gap (recommend adding DR-xxx) rather than silently discarding. If Teammate 4 creates endpoints not referenced by any screen, flag for removal or documentation as internal-only APIs.
 3. Resolve any conflicts or ambiguities raised by teammates.
 4. Ensure BRD traceability is maintained.
 5. **Cross-feature attention**: When a teammate asks about how feature A interacts with feature B, provide context from both features' BRD requirements. This is critical because the full-build approach creates interaction surfaces that wouldn't exist in a phased approach.
@@ -509,7 +509,7 @@ With the pipeline model's context window (see tech-stack.md § Model Specificati
 
 #### Review Agent Spawn Protocol
 
-Each review agent's spawn prompt MUST include:
+Each review agent's spawn prompt must include:
 - The instruction: "Read CLAUDE.md Part 1 (immutable rules) if it exists in the project root. Follow its conventions. Ignore Part 2 (project-specific configuration) — it is not yet populated at this stage."
 - The instruction: "Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate all PRD content and user-facing output in the specified language. Code, technical identifiers, and file names remain in English."
 - The list of all generated PRD files to review
@@ -533,7 +533,7 @@ Each agent produces a list of issues in this format:
     - **Affected Elements**: [List of PRD IDs impacted — US/SC/API/TS/etc.]
 
 Severity definitions:
-- **CRITICAL**: Specification is missing, contradictory, or would cause implementation failure. Blocks development.
+- Specification is missing, contradictory, or would cause implementation failure. Blocks development.
 - **HIGH**: Specification is vague, incomplete, or technically infeasible. Would cause rework during development.
 - **MEDIUM**: Quality issue that reduces clarity but doesn't block development. Inconsistency or missing detail.
 - **LOW**: Polish issue — formatting, minor terminology drift, optimization suggestion.
@@ -622,7 +622,7 @@ After all 3 review agents complete their reports:
    - When fixing coverage gaps (missing user stories, screen specs, API endpoints), generate complete specifications — not stubs or placeholders.
    - Ensure every fix maintains or improves BRD → PRD traceability.
 
-5. **Second Pass** (conditional): If the initial remediation resolved more than 15 CRITICAL+HIGH issues, perform a targeted re-review of ONLY the modified files to ensure fixes didn't introduce new problems. This re-review does NOT require spawning new agents — the lead performs it directly using the review checklists above.
+5. **Second Pass** (conditional): If the initial remediation resolved more than 15 CRITICAL+HIGH issues, perform a targeted re-review of ONLY the modified files to ensure fixes didn't introduce new problems. This re-review does not require spawning new agents — the lead performs it directly using the review checklists above.
 
 6. **Document Remaining Issues**: Create `./plancasting/prd/_review-log.md` containing:
    - Review date and agent versions
@@ -684,7 +684,7 @@ Include the gate decision in the `_review-log.md` output: `Stage 2 Outcome: [PAS
 6. **Cross-Feature Interactions**: Explicitly document how features interact with each other. A dashboard feature that aggregates data from 5 other features needs specifications for all 5 data sources, not just "data comes from other features."
 7. **Completeness**: If the BRD lacks detail, generate assumptions marked with `> ⚠️ ASSUMPTION:`. Never leave sections empty.
 8. **Consistency**: Use terminology defined in `./plancasting/prd/_context.md`.
-9. **Mermaid Diagrams**: Use mermaid syntax for all visual representations. ALWAYS validate syntax before including — common errors: (a) missing quotes around node labels containing special characters (`A[My Node]` not `A[My "Node"]`), (b) incorrect arrow syntax (`A --> B` not `A -> B` for flowcharts; `->>` for sequence diagrams), (c) unclosed `subgraph`/`loop`/`alt` blocks, (d) using Unicode `→` instead of ASCII `-->`. Validate by checking that all opened blocks (`subgraph`, `loop`, `alt`) are closed, all node references are consistent, and arrow syntax matches the diagram type (flowchart: `-->`, sequence: `->>`, state: `-->`).
+9. **Mermaid Diagrams**: Use mermaid syntax for all visual representations. always validate syntax before including — common errors: (a) missing quotes around node labels containing special characters (`A[My Node]` not `A[My "Node"]`), (b) incorrect arrow syntax (`A --> B` not `A -> B` for flowcharts; `->>` for sequence diagrams), (c) unclosed `subgraph`/`loop`/`alt` blocks, (d) using Unicode `→` instead of ASCII `-->`. Validate by checking that all opened blocks (`subgraph`, `loop`, `alt`) are closed, all node references are consistent, and arrow syntax matches the diagram type (flowchart: `-->`, sequence: `->>`, state: `-->`).
 10. **Cross-references**: Use relative markdown links between PRD files and back to BRD files.
 11. **Professional Tone**: Clear, precise, unambiguous. Use the session language specified in tech-stack.md.
 12. **ID Formats**: Follow the ID format and ranges defined in `_context.md`.

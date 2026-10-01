@@ -9,7 +9,7 @@ You are a senior technical writer acting as the TEAM LEAD for a multi-agent docu
 
 ## Prerequisites
 
-Stage 6D runs after Stage 5B PASS or CONDITIONAL PASS. Run Stage 6D AFTER Stage 6G (per pipeline ordering in CLAUDE.md). Can run after 5B PASS for an early draft, but MUST re-run after 6E–6G if code changed. Stage 6D = internal developer documentation (API reference, architecture, dev guide). Stage 7D = external user-facing site (Mintlify). Stage 6D always runs; Stage 7D is optional per tech-stack.md.
+Stage 6D runs after Stage 5B PASS or CONDITIONAL PASS. Run Stage 6D AFTER Stage 6G (per pipeline ordering in CLAUDE.md). Can run after 5B PASS for an early draft, but must re-run after 6E–6G if code changed. Stage 6D = internal developer documentation (API reference, architecture, dev guide). Stage 7D = external user-facing site (Mintlify). Stage 6D always runs; Stage 7D is optional per tech-stack.md.
 1. Verify `./plancasting/_audits/implementation-completeness/report.md` exists and shows a PASS or CONDITIONAL PASS. If the file does not exist, STOP: 'Stage 5B report not found — implementation completeness is unverified. Run Stage 5B before Stage 6D.' If 5B shows FAIL, FAIL-RETRY, or FAIL-ESCALATE, STOP — do not generate documentation for a codebase with unresolved implementation gaps. Report: 'Stage 5B FAIL — resolve implementation gaps before generating documentation.' If CONDITIONAL PASS, check Phase 1 step 5's blocking gate first: if >25% of total features are Category C or any P0 feature is incomplete, STOP — do not run 6D (see Phase 1 step 5 for calculation details). Otherwise, document Category C features as 'Planned' with the `⚠️ Planned` callout rather than 'Available'.
 2. Verify `./plancasting/_audits/refactoring/report.md` exists (Stage 6E). This file SHOULD exist per Stage 6 ordering (6E → 6F → 6G → 6D). If missing, WARN: "Stage 6E has not completed. If 6E restructures modules or renames functions after 6D, documentation structure may need regeneration." Note this in the report and proceed with caution — document current module boundaries but flag that they may shift after 6E. If the 6E report exists, also read its 'Schema Changes' section to ensure API documentation reflects post-refactoring schema.
 3. Verify `./plancasting/_audits/resilience/report.md` exists (Stage 6G). If missing, documentation may need updating after 6G completes — note this in the report.
@@ -62,7 +62,7 @@ docs/
 Note: `docs/` is internal developer documentation (Stage 6D output). `user-guide/` is the external user-facing Mintlify site (Stage 7D output — optional per tech-stack.md). They are separate documentation trees serving different audiences. Stage 6D generates lightweight markdown help docs as a foundation. Stage 7D imports, enhances, and publishes them to a Mintlify site. Do not worry about visual polish or branding in 6D — Stage 7D handles presentation.
 
 **Language**: Check `./plancasting/tech-stack.md` for the `Session Language` setting. Apply language rules per documentation type:
-- `docs/help/` → Generate in the Session Language (product help for end users — this is NOT the Stage 7D Mintlify site)
+- `docs/help/` → Generate in the Session Language (product help for end users — this is not the Stage 7D Mintlify site)
 - `docs/api/` → Generate in English (this is for developers, API identifiers are English)
 - `docs/developer/` → Generate in English (this is for engineers, code examples are English)
 - `docs/changelog.md` → Generate in the Session Language
@@ -86,12 +86,12 @@ Always read `CLAUDE.md` Part 2 (Backend Rules, Frontend Rules) for your project'
 Based on observed documentation generation outcomes:
 
 1. **PRD-as-docs copy**: Agent copies PRD specification text verbatim as user documentation. PRD is a spec for developers — docs are for end users. Rewrite in user-friendly language.
-2. **Hallucinated API signatures**: Agent documents function signatures from memory instead of reading actual source files. ALWAYS read the actual code before documenting.
+2. **Hallucinated API signatures**: Agent documents function signatures from memory instead of reading actual source files. always read the actual code before documenting.
 3. **Documenting ideal, not actual**: Agent describes how a feature SHOULD work (from PRD) rather than how it ACTUALLY works (from code). Code is the source of truth.
-4. **Generic changelog**: "Initial release" with no feature enumeration. ALWAYS list specific features, referencing FEAT-IDs.
-5. **Broken internal links**: Links between doc files use wrong relative paths. ALWAYS verify links resolve correctly.
-6. **Developer setup missing env vars**: Setup guide omits environment variables that are actually required. ALWAYS cross-reference `.env.local.example`.
-7. **Code examples that don't compile**: TypeScript examples with wrong types or missing imports. ALWAYS verify examples against actual code.
+4. **Generic changelog**: "Initial release" with no feature enumeration. always list specific features, referencing FEAT-IDs.
+5. **Broken internal links**: Links between doc files use wrong relative paths. always verify links resolve correctly.
+6. **Developer setup missing env vars**: Setup guide omits environment variables that are actually required. always cross-reference `.env.local.example`.
+7. **Code examples that don't compile**: TypeScript examples with wrong types or missing imports. always verify examples against actual code.
 8. **Documentation stale after 6E/6F/6G**: If running 6D before 6G completes, API docs may reference pre-refactoring module boundaries or miss error codes added by later stages. Document known placeholders with `> ⚠️ DOCUMENTATION GAP: May need updating after Stage 6G completes.`
 
 ## Agent Team Architecture
@@ -110,11 +110,11 @@ As the team lead, complete the following BEFORE spawning any teammates:
 5. **BLOCKING GATE**: Before spawning teammates, verify implementation completeness. Read `./plancasting/_audits/implementation-completeness/report.md` and check feature status. **Calculating the 25% threshold**: (1) Count total features from `plancasting/prd/02-feature-map-and-prioritization.md` (count FEAT-IDs). (2) Count Category C features from the 5B report. (3) Calculate: Category C count / total feature count. Threshold: >25% (strictly greater than). At exactly 25% (e.g., 3 of 12 features), PROCEED. Above 25% (e.g., 4 of 12 = 33.3%), STOP. If >25% OR any P0 feature has Category C status, STOP — documentation of unbuilt features will create misleading docs. Wait for Stage 5 re-run to reduce Category C count before proceeding with 6D. **Recovery**: Set affected features to `🔄 Needs Re-implementation` in `_progress.md`, re-run Stage 5 for those features, re-run 5B, then re-run 6D. Note: 5B CONDITIONAL PASS allows up to 3 Category C issues with documented workarounds. Examples: 12 features, 3 Category C = 25% (at threshold — proceed). 12 features, 4 Category C = 33% (exceeds 25% — STOP). 20 features, 4 Category C = 20% (safe to proceed).
 6. Create a task list for all teammates with dependency tracking.
 
-**Anti-Hallucination Rule (ALL teammates)**: Before documenting ANY feature, API, or process, read the actual source code or PRD. Do NOT write documentation from memory or assumption. Hallucinated documentation is the #1 cause of Stage 6D failures.
+**Anti-Hallucination Rule (ALL teammates)**: Before documenting ANY feature, API, or process, read the actual source code or PRD. Do not write documentation from memory or assumption. Hallucinated documentation is the #1 cause of Stage 6D failures.
 
 ### Phase 2: Spawn Documentation Teammates
 
-Spawn the following 3 teammates. Each teammate's spawn prompt MUST include the documentation map and writing style guidelines. Safety net for session resumption: re-verify the 25% Category C threshold (see Phase 1 step 5 for full criteria). If >25% of features or ANY P0 feature have Category C status, STOP immediately and output: "Stage 6D HALTED — Product is less than 75% feature-complete (Stage 5B shows >25% Category C issues or P0 feature gaps). Documentation is premature and will require substantial rework. Resolve Stage 5B failures before proceeding." Do not spawn teammates. If Stage 5B reported PASS, this threshold should not be triggered. If the file does not exist, WARN and proceed (implementation completeness unverified).
+Spawn the following 3 teammates. Each teammate's spawn prompt must include the documentation map and writing style guidelines. Safety net for session resumption: re-verify the 25% Category C threshold (see Phase 1 step 5 for full criteria). If >25% of features or ANY P0 feature have Category C status, STOP immediately and output: "Stage 6D HALTED — Product is less than 75% feature-complete (Stage 5B shows >25% Category C issues or P0 feature gaps). Documentation is premature and will require substantial rework. Resolve Stage 5B failures before proceeding." Do not spawn teammates. If Stage 5B reported PASS, this threshold should not be triggered. If the file does not exist, WARN and proceed (implementation completeness unverified).
 
 All teammates: Before creating any files, check if `./docs/` already exists. If it does, read existing content and preserve any sections marked as 'Manual' or 'User-added'. Manual content markers: `<!-- MANUAL: Do not regenerate -->` at the start and `<!-- END MANUAL -->` at the end of manually edited sections. Search for these markers before regenerating any file. (On first run, these markers will not exist. This convention applies to subsequent re-runs where docs/ has been manually edited.) If no markers are present and the file exists, rename it as backup (e.g., `api-old.md`) before generating fresh content. For auto-generated sections (e.g., API docs from source), regenerate. If in doubt, rename the existing file (e.g., `api-old.md`) and generate fresh, then manually merge critical manual content.
 
@@ -124,7 +124,7 @@ All teammates: Before creating any files, check if `./docs/` already exists. If 
 ~~~
 You are writing internal product help documentation as markdown files under docs/help/.
 
-NOTE: This is NOT the external user-facing documentation site (Stage 7D generates that as a Mintlify site under ./user-guide/). This is simpler markdown help content stored alongside API docs and developer guides.
+NOTE: This is not the external user-facing documentation site (Stage 7D generates that as a Mintlify site under ./user-guide/). This is simpler markdown help content stored alongside API docs and developer guides.
 
 Read CLAUDE.md first. Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write help docs in the session language (this is user-facing content). Then read ./plancasting/_audits/documentation/_doc-context.md for the documentation map and writing style.
 Read ./plancasting/prd/01-product-overview.md for product context.
@@ -162,7 +162,7 @@ When done, message the lead with: number of guides created, features covered.
 **Scope**: Backend function API reference
 
 ~~~
-**ANTI-HALLUCINATION RULE**: Before documenting ANY function signature, argument type, or return value, you MUST open and read the actual source file. Do NOT write from memory or training data. Hallucinated signatures are the #1 failure mode of this stage.
+**ANTI-HALLUCINATION RULE**: Before documenting ANY function signature, argument type, or return value, you must open and read the actual source file. Do not write from memory or training data. Hallucinated signatures are the #1 failure mode of this stage.
 
 You are writing the API reference documentation for all backend functions.
 
@@ -170,7 +170,7 @@ Read CLAUDE.md first. Check `./plancasting/tech-stack.md` for the `Session Langu
 Read your schema file (e.g., `./convex/schema.ts` for Convex, or your equivalent schema definition) for the data model. Read all files in your backend directory (e.g., `./convex/` for Convex, excluding _generated/ and __tests__/).
 Read ./plancasting/tech-stack.md for the backend technology details.
 
-CRITICAL: You MUST read the actual source file for EVERY function you document. Do NOT document any function signature, argument type, return type, or error code from memory. Open the source file, read the function definition, and document what you see.
+You must read the actual source file for EVERY function you document. Do not document any function signature, argument type, return type, or error code from memory. Open the source file, read the function definition, and document what you see.
 
 Your tasks:
 1. For each of your backend function files (e.g., `convex/<domain>.ts` for Convex), create `docs/api/<domain>.md`:
@@ -224,7 +224,7 @@ Your tasks:
 
 3. `docs/developer/conventions.md`
    - Quick-reference summary of CLAUDE.md conventions (link to CLAUDE.md sections rather than duplicating — CLAUDE.md is the source of truth)
-   - Before writing code examples, read the actual source files in the codebase to verify types, imports, and patterns. Do NOT write code examples from memory — hallucinated signatures are a known failure pattern.
+   - Before writing code examples, read the actual source files in the codebase to verify types, imports, and patterns. Do not write code examples from memory — hallucinated signatures are a known failure pattern.
    - Code examples for each pattern:
      - How to add a new backend function
      - How to add a new page
@@ -283,16 +283,16 @@ After all teammates complete:
 1. Verify all internal links between docs resolve correctly.
 2. Verify all code examples in docs compile (extract to temp files and type-check). Code examples must use correct imports and types matching the actual source files.
 3. Ensure consistent terminology across help docs, API docs, and developer guide.
-4. **Documentation Accuracy Verification** — **Ownership**: The api-docs-writer (Teammate 2) MUST perform 100% source verification during their task — read the actual source file for EVERY documented function, not a sample. The lead spot-checks a random sample of at least 10 documented functions (or all functions if fewer than 10 exist) against source files during Phase 4 review as a final failsafe.
+4. **Documentation Accuracy Verification** — **Ownership**: The api-docs-writer (Teammate 2) must perform 100% source verification during their task — read the actual source file for EVERY documented function, not a sample. The lead spot-checks a random sample of at least 10 documented functions (or all functions if fewer than 10 exist) against source files during Phase 4 review as a final failsafe.
 
-   For every documented function/endpoint, the api-docs-writer MUST:
+   For every documented function/endpoint, the api-docs-writer must:
    - Read the actual source file in the backend directory (e.g., `convex/`) or `src/`
    - Verify documented argument types match actual validators (e.g., `v` validators for Convex, Zod schemas, etc.)
    - Verify documented return types match actual return values
    - Verify documented error codes match actual error throws (e.g., `ConvexError` for Convex, or your backend's error type)
    - Verify documented auth requirements match actual auth check calls (e.g., `requireAuth`/`requireOrgMembership` for Convex, or your backend's auth helpers)
    - Verify code examples use correct imports and types by checking against actual source files. Type-check all code examples on critical paths (auth, mutations, data fetching). Spot-check others (at least 50% sample). If compilation failures found, fix all related examples.
-   - Do NOT trust the schema or PRD — verify against the actual running code.
+   - Do not trust the schema or PRD — verify against the actual running code.
 5. Run `bun run typecheck && bun run lint && bun run build` to verify documentation additions don't break the build. Skip `bun run test` and `bun run test:e2e` unless the documentation includes code examples that were added as test fixtures.
 6. Generate `docs/index.md` — top-level navigation hub linking to help docs, API docs, and developer guide.
 7. Output summary: total pages created, features covered, functions documented.
@@ -320,14 +320,14 @@ Generate `./plancasting/_audits/documentation/report.md` with the gate decision.
 
 ## Critical Rules
 
-1. NEVER copy PRD text verbatim into user documentation — rewrite for the target audience.
-2. NEVER document function signatures from memory — ALWAYS read the actual source file first.
-3. NEVER write documentation that describes ideal behavior instead of actual implementation.
-4. ALWAYS verify code examples compile by checking types against actual source files.
-5. ALWAYS cross-reference `.env.local.example` when documenting setup procedures. Extract all required environment variables from `.env.local.example` and include them in the developer guide's setup section. Document what each var is for and where to find the value (e.g., 'Get this from your Convex dashboard').
-6. ALWAYS verify internal links between documentation files resolve correctly.
+1. never copy PRD text verbatim into user documentation — rewrite for the target audience.
+2. never document function signatures from memory — always read the actual source file first.
+3. never write documentation that describes ideal behavior instead of actual implementation.
+4. always verify code examples compile by checking types against actual source files.
+5. always cross-reference `.env.local.example` when documenting setup procedures. Extract all required environment variables from `.env.local.example` and include them in the developer guide's setup section. Document what each var is for and where to find the value (e.g., 'Get this from your Convex dashboard').
+6. always verify internal links between documentation files resolve correctly.
 7. If `ARCHITECTURE.md` does not exist, derive architecture from `plancasting/tech-stack.md`, `CLAUDE.md`, and codebase structure.
-8. Reference Stage 5B output (`./plancasting/_audits/implementation-completeness/report.md`) to identify incomplete features — document them as "planned" rather than "available." Each teammate MUST check Stage 5B output: if a feature is listed as incomplete, mark it as "Planned" in all documentation (API docs, developer guide) with a `> ⚠️ Planned: This feature is not yet available.` callout at the top of the relevant section. Example: `> ⚠️ **Planned**: This feature is not yet available. See the product roadmap for timeline.` If the 5B report does not exist, assume all features are complete.
+8. Reference Stage 5B output (`./plancasting/_audits/implementation-completeness/report.md`) to identify incomplete features — document them as "planned" rather than "available." Each teammate must check Stage 5B output: if a feature is listed as incomplete, mark it as "Planned" in all documentation (API docs, developer guide) with a `> ⚠️ Planned: This feature is not yet available.` callout at the top of the relevant section. Example: `> ⚠️ **Planned**: This feature is not yet available. See the product roadmap for timeline.` If the 5B report does not exist, assume all features are complete.
 9. Reference Stage 6A-6C audit reports when documenting security practices, accessibility features, and performance characteristics. Also reference 6E (refactoring patterns), 6F (seed data instructions), and 6G (resilience patterns) if those stages have completed. If running before other Stage 6 audits complete: skip references to audit reports that don't yet exist, and note that documentation may need updating after Stages 6A-6G.
 10. If `./docs/` already exists, read existing content first and update rather than overwrite — preserve any manual additions.
 11. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).

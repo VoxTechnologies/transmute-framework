@@ -25,7 +25,7 @@ Issues found during this audit are classified into three SIZE-BASED categories:
 
 > ⚠️ This differs from Stage 6V/6R, which classifies by FIXABILITY (A = auto-fixable, B = semi-auto, C = needs human judgment). Size-based categories here determine whether the fix is small enough for a 5B teammate to handle or requires a full Stage 5 re-run.
 
-**What Stage 5B Does NOT Do**: Stage 5B fixes cosmetic/moderate gaps (Category A/B) and documents large gaps (Category C). It does NOT: (1) create entirely new backend functions or API endpoints — that's Stage 5 re-implementation, (2) build new features from scratch — only completes partially-built features, (3) refactor architecture — that's Stage 6E, (4) add error handling patterns — that's Stage 6G, (5) fix security issues — that's Stage 6A. If a fix requires >100 lines of net-new code in a single file, it's Category C and gets escalated back to Stage 5.
+**What Stage 5B Does not Do**: Stage 5B fixes cosmetic/moderate gaps (Category A/B) and documents large gaps (Category C). It does not: (1) create entirely new backend functions or API endpoints — that's Stage 5 re-implementation, (2) build new features from scratch — only completes partially-built features, (3) refactor architecture — that's Stage 6E, (4) add error handling patterns — that's Stage 6G, (5) fix security issues — that's Stage 6A. If a fix requires >100 lines of net-new code in a single file, it's Category C and gets escalated back to Stage 5.
 
 ## Known Failure Patterns (Prioritized)
 
@@ -115,7 +115,7 @@ If this stage is interrupted:
 
 Before running any scan scripts, read `plancasting/tech-stack.md` to determine your actual directory structure. Replace all placeholder paths (`[backend-dir]`, `[frontend-dir]`, `[pages-dir]`, `[components-dir]`, `[hooks-dir]`) with your project's actual paths. The scripts below use Convex + Next.js App Router paths as examples.
 
-**IMPORTANT**: Before spawning any teammate, replace ALL `[backend-dir]`, `[frontend-dir]`, `[pages-dir]`, `[components-dir]`, and `[hooks-dir]` placeholders in the teammate instructions with the actual paths from `plancasting/tech-stack.md`.
+Before spawning any teammate, replace ALL `[backend-dir]`, `[frontend-dir]`, `[pages-dir]`, `[components-dir]`, and `[hooks-dir]` placeholders in the teammate instructions with the actual paths from `plancasting/tech-stack.md`.
 
 - `convex/` → `[backend-dir]` (e.g., `convex/` for Convex, `server/` for Express, `api/` for Next.js API routes)
 - `src/` → `[frontend-dir]` (e.g., `src/` for Next.js, `packages/web/` for monorepos, `app/` for some frameworks). This is the root directory containing all frontend source code.
@@ -184,7 +184,7 @@ As the team lead, perform the full audit scan yourself before delegating fixes:
    # Note: Adjust --include filters to match your framework's file types (e.g., .svelte, .vue, .jsx)
    # Note: Exclude HTML attribute matches (e.g., placeholder="Enter email") — focus on
    # standalone text like 'This is a placeholder' or 'PLACEHOLDER CONTENT'.
-   # WARNING: [backend-dir] is a placeholder. You MUST replace it with your actual backend
+   # WARNING: [backend-dir] is a placeholder. You must replace it with your actual backend
    # directory path (e.g., convex/). Running this command with the literal placeholder will
    # silently skip backend scanning.
    grep -rn "implementation pending\|pending feature build\|⚠️ STUB\|TODO \[Stage 5\]\|Coming soon\|Not yet implemented\|PLACEHOLDER" "$FRONTEND_DIR" "$BACKEND_DIR" --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" | grep -v 'placeholder="\|Placeholder='
@@ -291,9 +291,9 @@ As the team lead, perform the full audit scan yourself before delegating fixes:
    - **Duplication fixes**: Page has inline UI + orphan component exists → move inline code into component, refactor page to import it
    - **Bloated page decomposition**: Page with 200+ lines of inline UI → extract into scaffold components
 
-   **Workaround definition** (applies to all CONDITIONAL PASS paths): A workaround is a documented alternative path that allows end-users to accomplish the same business goal through different UI steps, API calls, or manual processes. The workaround must be (a) actionable by end-users without developer intervention, (b) documented with specific steps, and (c) functional in the current build. "Accept the limitation" or "defer to post-launch" is NOT a workaround — it is a deferral requiring explicit operator approval noted in the report.
+   **Workaround definition** (applies to all CONDITIONAL PASS paths): A workaround is a documented alternative path that allows end-users to accomplish the same business goal through different UI steps, API calls, or manual processes. The workaround must be (a) actionable by end-users without developer intervention, (b) documented with specific steps, and (c) functional in the current build. "Accept the limitation" or "defer to post-launch" is not a workaround — it is a deferral requiring explicit operator approval noted in the report.
 
-   **Category C — Large Gap (document; 4–5 = FAIL-RETRY re-run 5B, 6+ = FAIL-ESCALATE re-run Stage 5)**: This threshold (1–3 Category C (with A/B ≤ 3 and each C with workaround) = CONDITIONAL PASS, 4–5 = FAIL-RETRY, 6+ Category C OR 6+ total unfixed = FAIL-ESCALATE — see Phase 4 for the full gate decision table; if both FAIL-RETRY and FAIL-ESCALATE thresholds are met simultaneously, FAIL-ESCALATE takes precedence) is a HARD gate. Do NOT classify 4 Category C issues as CONDITIONAL PASS. If a 4th Category C issue is found mid-audit, the gate automatically becomes FAIL. Escalate if ANY of these are true:
+   **Category C — Large Gap (document; 4–5 = FAIL-RETRY re-run 5B, 6+ = FAIL-ESCALATE re-run Stage 5)**: This threshold (1–3 Category C (with A/B ≤ 3 and each C with workaround) = CONDITIONAL PASS, 4–5 = FAIL-RETRY, 6+ Category C OR 6+ total unfixed = FAIL-ESCALATE — see Phase 4 for the full gate decision table; if both FAIL-RETRY and FAIL-ESCALATE thresholds are met simultaneously, FAIL-ESCALATE takes precedence) is a HARD gate. Do not classify 4 Category C issues as CONDITIONAL PASS. If a 4th Category C issue is found mid-audit, the gate automatically becomes FAIL. Escalate if ANY of these are true:
    1. Requires creating entirely new hooks or backend functions that the scaffold should have created but that don't exist. A hook/function "should have" been created if it maps to an API endpoint in `./plancasting/prd/12-api-specifications.md` or a component in `./plancasting/prd/08-screen-specifications.md` that needs to fetch/submit data. Check `plancasting/_scaffold-manifest.md` or `plancasting/_codegen-context.md` as the source of truth for what was scaffolded (PRD defines what should exist; the manifest defines what was created).
    2. A single file needs more than 100 lines of net-new code to complete a feature.
    3. Entire features where frontend is completely unbuilt — scaffold files exist but implementation is entirely missing. This indicates a Stage 5 session was interrupted or incompletely run. Escalate to the lead immediately.
@@ -303,7 +303,7 @@ As the team lead, perform the full audit scan yourself before delegating fixes:
 
    **Note**: Category A/B/C in Stage 5B classify by CODE SIZE (lines per file). This differs from Stage 6V/6R, which classify by FIXABILITY (auto-fixable vs manual). Do not confuse the two systems — see execution-guide.md § "Gate Decision Outcomes" → "Category Systems" for the 6V/6R system.
 
-   **Category C example**: `useUserProfile` hook is listed in `_codegen-context.md` but was never created. Creating it requires a new backend query, frontend hook, and 150+ lines of component code to consume it. This is NOT a stub fix — it's a missing feature requiring Stage 5 re-implementation.
+   **Category C example**: `useUserProfile` hook is listed in `_codegen-context.md` but was never created. Creating it requires a new backend query, frontend hook, and 150+ lines of component code to consume it. This is not a stub fix — it's a missing feature requiring Stage 5 re-implementation.
 
    **Multi-file classification rule**: Category A — all files need <30 lines each. Category B — each file needs 30–100 lines AND total across all files <150 lines. Category C — largest file needs ≥100 lines OR total ≥150 lines across all affected files. If ambiguous, default to the higher category. If multiple independent issues happen to be in the same feature, classify each issue separately.
 
@@ -319,7 +319,7 @@ As the team lead, perform the full audit scan yourself before delegating fixes:
 
 ### Phase 2: Spawn Fix Teammates
 
-Spawn Teammates 1 and 2 first (they can run in parallel). Teammate 3 (e2e-verification) MUST be spawned only AFTER Teammates 1 and 2 complete their work — it validates their fixes.
+Spawn Teammates 1 and 2 first (they can run in parallel). Teammate 3 (e2e-verification) must be spawned only AFTER Teammates 1 and 2 complete their work — it validates their fixes.
 
 Based on findings, spawn up to 3 teammates. If no issues are found in a category, skip that teammate.
 
@@ -339,16 +339,16 @@ Based on findings, spawn up to 3 teammates. If no issues are found in a category
 **Per-feature escalation rule**: If a single feature (same FEAT-ID) reports FAIL-RETRY three consecutive times across separate 5B runs (not Stage 5 re-runs), that feature automatically escalates to FAIL-ESCALATE regardless of overall category counts. A Stage 5 re-run for a feature resets that feature's consecutive FAIL-RETRY counter to 0 (the feature has been re-implemented). "Three consecutive times" means three 5B runs where that specific feature returned FAIL-RETRY — other features' results and intervening PASS/CONDITIONAL PASS outcomes for OTHER features are irrelevant. **Reading previous run state**: At the start of Phase 1, read the previous audit report at `./plancasting/_audits/implementation-completeness/report.md` if it exists — extract the per-feature `5B Runs` column to continue tracking consecutive FAIL-RETRY counts. If no previous report exists, this is Run 1. Track per-feature run counts in the audit report's feature table using a `5B Runs` column (e.g., `FEAT-003: 5B-run-1=FAIL-RETRY, 5B-run-2=FAIL-RETRY, 5B-run-3=FAIL-RETRY → ESCALATE`). This prevents infinite retry loops on features that consistently fail due to deeper architectural issues. Note: this is independent of the global Run Number (Run 4+ rule); a feature can escalate at global Run 2 if it has individually failed 3 times across prior runs.
 
 **Phase execution flow** (not all phases are conditional):
-- **Phase 1** (scan): ALWAYS runs — required to identify issues
+- **Phase 1** (scan): always runs — required to identify issues
 - **Phase 2** (fix): CONDITIONAL — only if Category A/B issues found AND Run Number < 4 (see table above)
 - **Phase 3** (verify): CONDITIONAL — only if Phase 2 ran (verifies fixes didn't introduce regressions)
-- **Phase 4** (report + gate): ALWAYS runs — the report is required by downstream stages (6A–6G, 6H)
-- **Phase 5** (rule extraction): ALWAYS runs — captures patterns found during Phase 1 scan even if no fixes were needed
+- **Phase 4** (report + gate): always runs — the report is required by downstream stages (6A–6G, 6H)
+- **Phase 5** (rule extraction): always runs — captures patterns found during Phase 1 scan even if no fixes were needed
 
 Save the report to `./plancasting/_audits/implementation-completeness/report.md` with the gate decision and Category C details.
 
 ---
-**⚠️ IMPORTANT: Everything below this line is TEAMMATE instructions, not lead instructions. The lead spawns these teammates AFTER completing Phase 1. Do NOT execute teammate instructions yourself — delegate them.**
+**⚠️ Everything below this line is TEAMMATE instructions, not lead instructions. The lead spawns these teammates AFTER completing Phase 1. Do not execute teammate instructions yourself — delegate them.**
 
 #### Teammate 1: "frontend-stub-fixer" (PRIMARY — spawned first when fixes needed)
 **Scope**: Fix all Category A and Category B frontend issues
@@ -361,9 +361,9 @@ Check `./plancasting/tech-stack.md` for the `Session Language` setting. Code rem
 Also read `./plancasting/tech-stack.md` for the design direction and UI component library.
 Read the audit report at ./plancasting/_audits/implementation-completeness/report.md.
 
-YOUR MANDATE: Replace every stub with a FUNCTIONAL implementation. You are NOT writing new features — the backend is already complete. You are connecting frontend components to the existing backend.
+YOUR MANDATE: Replace every stub with a FUNCTIONAL implementation. You are not writing new features — the backend is already complete. You are connecting frontend components to the existing backend.
 
-**CRITICAL BOUNDARY**: If a component needs a backend **mutation/query/action function** that doesn't exist in the backend directory, DO NOT create it — report as Category C. Missing backend functions indicate Stage 3 or Stage 5 incompleteness. However, if the backend function EXISTS but a frontend **hook wrapper** is missing (the function is in the backend but no `useXxx` hook wraps it), you MAY create the hook if it is <100 lines — this is a scaffold gap, not a backend gap.
+**CRITICAL BOUNDARY**: If a component needs a backend **mutation/query/action function** that doesn't exist in the backend directory, Do not create it — report as Category C. Missing backend functions indicate Stage 3 or Stage 5 incompleteness. However, if the backend function EXISTS but a frontend **hook wrapper** is missing (the function is in the backend but no `useXxx` hook wraps it), you MAY create the hook if it is <100 lines — this is a scaffold gap, not a backend gap.
 
 ## How to Fix Each Pattern
 
@@ -404,7 +404,7 @@ YOUR MANDATE: Replace every stub with a FUNCTIONAL implementation. You are NOT w
 - If the component duplicates another: DELETE and update imports.
 
 ### Duplication Pattern (inline page UI + orphan component)
-This is NOT the same as a stub. The component file has a real (or scaffold) body AND the page has inline UI for the same purpose. Fix strategy:
+This is not the same as a stub. The component file has a real (or scaffold) body AND the page has inline UI for the same purpose. Fix strategy:
 1. Read both the page file and the orphan component file.
 2. Determine which has the BETTER implementation (usually the page's inline version, since Stage 5 wrote it).
 3. Move the better implementation INTO the scaffold component file (preserving the component's file location and exports).
@@ -425,13 +425,13 @@ Pages with 200+ lines that contain inline hooks, state, and JSX should be decomp
 - Follow the existing key naming convention.
 
 ## VERIFICATION (non-negotiable)
-After ALL fixes are applied, if any test fails, diagnose each failure: (a) if caused by a fix you just applied (new behavior replacing a stub), update the test to match the new behavior; (b) if a genuine regression (a fix broke unrelated code), escalate to the lead immediately with details. Do NOT skip or delete failing tests.
+After ALL fixes are applied, if any test fails, diagnose each failure: (a) if caused by a fix you just applied (new behavior replacing a stub), update the test to match the new behavior; (b) if a genuine regression (a fix broke unrelated code), escalate to the lead immediately with details. Do not skip or delete failing tests.
 
 Set `FRONTEND_DIR` to your frontend root (e.g., `FRONTEND_DIR=src/`) and `BACKEND_DIR` to your actual backend directory path (e.g., `BACKEND_DIR=convex/`) before running these commands.
 
 1. Run the full stub scan again:
    grep -rn "implementation pending\|pending feature build\|⚠️ STUB\|TODO \[Stage 5\]\|Coming soon\|Not yet implemented\|PLACEHOLDER" "$FRONTEND_DIR" "$BACKEND_DIR" --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" | grep -v 'placeholder="\|Placeholder='
-   MUST return zero results.
+   must return zero results.
 2. Run typecheck: e.g., bun run typecheck — zero errors (adapt to your package manager per CLAUDE.md).
 3. Run lint: e.g., bun run lint — zero errors (adapt to your package manager per CLAUDE.md).
 4. Run frontend tests: e.g., bun run test -- src/ — all pass (adapt to your package manager per CLAUDE.md).
@@ -514,7 +514,7 @@ Your tasks:
 
 3. Run a FINAL stub scan across the entire project (set `FRONTEND_DIR` to your frontend root, e.g., `FRONTEND_DIR=src/`, and `BACKEND_DIR` to your actual backend directory path, e.g., `BACKEND_DIR=convex/`, before running):
    grep -rn "implementation pending\|pending feature build\|⚠️ STUB\|TODO \[Stage 5\]\|Coming soon\|Not yet implemented\|PLACEHOLDER" "$FRONTEND_DIR" "$BACKEND_DIR" --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" | grep -v 'placeholder="\|Placeholder='
-   This MUST return zero results. All features in `./plancasting/prd/02-feature-map-and-prioritization.md` are in current build scope per the Transmute full-build approach. The only acceptable stubs are in utility or helper files that are not directly user-facing (e.g., placeholder analytics wrappers, optional integration hooks).
+   This must return zero results. All features in `./plancasting/prd/02-feature-map-and-prioritization.md` are in current build scope per the Transmute full-build approach. The only acceptable stubs are in utility or helper files that are not directly user-facing (e.g., placeholder analytics wrappers, optional integration hooks).
 
 4. Run an orphan component scan and report any remaining orphans.
    This scan may produce false positives for dynamically imported components (`React.lazy`, `next/dynamic`). Before deleting an apparent orphan, also check for `dynamic(() => import(` and `lazy(() => import(` patterns referencing the component.
@@ -522,7 +522,7 @@ Your tasks:
 5. Spot-check ALL pages that had Category B fixes applied, plus additional random pages. Coverage by feature count: <10 features → spot-check all pages; 10–30 features → spot-check 50% (every 2nd page alphabetically) plus all Category B pages; >30 features → spot-check 30% (every 3rd page alphabetically) plus all Category B pages. For each page, verify:
    a. Open the page source file (e.g., `src/app/.../page.tsx`)
    b. Verify it has component imports from `[components-dir]` (not all UI inline)
-   c. Verify it does NOT have raw `useState()` hooks for data that should be server-derived
+   c. Verify it does not have raw `useState()` hooks for data that should be server-derived
    d. Verify the page JSX renders the imported components (not commented out)
    e. Verify sibling files `loading.tsx` and `error.tsx` exist (if applicable per tech-stack.md)
    f. Run the app and navigate to the page — verify it loads without blank screens or console errors
@@ -541,7 +541,7 @@ When done, message the lead using this exact format:
 
 ### Phase 3: Coordination
 
-**Mandatory file conflict prevention**: Before spawning, assign mutually exclusive file sets to Teammates 1 and 2. If shared files exist (type definitions, shared utilities, barrel exports), assign them to Teammate 1 (frontend) exclusively — Teammate 2 (backend) MUST NOT modify frontend-owned files. If Teammate 2 discovers a type mismatch in a shared file, report it to the lead for manual fix after Teammate 1 completes. For files in the backend directory, Teammate 2 has exclusive ownership. For shared files, Teammate 2 should read the latest version after Teammate 1 completes.
+**Mandatory file conflict prevention**: Before spawning, assign mutually exclusive file sets to Teammates 1 and 2. If shared files exist (type definitions, shared utilities, barrel exports), assign them to Teammate 1 (frontend) exclusively — Teammate 2 (backend) must not modify frontend-owned files. If Teammate 2 discovers a type mismatch in a shared file, report it to the lead for manual fix after Teammate 1 completes. For files in the backend directory, Teammate 2 has exclusive ownership. For shared files, Teammate 2 should read the latest version after Teammate 1 completes.
 
 While teammates work (this phase runs concurrently with Phase 2):
 1. After each teammate completes, review their completion message for Category C escalations — if found, document them in `plancasting/_progress.md`. After both Teammates 1 and 2 report completion, spawn Teammate 3 (e2e-verification).
@@ -609,7 +609,7 @@ After all teammates complete:
    ## Per-Feature 5B History
    | Feature ID | Run 1 | Run 2 | Run 3 | Escalation |
    |---|---|---|---|---|
-   [Track per-feature outcomes across 5B runs — 3 consecutive FAIL-RETRY for a single feature triggers automatic FAIL-ESCALATE. IMPORTANT: When updating this report, ALWAYS preserve the Per-Feature 5B History table from the previous run. Append new run results — do not overwrite. This table persists state across sessions.]
+   [Track per-feature outcomes across 5B runs — 3 consecutive FAIL-RETRY for a single feature triggers automatic FAIL-ESCALATE. When updating this report, always preserve the Per-Feature 5B History table from the previous run. Append new run results — do not overwrite. This table persists state across sessions.]
 
    ## Issues by Feature
    [Detailed breakdown per feature]
@@ -654,7 +654,7 @@ After the gate decision but before the final commit, extract implementation less
    - **MEDIUM** (single feature but generalizable): Append the candidate to `plancasting/_rules-candidates.md`.
    - **LOW** (edge case or uncertain): Append the candidate to `plancasting/_rules-candidates.md`.
 
-4. **Update ONLY CLAUDE.md Part 2** Path-Scoped Rules table with updated rule counts if any HIGH confidence rules were added. Do NOT modify Part 1.
+4. **Update ONLY CLAUDE.md Part 2** Path-Scoped Rules table with updated rule counts if any HIGH confidence rules were added. Do not modify Part 1.
 
 5. **Include in commit**: Stage the updated `.claude/rules/` files and `plancasting/_rules-candidates.md` in the audit commit.
 
@@ -666,18 +666,18 @@ After the gate decision but before the final commit, extract implementation less
 
 ## Critical Rules
 
-1. NEVER skip the automated stub scan. It is the objective foundation of this audit. The scan catches explicit text-pattern stubs (high confidence). THEN manually review components with fewer than 20 lines by cross-referencing the PRD screen specification: a thin component is a stub only if it implements fewer states/interactions than the spec requires. A legitimately simple read-only widget may be under 20 lines and NOT a stub. Also check components that import hooks but don't use their return values.
-2. NEVER mark a stub as "acceptable" — stubs are ALWAYS bugs at this stage. The only acceptable "Coming soon" is for features explicitly marked as future scope in the PRD (not in the current feature map).
-3. NEVER delete test files to make the suite pass. Fix the code, not the tests.
-4. ALWAYS read the feature brief and PRD screen spec before fixing a component — understand what it SHOULD do before writing code.
-5. ALWAYS follow CLAUDE.md conventions when writing fix code — this is not a shortcut stage.
-6. ALWAYS run the full verification suite before declaring the audit complete.
+1. never skip the automated stub scan. It is the objective foundation of this audit. The scan catches explicit text-pattern stubs (high confidence). THEN manually review components with fewer than 20 lines by cross-referencing the PRD screen specification: a thin component is a stub only if it implements fewer states/interactions than the spec requires. A legitimately simple read-only widget may be under 20 lines and NOT a stub. Also check components that import hooks but don't use their return values.
+2. never mark a stub as "acceptable" — stubs are always bugs at this stage. The only acceptable "Coming soon" is for features explicitly marked as future scope in the PRD (not in the current feature map).
+3. never delete test files to make the suite pass. Fix the code, not the tests.
+4. always read the feature brief and PRD screen spec before fixing a component — understand what it SHOULD do before writing code.
+5. always follow CLAUDE.md conventions when writing fix code — this is not a shortcut stage.
+6. always run the full verification suite before declaring the audit complete.
 7. Frontend fixes are the PRIMARY focus. Allocate 70% of effort to frontend-stub-fixer.
-8. If a component fix requires backend changes that don't exist, this is a Category C issue — do NOT create backend stubs to unblock frontend.
-9. The goal is NOT perfection — it is completeness. Every feature should be FUNCTIONAL. Polish happens in Stage 6.
+8. If a component fix requires backend changes that don't exist, this is a Category C issue — do not create backend stubs to unblock frontend.
+9. The goal is not perfection — it is completeness. Every feature should be FUNCTIONAL. Polish happens in Stage 6.
 10. This stage should fix, not redesign. Maintain the architectural decisions made in Stage 5.
 
-Blocking items (1–6) MUST pass for ✅ Done status. Secondary items (7, 9) — if failed, the feature is still ✅ Done but failures are documented in the audit report for future attention. Session recovery items (8, 10) MUST be recorded for future session continuity.
+Blocking items (1–6) must pass for ✅ Done status. Secondary items (7, 9) — if failed, the feature is still ✅ Done but failures are documented in the audit report for future attention. Session recovery items (8, 10) must be recorded for future session continuity.
 
-**5B Quality Standard**: 5B fixes should bring components from 'scaffold' to 'working' — happy path complete, loading/error states present, no obvious bugs. This is NOT production polish (Stage 6P handles that). The bar is: 'does this work as described in the PRD?'
+**5B Quality Standard**: 5B fixes should bring components from 'scaffold' to 'working' — happy path complete, loading/error states present, no obvious bugs. This is not production polish (Stage 6P handles that). The bar is: 'does this work as described in the PRD?'
 ````

@@ -20,13 +20,13 @@ The Feature Orchestrator implements error handling per-feature, but certain fail
 
 Based on observed resilience hardening outcomes:
 
-1. **Retry on non-idempotent operations**: Agent adds retry logic to mutations that create records, causing duplicate data. ALWAYS verify idempotency before adding retries.
-2. **Permanently open circuit breakers**: Agent adds circuit breakers that never reset, permanently disabling a feature after a transient outage. ALWAYS include a reset mechanism (time-based or health-check-based).
-3. **Error boundaries that lose state**: Agent wraps forms in error boundaries, but when the boundary catches an error, the user loses all entered data. ALWAYS preserve user input across error recovery.
+1. **Retry on non-idempotent operations**: Agent adds retry logic to mutations that create records, causing duplicate data. always verify idempotency before adding retries.
+2. **Permanently open circuit breakers**: Agent adds circuit breakers that never reset, permanently disabling a feature after a transient outage. always include a reset mechanism (time-based or health-check-based).
+3. **Error boundaries that lose state**: Agent wraps forms in error boundaries, but when the boundary catches an error, the user loses all entered data. always preserve user input across error recovery.
 4. **Over-aggressive timeouts**: Setting 3-second timeouts on operations that legitimately take 10+ seconds (file uploads, AI pipeline steps). Match timeouts to actual operation characteristics.
 5. **Silent error swallowing**: Agent catches errors but logs them silently without user notification. Every caught error must either be re-thrown, logged with context, or communicated to the user.
 6. **Graceful degradation that hides features**: Instead of showing a degraded experience, agent hides the entire feature. Show degraded state with an explanation, not a blank space.
-7. **Over-broad idempotency keys**: Teammate adds idempotency keys to operations that shouldn't be retried (e.g., one-time deletions, irreversible actions like sending notifications). ALWAYS distinguish between "safe to retry" (create/update mutations) and "unsafe to retry" (delete, decrement, send). Only add idempotency keys to create/update mutations.
+7. **Over-broad idempotency keys**: Teammate adds idempotency keys to operations that shouldn't be retried (e.g., one-time deletions, irreversible actions like sending notifications). always distinguish between "safe to retry" (create/update mutations) and "unsafe to retry" (delete, decrement, send). Only add idempotency keys to create/update mutations.
 
 ## Rate Limiting Scope Boundary (6A ↔ 6G)
 
@@ -52,12 +52,12 @@ Stage 6A implements rate limiting for **AUTH endpoints** (login, signup, passwor
 
 ## Prerequisites
 
-**Prerequisite**: Stage 6E MUST have completed before 6G starts — 6G depends on refactored error handling patterns from 6E. Do NOT run 6E and 6G in parallel.
+**Prerequisite**: Stage 6E must have completed before 6G starts — 6G depends on refactored error handling patterns from 6E. Do not run 6E and 6G in parallel.
 
 This stage runs AFTER Stage 6E (Code Refactoring) — per CLAUDE.md Stage 6 ordering, resilience hardening should follow refactoring for cleaner error handling patterns. Before beginning:
 1. Verify `./plancasting/_audits/implementation-completeness/report.md` exists and shows a PASS or CONDITIONAL PASS gate decision. If the file does not exist, STOP: "Stage 5B report not found — run Stage 5B before starting Stage 6 audits. Do not harden code with unverified implementation completeness."
-2. If 5B shows FAIL (FAIL-RETRY or FAIL-ESCALATE — see execution-guide.md § "Gate Decision Outcomes" for definitions), STOP — re-run Stage 5/5B until PASS or CONDITIONAL PASS before resilience hardening. If CONDITIONAL PASS, review the documented Category C issues — proceed with awareness of known gaps. Do NOT harden features with Category C status — their implementation may change during re-implementation.
-3. Verify `./plancasting/_audits/refactoring/report.md` exists (Stage 6E output). If missing, STOP: "Stage 6E (Code Refactoring) has not been completed. Stage 6G MUST run after 6E per CLAUDE.md mandatory ordering. Run 6E first, then restart 6G." If it exists, read it — especially the "Extracted Error Handling Patterns for Stage 6G" section (if present) — to reuse extracted error handling utilities rather than creating new ones.
+2. If 5B shows FAIL (FAIL-RETRY or FAIL-ESCALATE — see execution-guide.md § "Gate Decision Outcomes" for definitions), STOP — re-run Stage 5/5B until PASS or CONDITIONAL PASS before resilience hardening. If CONDITIONAL PASS, review the documented Category C issues — proceed with awareness of known gaps. Do not harden features with Category C status — their implementation may change during re-implementation.
+3. Verify `./plancasting/_audits/refactoring/report.md` exists (Stage 6E output). If missing, STOP: "Stage 6E (Code Refactoring) has not been completed. Stage 6G must run after 6E per CLAUDE.md mandatory ordering. Run 6E first, then restart 6G." If it exists, read it — especially the "Extracted Error Handling Patterns for Stage 6G" section (if present) — to reuse extracted error handling utilities rather than creating new ones.
 4. Verify `./plancasting/_audits/performance/report.md` exists (Stage 6C output — per CLAUDE.md ordering, 6C runs before 6G). If missing, WARN and use generic timeout baselines from the relevant BRD file. Search with `grep -rl 'availability\|reliability\|non-functional' ./plancasting/brd/` to find the relevant BRD file. Common location: `08-non-functional-requirements.md` (file number may vary by project).
 5. Read `./CLAUDE.md` and `./plancasting/tech-stack.md` for project conventions
 6. Read `./plancasting/_audits/security/report.md` — 6A SHOULD be complete before 6G starts (6A runs in parallel with 6B/6C, all before 6E/6F/6G). Include the 6A report in all teammate spawn prompts so teammates can verify rate limiting scope boundaries and avoid duplicating 6A's auth-endpoint rate limiting. If the report is missing, WARN: "Stage 6A not completed — rate limiting scope boundaries cannot be verified. Proceed with caution: Teammate 1 should implement rate limiting for data-mutation endpoints only, assuming 6A will handle auth endpoints." Include this warning in the final report.
@@ -69,7 +69,7 @@ This stage runs AFTER Stage 6E (Code Refactoring) — per CLAUDE.md Stage 6 orde
 - **PRD**: `./plancasting/prd/` (especially interaction patterns, non-functional specs)
 - **BRD**: `./plancasting/brd/` (availability and reliability requirements)
 - **Project Rules**: `./CLAUDE.md`
-- **Performance Report**: `./plancasting/_audits/performance/report.md` (Stage 6C output — MUST exist before 6G starts, since 6C runs in the parallel group before 6G). Extract measured latencies for each operation type to calibrate timeout values and retry configurations. If this file does not exist, WARN: "Stage 6C (Performance Optimization) has not completed. Timeout values will use generic baselines instead of measured latencies — recalibrate after 6C completes."
+- **Performance Report**: `./plancasting/_audits/performance/report.md` (Stage 6C output — must exist before 6G starts, since 6C runs in the parallel group before 6G). Extract measured latencies for each operation type to calibrate timeout values and retry configurations. If this file does not exist, WARN: "Stage 6C (Performance Optimization) has not completed. Timeout values will use generic baselines instead of measured latencies — recalibrate after 6C completes."
 
 **Language**: Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate all reports and user-facing output in the specified language. Code, technical identifiers, and file names remain in English.
 
@@ -83,7 +83,7 @@ The examples and file paths in this prompt use Convex + Next.js as the reference
 - `useQuery`/`useMutation` → your data fetching hooks
 - `npx convex dev` → your backend dev command
 - `src/app/` → your frontend pages directory
-- Auto-generated directories: `convex/_generated/` → adapt to your backend's equivalent (e.g., `prisma/generated/`, `.next/`, `supabase/types/`). NEVER edit files in auto-generated directories.
+- Auto-generated directories: `convex/_generated/` → adapt to your backend's equivalent (e.g., `prisma/generated/`, `.next/`, `supabase/types/`). never edit files in auto-generated directories.
 Always read `CLAUDE.md` Part 2 (Backend Rules, Frontend Rules) for your project's actual conventions.
 
 **Package Manager**: Commands in this prompt use `bun run` as the default. Replace with your project's package manager as specified in `CLAUDE.md` (e.g., `npm run`, `pnpm run`, `yarn`).
@@ -104,7 +104,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 1. Ensure output directory exists: `mkdir -p ./plancasting/_audits/resilience`
 2. Read `./CLAUDE.md`, `./plancasting/tech-stack.md`, and `./plancasting/prd/15-non-functional-specifications.md`. Search with `grep -rl 'availability\|reliability\|non-functional' ./plancasting/brd/` to find the relevant BRD file. Common location: `08-non-functional-requirements.md` (file number may vary by project). Read the BRD file for availability and reliability requirements. Read `./plancasting/_audits/performance/report.md` if it exists — use identified performance characteristics to inform timeout values and retry configurations.
-3. **Rate limiting scope verification**: If `./plancasting/_audits/security/report.md` exists (Stage 6A output), read its rate limiting section and create a scope boundary table in `./plancasting/_audits/resilience/plan.md` listing: (a) all endpoints already rate-limited by 6A (auth-tier), (b) all data-mutation endpoints where 6G will add rate limiting. **Additionally, perform an independent scan** of all data-mutation endpoints in the codebase to verify 6A identified all gaps — do NOT rely solely on 6A's flagged gaps. If the independent scan finds endpoints 6A missed, add them to the resilience plan. Flag any overlaps or gaps for resolution before spawning teammates.
+3. **Rate limiting scope verification**: If `./plancasting/_audits/security/report.md` exists (Stage 6A output), read its rate limiting section and create a scope boundary table in `./plancasting/_audits/resilience/plan.md` listing: (a) all endpoints already rate-limited by 6A (auth-tier), (b) all data-mutation endpoints where 6G will add rate limiting. **Additionally, perform an independent scan** of all data-mutation endpoints in the codebase to verify 6A identified all gaps — do not rely solely on 6A's flagged gaps. If the independent scan finds endpoints 6A missed, add them to the resilience plan. Flag any overlaps or gaps for resolution before spawning teammates.
 4. Map all external dependencies:
    - Third-party APIs called by your backend actions/functions (e.g., Convex actions, API routes, serverless functions)
    - Auth provider
@@ -120,7 +120,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 ### Phase 2: Spawn Hardening Teammates
 
 **Shared Context for All Teammates — Idempotency Classification**:
-When evaluating mutations, classify them as either truly idempotent (safe to retry) or subtly non-idempotent (unsafe). A mutation that increments a counter, appends to a log, or sends a notification is NOT idempotent even if it uses a 'set' operation — the side effect accumulates on retry. All teammates must apply this classification when adding retry logic or error recovery to mutations.
+When evaluating mutations, classify them as either truly idempotent (safe to retry) or subtly non-idempotent (unsafe). A mutation that increments a counter, appends to a log, or sends a notification is not idempotent even if it uses a 'set' operation — the side effect accumulates on retry. All teammates must apply this classification when adding retry logic or error recovery to mutations.
 
 Spawn the following 3 teammates.
 
@@ -147,14 +147,14 @@ Your tasks:
    For each external call:
    - Verify there is a try/catch with appropriate error handling.
    - Verify timeout is configured (not waiting indefinitely). **Timeout baselines**: fast API calls: 3–5s; file operations: 30s; AI model calls: 60–120s; long-running workflows: per business SLA. If `./plancasting/_audits/performance/report.md` exists, extract measured latencies for each operation type and use measured value + 50% buffer as the timeout. If `./plancasting/_audits/performance/report.md` does not exist (6C hasn't completed yet), use these generic baselines. After 6C completes, update timeout values based on measured p95 latencies from the performance report. Document this in the resilience report and re-visit timeout configuration after 6C completes if actual measured latencies differ significantly.
-   - **For external API calls**: Implement retry logic with exponential backoff for transient failures (network errors, 5xx responses, and 429 rate limit responses). Configure: maximum 3 retries, delay = min(2^attempt × 1000ms, 30000ms) + random(0, 1000ms) jitter, where attempt starts at 1 — i.e., retry 1: ~2-3s, retry 2: ~4-5s, retry 3: ~8-9s, then stop. For 429 responses, honor the `Retry-After` header when present (parse both seconds-value and HTTP-date formats per RFC 7231) (capped at 30 seconds).
-   - **For backend mutations**: Before adding retry logic, verify idempotency first (see Idempotency Note below for definitions and examples). Only add automatic retries for idempotent mutations; non-idempotent mutations MUST surface errors to the user with a manual retry option instead.
+   - **For external API calls**: Implement retry logic with exponential backoff for transient failures (network errors, 5xx responses, and 429 rate limit responses). Configure: maximum 3 retries, delay = min(2^attempt × 1000ms, 30000ms) + random(0, 1000ms) jitter, where attempt starts at 1 — i.e., retry 1: ~2-3s, retry 2: ~4-5s, retry 3: ~8-9s, then stop. For 429 responses, honor the `Retry-After` header when present (parse both seconds-value and HTTP-date formats per RFC 7231) (capped at 30 seconds). **LLM calls**: a status-code retry policy is not enough — a Claude safety-classifier refusal is HTTP 200 with `stop_reason: "refusal"` and empty or partial `content`. Branch on `stop_reason` before parsing; a refusal is not retried on the same model (use server-side `fallbacks: "default"` or a graceful error), and a 400 is a request-shape bug, not a transient failure. See `.claude/rules/ai-provider.md` if present.
+   - **For backend mutations**: Before adding retry logic, verify idempotency first (see Idempotency Note below for definitions and examples). Only add automatic retries for idempotent mutations; non-idempotent mutations must surface errors to the user with a manual retry option instead.
    - **Circuit breaker decision** (evaluate BEFORE implementing): In serverless environments (Convex actions, Lambda, Edge Functions), there is no persistent in-memory state between invocations. **Recommendation for most serverless products**: Use retry-with-exponential-backoff alone (option b below) — circuit breakers add complexity and state management overhead that rarely pays off in serverless architectures. Only implement full circuit breakers if the product uses long-running servers with persistent state, or if a specific external service has frequent, prolonged outages (>5 minutes).
      - **(a) Full circuit breaker** (long-running servers or frequent outages): States: CLOSED (normal) → OPEN (after 5 consecutive failures within a 5-minute sliding window, return cached/fallback response for 60-second cooldown) → HALF-OPEN (after cooldown, allow one probe request — success → CLOSED, failure → OPEN). In serverless, persist state via database table or key-value store (e.g., Convex table, Redis).
      - **(b) Retry-with-backoff only** (recommended default for serverless): The exponential backoff configured above provides sufficient resilience. No additional circuit state needed.
      - **(c) Fail fast** (non-critical features): Skip both circuit breakers and retries, surface errors to the user immediately. Choose when data integrity outweighs availability.
      Document the chosen approach for each external service.
-   - Note: Circuit breakers apply differently by operation type. For QUERY paths: return cached or fallback data during cooldown. For ACTION/mutation paths: return a graceful error message (do NOT return cached data for mutations, as this would mask write failures). Circuit breakers are most effective on read-heavy paths with external dependencies.
+   - Note: Circuit breakers apply differently by operation type. For QUERY paths: return cached or fallback data during cooldown. For ACTION/mutation paths: return a graceful error message (do not return cached data for mutations, as this would mask write failures). Circuit breakers are most effective on read-heavy paths with external dependencies.
    - Verify the user receives a meaningful error message, not a raw exception. Meaningful = (1) describes what went wrong in user terms (not technical terms), (2) suggests what the user can do (e.g., 'The server is temporarily unavailable. Please try again in a few moments.'), not a raw stack trace or exception name.
    - Verify the system degrades gracefully (e.g., if analytics service is down, the core feature still works).
 
@@ -198,9 +198,9 @@ If a hardening fix changes the API contract (e.g., adding required fields, chang
 **Making non-idempotent mutations safe for retry**: If you find a non-idempotent INSERT mutation that should be retryable: (1) Identify a natural deduplication key (e.g., userId + projectName + timestamp for project creation), (2) Add an `idempotencyKey` parameter to the mutation, (3) Before inserting, check if a record with the same key already exists — if so, return the existing record instead of creating a duplicate, (4) Document the idempotency key composition in a code comment.
 Example idempotency key: `const idempotencyKey = crypto.createHash('sha256').update([userId, projectId, taskTitle, timestamp].join('-')).digest('hex')` — reuse this key if retrying the same operation.
 
-If a mutation cannot be made idempotent (no natural deduplication key exists), do NOT add automatic retry — instead, surface the error to the user with a manual retry option. For non-idempotent mutations inside multi-step operations, ensure the error is: (1) caught and logged with context, (2) communicated to the user with a clear description, (3) either rolled back or the state is marked as "needs manual recovery" with a retry button.
+If a mutation cannot be made idempotent (no natural deduplication key exists), do not add automatic retry — instead, surface the error to the user with a manual retry option. For non-idempotent mutations inside multi-step operations, ensure the error is: (1) caught and logged with context, (2) communicated to the user with a clear description, (3) either rolled back or the state is marked as "needs manual recovery" with a retry button.
 
-If you encounter a resilience issue that requires architectural changes beyond this stage's scope, do NOT attempt architectural redesigns. Document it in `plancasting/_audits/resilience/unfixable-violations-backend.md` and continue with other tasks.
+If you encounter a resilience issue that requires architectural changes beyond this stage's scope, do not attempt architectural redesigns. Document it in `plancasting/_audits/resilience/unfixable-violations-backend.md` and continue with other tasks.
 
 When done, message the lead with: external calls hardened, multi-step operations secured, validation improvements, rate limits added, API contract changes (if any, with before/after).
 ~~~
@@ -245,7 +245,7 @@ Your tasks:
    - Verify the UI doesn't flash (show optimistic state → rollback → show error).
    Verify rollback by: (1) unit test the hook's rollback logic with error scenarios, (2) E2E test a complete optimistic update + rollback flow, (3) manually verify the UI doesn't visually flash (show optimistic state → rollback → show error instantly without layout shift).
 
-If you encounter a resilience issue that requires architectural changes beyond this stage's scope, do NOT attempt architectural redesigns. Document it in `plancasting/_audits/resilience/unfixable-violations-frontend.md` and continue with other tasks.
+If you encounter a resilience issue that requires architectural changes beyond this stage's scope, do not attempt architectural redesigns. Document it in `plancasting/_audits/resilience/unfixable-violations-frontend.md` and continue with other tasks.
 
 When done, message the lead with: error boundaries added/fixed, network failure UX improvements, timeout handling added, reconnection handling verified.
 ~~~
@@ -292,14 +292,14 @@ Your tasks:
    - Add tests to `e2e/resilience/` directory. If the E2E test directory does not exist, create `e2e/resilience/` and follow the Playwright test conventions from `playwright.config.ts`.
    - Focus on scenarios that would cause data loss or user confusion if not handled.
 
-If you encounter a resilience issue that requires architectural changes beyond this stage's scope, do NOT attempt architectural redesigns. Document it in `plancasting/_audits/resilience/unfixable-violations-edge-cases.md` and continue with other tasks.
+If you encounter a resilience issue that requires architectural changes beyond this stage's scope, do not attempt architectural redesigns. Document it in `plancasting/_audits/resilience/unfixable-violations-edge-cases.md` and continue with other tasks.
 
 When done, message the lead with: concurrent usage scenarios handled, boundary conditions fixed, auth edge cases fixed, navigation edge cases fixed, E2E tests added.
 ~~~
 
 ### Unfixable Violation Protocol
 
-If a resilience issue requires architectural changes beyond this stage's scope (e.g., redesigning the data flow, adding a message queue), document it in the teammate's designated unfixable-violations file (`unfixable-violations-backend.md`, `unfixable-violations-frontend.md`, or `unfixable-violations-edge-cases.md` in `plancasting/_audits/resilience/`) with the issue description, root cause, and recommended architectural change. Do NOT attempt architectural redesigns during this stage. The lead merges these files in Phase 3.
+If a resilience issue requires architectural changes beyond this stage's scope (e.g., redesigning the data flow, adding a message queue), document it in the teammate's designated unfixable-violations file (`unfixable-violations-backend.md`, `unfixable-violations-frontend.md`, or `unfixable-violations-edge-cases.md` in `plancasting/_audits/resilience/`) with the issue description, root cause, and recommended architectural change. Do not attempt architectural redesigns during this stage. The lead merges these files in Phase 3.
 
 ### Phase 3: Post-Completion Review & Reconciliation
 
@@ -355,15 +355,15 @@ After all teammates complete:
 
 ## Critical Rules
 
-1. NEVER add retry logic to mutations that are not idempotent — fix idempotency first.
-2. NEVER swallow errors silently — every caught error must be re-thrown, logged, or communicated to the user.
-3. NEVER add circuit breakers without a corresponding reset mechanism (time-based or health-check-based).
+1. never add retry logic to mutations that are not idempotent — fix idempotency first.
+2. never swallow errors silently — every caught error must be re-thrown, logged, or communicated to the user.
+3. never add circuit breakers without a corresponding reset mechanism (time-based or health-check-based).
 4. Retry with exponential backoff (see Teammate 1 instructions for the canonical formula). Maximum retry count: 3. Maximum delay cap: 30s. Always include jitter to prevent synchronized retries from multiple clients.
-5. ALWAYS preserve user input across error recovery (forms, editors, multi-step wizards).
-6. ALWAYS run the full test suite after resilience changes.
+5. always preserve user input across error recovery (forms, editors, multi-step wizards).
+6. always run the full test suite after resilience changes.
 7. Match timeout values to actual operation characteristics — file uploads and AI operations need longer timeouts.
 8. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).
 9. Reference Stage 5B output to avoid hardening incomplete features.
 10. If using long-running workflows or step functions (e.g., Convex Workflows, AWS Step Functions, Temporal, Inngest): verify workflow step failures are handled with proper retry/compensation logic and that event-wait calls (e.g., `awaitEvent`) have timeout handling.
-11. Do NOT implement rate limiting on authentication endpoints (login, signup, password reset, MFA, session management) — these are Stage 6A's scope. Stage 6G handles DATA-MUTATION endpoints only. See Rate Limiting Scope Boundary section above.
+11. Do not implement rate limiting on authentication endpoints (login, signup, password reset, MFA, session management) — these are Stage 6A's scope. Stage 6G handles DATA-MUTATION endpoints only. See Rate Limiting Scope Boundary section above.
 ````

@@ -7,12 +7,14 @@ description: >-
   "check if production is working", "run post-deployment verification",
   "run stage 7V", or "verify the deployed application",
   or when the transmute-pipeline agent reaches Stage 7V of the pipeline.
-version: 1.1.0
+metadata:
+  version: 1.1.0
+effort: medium
 ---
 
 # Production Smoke Verification — Stage 7V
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/smoke-detailed-guide.md` for the full verification checklist, report template, known failure patterns, and rollback guidance. Read `${CLAUDE_SKILL_ROOT}/references/feature-scenario-generation.md` for the scenario generation algorithm.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/smoke-detailed-guide.md` for the full verification checklist, report template, known failure patterns, and rollback guidance. Read `${CLAUDE_SKILL_DIR}/references/feature-scenario-generation.md` for the scenario generation algorithm.
 
 ## Prerequisites
 
@@ -31,7 +33,7 @@ Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/smoke-detailed-guide
 ## Inputs
 
 - **Production URL**: The live application URL
-- **Scenario Generation Guide**: `${CLAUDE_SKILL_ROOT}/references/feature-scenario-generation.md` (if not available, use PRD files directly)
+- **Scenario Generation Guide**: `${CLAUDE_SKILL_DIR}/references/feature-scenario-generation.md` (if not available, use PRD files directly)
 - **6V Scenario Matrix** (if exists): `./plancasting/_audits/visual-verification/feature-scenario-matrix.md`
 - **6V Report**: `./plancasting/_audits/visual-verification/report.md`
 - **6R Report** (if exists): `./plancasting/_audits/runtime-remediation/report.md`
@@ -84,7 +86,7 @@ Scope: SMOKE — P0+P1 features only, max 15 scenarios.
 
 10. **Performance Spot-Check**: Measure TTFB and LCP for landing page and dashboard. Flag if >2x slower than dev.
 
-11. **Third-Party Integration Verification**: Verify auth, database, payments, email, analytics, error monitoring, webhooks, real-time connections. **CRITICAL**: Verify AI model IDs first (grep codebase, send minimal test request). Run external API health checks with minimal requests (cost warning: real API calls against production keys). Verify OAuth integration health for each connected service (check redirect_uri matches, client IDs, provider app registration).
+11. **Third-Party Integration Verification**: Verify auth, database, payments, email, analytics, error monitoring, webhooks, real-time connections. Verify AI model IDs first (grep codebase, send minimal test request). Run external API health checks with minimal requests (cost warning: real API calls against production keys). Verify OAuth integration health for each connected service (check redirect_uri matches, client IDs, provider app registration).
 
 ## Output
 
@@ -107,23 +109,23 @@ Generate `./plancasting/_audits/production-smoke/report.md` following the report
 | Auth completely broken (login 500s) | Rollback deployment immediately |
 | Core data query empty (DB inaccessible) | Check backend deployment status; rollback if needed |
 | SSR hydration errors on landing page | Check Tailwind CSS purging; hotfix if CSS issue |
-| 3rd-party integration failure | Do NOT rollback; escalate to operator to verify API keys |
+| 3rd-party integration failure | Do not rollback; escalate to operator to verify API keys |
 
 ## Critical Rules
 
-1. ALWAYS use the PRODUCTION URL -- never test against localhost.
-2. NEVER modify production data beyond test accounts.
-3. NEVER test payment flows with real payment methods.
+1. always use the PRODUCTION URL -- never test against localhost.
+2. never modify production data beyond test accounts.
+3. never test payment flows with real payment methods.
 4. Use identifiable test accounts (`smoke-test-*@domain`).
-5. If ANY critical flow fails, follow rollback guidance. Do NOT mark as "known issue for later."
+5. If ANY critical flow fails, follow rollback guidance. Do not mark as "known issue for later."
 6. Keep this stage FAST -- 25-45 minutes max.
-7. ALWAYS compare against Stage 6V results for deployment-specific regressions.
-7a. Flaky scenarios = FAIL in production. Do NOT mark as passing if it required a retry.
-8. ALWAYS clean up test accounts after verification.
-9. ALWAYS verify test user login works BEFORE authenticated page checks.
-10. ALWAYS test public utility routes (`/sitemap.xml`, `/robots.txt`, `/api/health`) WITHOUT authentication.
-11. ALWAYS verify 6R fixes BEFORE detailed feature/navigation checks if 6R report exists.
-12. ALWAYS test navigation at BOTH desktop and mobile viewports.
-13. ALWAYS check deployed commit hash against 6R remediation commit hash if 6R report exists.
+7. always compare against Stage 6V results for deployment-specific regressions.
+7a. Flaky scenarios = FAIL in production. Do not mark as passing if it required a retry.
+8. always clean up test accounts after verification.
+9. always verify test user login works BEFORE authenticated page checks.
+10. always test public utility routes (`/sitemap.xml`, `/robots.txt`, `/api/health`) WITHOUT authentication.
+11. always verify 6R fixes BEFORE detailed feature/navigation checks if 6R report exists.
+12. always test navigation at BOTH desktop and mobile viewports.
+13. always check deployed commit hash against 6R remediation commit hash if 6R report exists.
 14. Spot-check 6P/6P-R visual polish changes if visual polish report exists.
-15. NEVER modify application code, production configuration, or database records during this stage (except test account creation/cleanup).
+15. never modify application code, production configuration, or database records during this stage (except test account creation/cleanup).

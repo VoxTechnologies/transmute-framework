@@ -20,6 +20,7 @@ description: |
   <commentary>Test updates after runtime remediation — ensures fixes are covered by automated tests.</commentary>
   </example>
 model: inherit
+effort: high
 color: yellow
 tools:
   - Read
@@ -52,7 +53,7 @@ Before writing ANY test code, check for existing scaffold test files:
 
 1. Run `ls e2e/` to identify existing files for this feature.
 2. Check `plancasting/_scaffold-manifest.md` for E2E test scaffold mappings.
-3. If scaffold E2E files exist (from Stage 3 Teammate 5), implement inside them rather than creating new files. NEVER create duplicate files alongside scaffold files.
+3. If scaffold E2E files exist (from Stage 3 Teammate 5), implement inside them rather than creating new files. never create duplicate files alongside scaffold files.
 
 ## E2E Tests
 
@@ -101,7 +102,7 @@ Every test must contain real assertions — no `test.skip()` placeholders, no `e
 
 ## Completion Message
 
-When done, message the lead with:
+Before reporting, audit each claim against a tool result from this session: only report work you can point to evidence for (a file you wrote, a command you ran and its output). If something is not yet verified, say so explicitly rather than reporting it as done. When done, message the lead with:
 - **Files created/modified** (with full paths)
 - **Exported symbols** (test suite names, helper functions)
 - **Schema/data changes** (if any — e.g., test fixtures added)

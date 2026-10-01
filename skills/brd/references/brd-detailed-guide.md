@@ -19,13 +19,13 @@ Features explicitly labeled "out-of-scope" in the Business Plan are excluded. Al
 
 Based on observed Plan Cast outcomes, these are common BRD generation failures:
 
-1. **Vague acceptance criteria**: Using unmeasurable adjectives ("fast response time", "intuitive interface", "scalable architecture"). ALWAYS include specific metrics (e.g., "response time < 200ms", "task completion in < 3 clicks").
+1. **Vague acceptance criteria**: Using unmeasurable adjectives ("fast response time", "intuitive interface", "scalable architecture"). always include specific metrics (e.g., "response time < 200ms", "task completion in < 3 clicks").
 2. **Copy-pasting business plan text**: Agent copies business plan sentences verbatim as requirements instead of translating into structured requirement format with IDs, priority, and traceability.
 3. **MoSCoW inflation**: All requirements marked "Must Have" because the full-build approach is misinterpreted as "everything is critical." Maintain proper priority distribution — Must/Should/Could/Won't should reflect both criticality and implementation dependency order, ensuring reasonable distribution across tiers. In a full-build approach, all features are in-scope (will be built). However, MoSCoW reflects CRITICALITY AND DEPENDENCY ORDER, not inclusion/exclusion. A healthy distribution: Must 50–65%, Should 20–30%, Could 10–15%, Won't 0–5% (reserved for features explicitly considered and rejected — features NOT described in the Business Plan at all, e.g., features someone might assume exist but the Business Plan intentionally omits; never use Won't Have for Business Plan features marked as 'future' or 'phase 2' — in the full-build approach, those are still in-scope). Exception: Products with mandatory compliance requirements (regulated industries, accessibility-critical systems) may have higher Must Have (up to 70%). See prompt_validate_specs.md gate validation for acceptance thresholds during Stage 2B. Example: Authentication (Must Have) is more critical for day-one than advanced reporting (Could Have), even though both will be built.
-4. **Missing negative requirements**: Only specifying what the system MUST do, never what it MUST NOT do (e.g., "the system must NOT allow users to access other organizations' data").
+4. **Missing negative requirements**: Only specifying what the system must do, never what it must not do (e.g., "the system must not allow users to access other organizations' data").
 5. **Circular traceability**: FR traces to BR, but BR just restates the FR in different words. Each requirement level must add specificity.
 6. **NFRs without measurement methods**: Specifying "99.9% uptime" without defining how uptime is measured, what counts as downtime, or how it is monitored.
-7. **Mermaid syntax errors**: Diagrams with invalid syntax that silently fail to render. ALWAYS validate mermaid syntax before including. Common errors: (a) missing quotes around node labels containing special characters (`A[My Node]` not `A[My "Node"]`), (b) incorrect arrow syntax (`A --> B` not `A -> B` for flowcharts), (c) unclosed subgraph blocks, (d) using `→` Unicode arrow instead of `-->` ASCII arrow. Validate by checking that all opened blocks (`subgraph`, `loop`, `alt`) are closed, all node references are consistent, and arrow syntax matches the diagram type (flowchart: `-->`, sequence: `->>`, state: `-->`).
+7. **Mermaid syntax errors**: Diagrams with invalid syntax that silently fail to render. always validate mermaid syntax before including. Common errors: (a) missing quotes around node labels containing special characters (`A[My Node]` not `A[My "Node"]`), (b) incorrect arrow syntax (`A --> B` not `A -> B` for flowcharts), (c) unclosed subgraph blocks, (d) using `→` Unicode arrow instead of `-->` ASCII arrow. Validate by checking that all opened blocks (`subgraph`, `loop`, `alt`) are closed, all node references are consistent, and arrow syntax matches the diagram type (flowchart: `-->`, sequence: `->>`, state: `-->`).
 8. **Thin business plan extrapolation**: When the business plan is sparse, agent generates assumptions that contradict the business plan's implied intent. If 30% or more of total requirements across all categories must be assumed (not derived from the Business Plan), flag this as CRITICAL in the final summary and recommend the user review assumptions before proceeding to Stage 2.
 
 ## Input
@@ -121,7 +121,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 Spawn the following 5 teammates. If dependencies between teammates are identified during Phase 1 analysis, the lead MAY delay spawning dependent teammates until their prerequisite teammates complete. **Known dependency**: Teammate 3 (data-and-integration) depends on Teammate 2 (technical-infrastructure) for security requirements (SR-xxx) and data privacy classifications (PII categories, encryption requirements, data residency). Either spawn Teammate 3 after Teammate 2 completes, or include Teammate 2's security and compliance context in Teammate 3's spawn prompt.
 
-Each teammate's spawn prompt MUST include:
+Each teammate's spawn prompt must include:
 - The instruction: "Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate all BRD content and user-facing output in the specified language. Code, technical identifiers, and file names remain in English."
 - The instruction: "Read CLAUDE.md Part 1 (immutable rules) if it exists in the project root. Follow its conventions. Ignore Part 2 (project-specific configuration) — it contains implementation details that should not influence requirements definitions. Requirements are tech-neutral; tech stack adaptation happens in later stages."
 - The full content of `./plancasting/brd/_context.md` (copy the FULL TEXT inline into each spawn prompt — do not instruct teammates to read the file themselves, as parallel teammates may race on file reads)
@@ -184,7 +184,7 @@ Each teammate's spawn prompt MUST include:
 
 ### Token Budget Management
 
-Each spawned agent has an output token limit per response (see tech-stack.md § Model Specifications "Output token limit"). If a teammate's output is truncated, re-spawn it with a smaller scope. A single agent generating a large file (e.g., 07-functional-requirements.md with 200+ FRs) will hit this limit and fail. The team lead MUST proactively split heavy workloads BEFORE spawning agents. Note: the pipeline model's context window (see tech-stack.md § Model Specifications) means input context is NOT the bottleneck — the output token limit per agent response is the binding constraint.
+Each spawned agent has an output token limit per response (see tech-stack.md § Model Specifications "Output token limit"). If a teammate's output is truncated, re-spawn it with a smaller scope. A single agent generating a large file (e.g., 07-functional-requirements.md with 200+ FRs) will hit this limit and fail. The team lead must proactively split heavy workloads BEFORE spawning agents. Note: the pipeline model's context window (see tech-stack.md § Model Specifications) means input context is not the bottleneck — the output token limit per agent response is the binding constraint.
 
 #### Estimation Heuristics
 
@@ -237,16 +237,16 @@ If a teammate fails (crashes, times out, or produces truncated output):
 1. Check which files were successfully written to `./plancasting/brd/`.
 2. For missing files: re-spawn with the same context and file assignments.
 3. For truncated files: re-spawn, instructing the agent to complete from the last complete section.
-4. If a re-spawned teammate's output is still truncated after reducing scope, split the failing file's scope further into smaller chunks (one chunk per new agent), each with unique ID ranges, and merge the outputs in Phase 4. Do NOT retry the same scope more than once.
-5. Do NOT proceed to Phase 4 until all assigned files are complete.
+4. If a re-spawned teammate's output is still truncated after reducing scope, split the failing file's scope further into smaller chunks (one chunk per new agent), each with unique ID ranges, and merge the outputs in Phase 4. Do not retry the same scope more than once.
+5. Do not proceed to Phase 4 until all assigned files are complete.
 
-Do NOT proceed to Phase 4 until ALL teammates have completed their file generation.
+Do not proceed to Phase 4 until ALL teammates have completed their file generation.
 
 ### Phase 3: Coordination During Execution
 
 While teammates are working:
 1. Monitor progress via the shared task list.
-2. Cross-team coordination is best-effort. The lead MUST front-load as much shared context as possible in the spawn prompts. Teammates communicate intermediate results to the lead via their completion messages for Phase 4 integration — teammates should NOT write directly to `_context.md` (the lead manages that file). Teammates should NOT depend on each other's outputs during parallel execution. Known dependencies (e.g., Teammate 2 → Teammate 3) are resolved by the lead before spawning, either by sequencing or by pre-loading context into the dependent teammate's spawn prompt. If a teammate's output depends on another teammate's output, the lead should spawn the dependent teammate AFTER the dependency completes:
+2. Cross-team coordination is best-effort. The lead must front-load as much shared context as possible in the spawn prompts. Teammates communicate intermediate results to the lead via their completion messages for Phase 4 integration — teammates should not write directly to `_context.md` (the lead manages that file). Teammates should not depend on each other's outputs during parallel execution. Known dependencies (e.g., Teammate 2 → Teammate 3) are resolved by the lead before spawning, either by sequencing or by pre-loading context into the dependent teammate's spawn prompt. If a teammate's output depends on another teammate's output, the lead should spawn the dependent teammate AFTER the dependency completes:
    - When Teammate 4 defines KPIs → if Teammate 5 needs those KPIs, spawn Teammate 5 after Teammate 4 completes (or include estimated KPIs in Teammate 5's spawn prompt)
    - When Teammate 2 defines security requirements → if Teammate 3 needs those, spawn Teammate 3 after Teammate 2 completes (or include security context in Teammate 3's spawn prompt)
 3. Resolve any conflicts or ambiguities raised by teammates.
@@ -282,7 +282,7 @@ With the pipeline model's context window (see tech-stack.md § Model Specificati
 
 #### Review Agent Spawn Protocol
 
-Each review agent's spawn prompt MUST include:
+Each review agent's spawn prompt must include:
 - The instruction: "Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate all BRD content and user-facing output in the specified language. Code, technical identifiers, and file names remain in English."
 - The instruction: "Read CLAUDE.md Part 1 (immutable rules) if it exists in the project root. Follow its conventions. Ignore Part 2 (project-specific configuration) — it is not yet populated at this stage."
 - The list of all generated BRD files to review
@@ -306,7 +306,7 @@ Each agent produces a list of issues in this format:
     - **Affected Requirements**: [List of requirement IDs impacted]
 
 Severity definitions:
-- **CRITICAL**: Requirement is missing, contradictory, or would cause implementation failure. Blocks development.
+- Requirement is missing, contradictory, or would cause implementation failure. Blocks development.
 - **HIGH**: Requirement is vague, incomplete, or technically infeasible. Would cause rework during development.
 - **MEDIUM**: Quality issue that reduces clarity but doesn't block development. Inconsistency or missing detail.
 - **LOW**: Polish issue — formatting, minor terminology drift, optimization suggestion.
@@ -382,7 +382,7 @@ After all 3 review agents complete their reports:
    - When adding missing requirements, follow the same ID conventions and formatting as existing requirements.
    - When fixing technical feasibility issues, adjust the requirement to be achievable while preserving the business intent.
 
-5. **Second Pass** (conditional): If the initial remediation resolved more than 15 CRITICAL+HIGH issues, perform a targeted re-review of ONLY the modified files to ensure fixes didn't introduce new problems. (Threshold: 15+ fixes indicates significant document modification, increasing the risk of introduced inconsistencies that require a re-review pass.) This re-review does NOT require spawning new agents — the lead performs it directly using the review checklists above. This is a single re-review pass — if it finds new CRITICAL issues, document them in the review log rather than entering a recursive loop.
+5. **Second Pass** (conditional): If the initial remediation resolved more than 15 CRITICAL+HIGH issues, perform a targeted re-review of ONLY the modified files to ensure fixes didn't introduce new problems. (Threshold: 15+ fixes indicates significant document modification, increasing the risk of introduced inconsistencies that require a re-review pass.) This re-review does not require spawning new agents — the lead performs it directly using the review checklists above. This is a single re-review pass — if it finds new CRITICAL issues, document them in the review log rather than entering a recursive loop.
 
 6. **Document Remaining Issues**: Create `./plancasting/brd/_review-log.md` containing:
    - Review date and agent versions
@@ -390,7 +390,7 @@ After all 3 review agents complete their reports:
    - Issues resolved by severity
    - Remaining MEDIUM/LOW issues with their descriptions and affected files
    - Any CRITICAL/HIGH issues that could not be fully resolved, with explanation and proposed resolution path
-   - **Assumption Review Status** section (ALWAYS include — Stage 2B reads this section for gate decisions):
+   - **Assumption Review Status** section (always include — Stage 2B reads this section for gate decisions):
      ```markdown
      ## Assumption Review Status
      - **Assumption volume**: [N]% ([count] assumptions / [count] requirement IDs)
@@ -406,7 +406,7 @@ After all 3 review agents complete their reports:
    - Master feature inventory coverage: number of features covered vs total
    - Number of assumptions flagged
    - **Assumption volume**: Percentage of assumption blockquotes vs total requirement IDs. Each `> ⚠️ ASSUMPTION:` blockquote counts as 1 assumption regardless of how many distinct claims it contains. If ≥ 30%, include: "⚠️ CRITICAL: Assumption volume exceeds 30% ([N]%). Recommend reviewing and updating the Business Plan before proceeding to Stage 2. Proceeding with high assumptions risks downstream rework — Stage 2B validates but cannot fix fundamental Business Plan gaps." Ensure the assumption percentage is recorded in `./plancasting/brd/_review-log.md` § 'Assumption Review Status' (generated in step 6) — Stage 2B reads this file to make its gate decision.
-   - **Pipeline halt** (if assumption volume >= 30%): Output a CRITICAL warning: "STOP — Do NOT proceed to Stage 2 until the operator has reviewed assumptions in BRD files and updated `_review-log.md` § Assumption Review Status to `Operator reviewed: YES`. Stage 2B will FAIL if this review has not been completed."
+   - **Pipeline halt** (if assumption volume >= 30%): Output a CRITICAL warning: "STOP — Do not proceed to Stage 2 until the operator has reviewed assumptions in BRD files and updated `_review-log.md` § Assumption Review Status to `Operator reviewed: YES`. Stage 2B will FAIL if this review has not been completed."
    - Number of mermaid diagrams generated
    - Number of cross-feature interactions identified
    - **Quality metrics**:
@@ -457,7 +457,7 @@ Include the gate decision in the Final Summary output and in `_review-log.md`: "
 2. **Traceability**: Every requirement must trace to a specific Business Plan section. Use explicit references (e.g., "Derived from Business Plan § Market Analysis" or "Derived from Business Plan § Phase 2 Roadmap → Feature X").
 3. **Measurability**: All requirements must include measurable acceptance criteria. Avoid vague terms like "fast," "user-friendly," or "scalable" without quantification.
 4. **Completeness**: If the Business Plan lacks sufficient detail for a section, generate reasonable assumptions and mark them with `> ⚠️ ASSUMPTION: [Assumption text explaining why this is assumed and its impact]` blockquotes. The assumption text must explain both the reasoning and the potential impact if the assumption is wrong. Never leave sections empty.
-5. **Consistency**: Use terminology defined in `./plancasting/brd/_context.md`. Define new terms and notify the lead for glossary inclusion (via message to lead — do NOT write directly to `_context.md`, as the lead manages that file during Phase 4 integration).
+5. **Consistency**: Use terminology defined in `./plancasting/brd/_context.md`. Define new terms and notify the lead for glossary inclusion (via message to lead — do not write directly to `_context.md`, as the lead manages that file during Phase 4 integration).
 6. **Mermaid Diagrams**: Use mermaid syntax for all diagrams (flowcharts, sequence diagrams, state diagrams, Gantt charts, ER diagrams). Wrap in mermaid-tagged code blocks.
 7. **Cross-references**: Use relative markdown links (e.g., `[See Functional Requirements](./07-functional-requirements.md#fr-003)`).
 8. **Professional Tone**: Clear, precise, professional tone in the session language. Active voice (e.g., "The system validates the input" not "The input is validated"). No ambiguity.
@@ -471,7 +471,7 @@ Include the gate decision in the Final Summary output and in `_review-log.md`: "
 
 > The canonical gate decision logic is in the detailed Gate Decision section above (§ Gate Decision, after Phase 7). This simplified reference summarizes the three possible outcomes — if any discrepancy, the detailed decision tree above takes precedence.
 
-- **PASS**: All 23 BRD files generated and complete, master feature inventory covers 100% of Business Plan features, zero CRITICAL/HIGH issues, all BRs traceable, all cross-references resolve, mermaid diagrams render without syntax errors. Note: assumption volume ≥ 30% triggers a pipeline halt (operator review before Stage 2) but does NOT downgrade the gate outcome.
+- **PASS**: All 23 BRD files generated and complete, master feature inventory covers 100% of Business Plan features, zero CRITICAL/HIGH issues, all BRs traceable, all cross-references resolve, mermaid diagrams render without syntax errors. Note: assumption volume ≥ 30% triggers a pipeline halt (operator review before Stage 2) but does not downgrade the gate outcome.
 - **CONDITIONAL PASS**: All BRD files generated, 100% feature inventory coverage, zero CRITICAL/HIGH issues, but minor gaps in non-critical sections (glossary, appendices, formatting). Document each gap in `_review-log.md`. Assumption volume interaction same as PASS.
 - **FAIL**: Missing critical BRD files, master feature inventory incomplete, unresolved CRITICAL/HIGH issues, untraceable BRs, or files empty/corrupted. Re-run Stage 1.
 

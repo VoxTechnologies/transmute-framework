@@ -7,12 +7,14 @@ description: >-
   "generate product requirements", "create PRD from BRD",
   "translate BRD to PRD", or when the transmute-pipeline agent
   reaches Stage 2 of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Transmute — PRD Generation (Stage 2)
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/prd-detailed-guide.md` for the complete agent team architecture, teammate spawn prompts, token budget management, review agent checklists, story grouping examples, and writing guidelines.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/prd-detailed-guide.md` for the complete agent team architecture, teammate spawn prompts, token budget management, review agent checklists, story grouping examples, and writing guidelines.
 
 ## Prerequisites
 
@@ -52,12 +54,12 @@ If BRD gaps are found during PRD generation, use this decision tree:
 2. **Requires business judgment**: Mark with `> ⚠️ ASSUMPTION:` and note in `_brd-issues.md`
 3. **Blocking**: Escalate in status message
 
-Do NOT modify BRD files. Document issues in `./plancasting/prd/_brd-issues.md` with classification:
+Do not modify BRD files. Document issues in `./plancasting/prd/_brd-issues.md` with classification:
 - **BLOCKING**: Empty/corrupted BRD files → STOP
 - **CRITICAL-BUT-RECOVERABLE**: BRD gap but can continue with best interpretation → Continue, document, flag
 - **NON-BLOCKING**: Incomplete but workable with assumptions → Continue
 
-If no BRD issues found, do NOT create this file. Stage 2B reads `_brd-issues.md` (if it exists) and maps classifications: BLOCKING → CRITICAL, CRITICAL-BUT-RECOVERABLE → HIGH, NON-BLOCKING → MEDIUM/LOW.
+If no BRD issues found, do not create this file. Stage 2B reads `_brd-issues.md` (if it exists) and maps classifications: BLOCKING → CRITICAL, CRITICAL-BUT-RECOVERABLE → HIGH, NON-BLOCKING → MEDIUM/LOW.
 
 ### Step 3: Build Feature Decomposition Map
 
@@ -75,7 +77,7 @@ If no BRD issues found, do NOT create this file. Stage 2B reads `_brd-issues.md`
 
 ### Step 4: Spawn Agent Teams (Phase 2)
 
-Spawn 5 specialized teammates. Each spawn prompt MUST include: CLAUDE.md Part 1 instructions, full `_context.md` content, the COMPLETE Feature Decomposition Map, file assignments with ID ranges, relevant BRD files, full-scope instruction ("This PRD covers the COMPLETE product. Every feature in the Feature Decomposition Map must be specified."), and the writing guidelines from the detailed guide.
+Spawn 5 specialized teammates. Each spawn prompt must include: CLAUDE.md Part 1 instructions, full `_context.md` content, the COMPLETE Feature Decomposition Map, file assignments with ID ranges, relevant BRD files, full-scope instruction ("This PRD covers the COMPLETE product. Every feature in the Feature Decomposition Map must be specified."), and the writing guidelines from the detailed guide.
 
 **Teammate 1 — "product-strategy"**
 Files: `01-product-overview.md`, `02-feature-map-and-prioritization.md`, `03-release-plan.md`

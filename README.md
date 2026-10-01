@@ -114,9 +114,10 @@ Business Plan → Tech Stack → BRD → PRD → Spec Validation → Scaffold + 
 | **2**  | PRD Generation              | Multiple agents produce 18-section Product Requirements                    |
 | **2B** | Spec Validation             | Cross-validates BRD against PRD for consistency                            |
 | **3**  | Scaffold Generation         | Creates full project skeleton from PRD                                     |
-| **4**  | CLAUDE.md Verification      | *Manual* — verify Part 2 has project specifics                             |
+| **4**  | CLAUDE.md Verification      | Automated check — Part 2 populated, starter rules present (repeated by the gate hook before Stage 5) |
 | **5**  | Feature Implementation      | Agent teams implement every feature in priority order (P0→P3)              |
 | **5B** | Implementation Audit        | Verifies all PRD features are actually implemented                         |
+| **5V** | Early Runtime Check         | Starts the app and walks P0/P1 flows (6V in critical mode) before the Stage 6 audits |
 | **6A** | Security Audit              | OWASP vulnerabilities, auth issues, injection risks                        |
 | **6B** | Accessibility Audit         | ARIA, keyboard nav, color contrast, screen reader support                  |
 | **6C** | Performance Optimization    | Bottlenecks, bundle size, slow queries                                     |
@@ -129,7 +130,7 @@ Business Plan → Tech Stack → BRD → PRD → Spec Validation → Scaffold + 
 | **6R** | Runtime Remediation         | Fixes 6V failures (skipped if 6V passes clean)                             |
 | **6P** | Visual Polish               | Final UI refinements                                                       |
 | **6P-R** | Frontend Design Elevation | Interactive full design overhaul (alternative to 6P)                       |
-| **7**  | Deployment                  | *Manual* — deploy backend first, then frontend                             |
+| **7**  | Deployment                  | Manual by default — deploy backend first, then frontend; automated when `tech-stack.md` sets `Deployment: automated` |
 | **7V** | Production Smoke Tests      | End-to-end live deployment verification                                    |
 | **7D** | User Guide Generation       | End-user documentation                                                     |
 | **8**  | Feedback Loop               | User feedback → spec updates → code changes                               |
@@ -160,6 +161,7 @@ Each stage is also a standalone skill. The plugin namespace is `transmuter`, so 
 | `/transmuter:scaffold`          | 3     | Project scaffolding              |
 | `/transmuter:implement`         | 5     | Feature implementation           |
 | `/transmuter:audit-completeness`| 5B    | Implementation audit             |
+| `/transmuter:cast early-verify` | 5V    | Early runtime check (6V, critical scope) |
 | `/transmuter:audit-security`    | 6A    | Security audit                   |
 | `/transmuter:audit-a11y`        | 6B    | Accessibility audit              |
 | `/transmuter:optimize`          | 6C    | Performance optimization         |
@@ -177,7 +179,9 @@ Each stage is also a standalone skill. The plugin namespace is `transmuter`, so 
 | `/transmuter:feedback`          | 8     | Feedback loop                    |
 | `/transmuter:maintain`          | 9     | Dependency maintenance           |
 
-Stages **4** and **7** are manual and cannot be invoked via commands.
+Stage **4** is an automated check (no command needed). Stage **7** is manual by default and has no command; set `Deployment: automated` in `tech-stack.md` to let the pipeline agent run it.
+
+`/transmuter:cast full` runs unattended; `/transmuter:cast attended` stops once after Stage 2B so you can approve the feature map that everything downstream derives from. The pipeline also stops after Stage 1 when more than 30% of the requirements had to be assumed, since that means the business plan is too thin to build from.
 
 ## How It Works
 
@@ -219,7 +223,7 @@ Pipeline status now includes a **Blocked** state (`⏸ Blocked`) alongside exist
 
 ## Agent Teams
 
-Several stages use Claude Code Agent Teams to parallelize work:
+Several stages spawn "teammates" to parallelize work. A teammate is a Claude Code subagent started with the Agent tool (the agent definitions under `agents/`, or a spawn prompt from the stage's detailed guide); its final message is its completion message to the lead. Claude Code's experimental Agent Teams feature (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`) can be used in its place, but is not required. The stages that fan out:
 
 - **Stage 1** (BRD): 5 writer agents + 3 review agents
 - **Stage 2** (PRD): Multiple writer agents producing 18 document sections
@@ -279,7 +283,8 @@ transmute-framework/
     ├── progress.md              # Progress tracking template
     ├── execution-guide.md       # Pipeline execution reference
     ├── feature_scenario_generation.md  # 6V/7V scenario generation
-    └── rules-templates/         # 6 path-scoped rules templates
+    └── rules-templates/         # 7 path-scoped rules templates (`paths:` frontmatter)
+        ├── _ai-provider-template.md   # rendered only for products with an AI/LLM provider
         ├── _api-contracts-template.md
         ├── _auth-template.md
         ├── _backend-template.md
@@ -290,11 +295,59 @@ transmute-framework/
 
 ## Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 2.1.x or newer, installed and authenticated (the plugin uses `${CLAUDE_SKILL_DIR}`, 0-based `$0` command arguments, exit-code-2 blocking hooks and the `UserPromptExpansion` hook event)
+- A Claude 5 model as the session model (Claude Opus 5.5 by default; Claude Fable 5.1 for the most capable runs). Stage 0 records the model and its limits in `plancasting/tech-stack.md`
 - Node.js v20.17+ (required by Stage 7D Mintlify CLI; v18+ sufficient for earlier stages)
-- A business plan (markdown or PDF files)
+- A business plan (markdown or PDF files). `examples/sample-plan/` holds a small fixture plan you can copy to try the pipeline
+
+Contributors: run `scripts/conformance.sh` before a release (`--live` also loads the plugin with `claude -p` and checks routing and the gate hook).
 
 ## Changelog
+
+### v3.2.0
+
+**Pipeline flow** — nine changes to how the stages run, in the order they pay off.
+
+- `scripts/conformance.sh`: the repository's first test suite. Static checks verify the manifest, every stage's eight places, the Claude Code 2.1 facts fixed in v3.1.0, and the gate hook against fixtures; `--live` loads the plugin with `claude -p` and checks command routing and the hook. `examples/sample-plan/` is a fixture business plan (an AI feature included, so the AI-provider rules render)
+- Credential gate split by tier: Stage 3 now blocks only on placeholder pipeline-infrastructure credentials (red tier) and warns about the rest; Stage 5 blocks on any placeholder, where tests first need real values. The old gate blocked scaffolding on service keys the scaffold never used
+- Stage 4 is an automated check: the pipeline agent verifies CLAUDE.md Part 2 and the starter rules after Stage 3, and the gate hook repeats the check before Stage 5. It is no longer an operator stop
+- `/transmuter:cast attended`: the full pipeline with one sign-off after Stage 2B, where the operator approves the feature map everything downstream derives from. The pipeline also stops after Stage 1 when the BRD's assumption volume is ≥ 30% without `Operator reviewed: YES` — Stage 2B already failed on that marker, but `cast full` used to run into it blind
+- Stage 5V (early runtime check): the 6V prompt in `MODE: critical`, run right after 5B, so a product that does not start or cannot log in goes back to Stage 5 before the eight Stage 6 audits. Alias `/transmuter:cast early-verify`; the hook accepts the 5B report as its prerequisite
+- Stage 5 parallel waves (opt-in): `tech-stack.md` § Model Specifications "Stage 5 parallel waves" lets the lead build up to N dependency-free, shared-UI-free features at once, each in its own git worktree, merged per feature after its quality gate. Default stays 1 until a measured run shows clean merges
+- `plancasting/_progress.md` gains Duration and Usage columns, filled per stage from `/cost` or the `usage` block of a `claude -p --output-format json` run, so the expensive stages become visible
+- Rule promotion: Stage 9 exports stack-level `.claude/rules/` lessons to `plancasting/_rules-export.md`; CONTRIBUTING.md § Promoting rules from projects describes folding them into `rules-templates/`, so the framework learns from the products it builds
+- `templates/execution-guide.md` leads every stage with `/transmuter:cast <stage>` and keeps the paste-the-prompt form as the no-plugin fallback (21 stages rewritten)
+- Stage 7 automated deployment (optional): `Deployment: automated` in `tech-stack.md` § Hosting Platform lets the pipeline agent run the Stage 6D deployment guide itself, logging every production command to `plancasting/_launch/deploy-log.md` and stopping on the first non-zero exit. Manual stays the default
+
+### v3.1.0
+
+**Claude 5 alignment and Claude Code 2.1 compliance** — a repo-wide audit against the Claude Code 2.1.286 documentation and the Claude 5 model migration guides (Fable 5.1, Opus 5.5, Sonnet 5.5). The full audit with evidence per item is kept in the canonical template vault (`Transmute_Framework_Claude5_Update_Audit.md`).
+
+Fixes to things that did not work as documented:
+
+- All 23 `SKILL.md` files, `CLAUDE.md`, `docs/plugin-architecture.md` and `CONTRIBUTING.md` referenced `${CLAUDE_SKILL_ROOT}`, a variable Claude Code never substitutes. Replaced with the documented `${CLAUDE_SKILL_DIR}`
+- `commands/cast.md` read the stage name from `$1`; command argument indices are 0-based, so `$1` is the second argument. Now `$0`
+- The gate hook exited with code 1, which Claude Code treats as a non-blocking error — every `BLOCK:` message was shown but the stage ran anyway. The script now exits 2 with the reason on stderr, accepts both the `skill` and `skill_name` input keys, strips the `transmuter:` prefix, and is also registered on `UserPromptExpansion` so that typing `/transmuter:<stage>` directly (which bypasses `PreToolUse`) is gated too. Its 19 `BLOCK:` messages still said `/transmute:cast`; corrected. The stale `.claude-plugin/hooks/` copy (an unsupported `before:skill` schema) is removed
+- The six `rules-templates/` and `templates/CLAUDE.md` scoped rule files with `globs:`; Claude Code scopes `.claude/rules/*.md` by `paths:`, so every generated rule loaded in every session. Now `paths:`
+- `templates/execution-guide.md` told operators to run `claude config set --global model`, a subcommand that no longer exists. Now `/model`, `claude --model`, or `settings.json`
+
+Model generation:
+
+- Pipeline model `claude-opus-5` → `claude-opus-5-5`; lighter alternative `claude-sonnet-5` → the same model at `medium` effort, or `claude-sonnet-5-5`; `claude-fable-5-1` named as the most capable option (`templates/execution-guide.md`, Stage 0 and 7V guides)
+- Model Specifications now derive limits from `GET /v1/models/<id>` (`max_input_tokens`, `max_tokens`) instead of asking the model to recall its own specs, state that the 32K per-response cap is Claude Code's `CLAUDE_CODE_MAX_OUTPUT_TOKENS` (not a model property), note that thinking tokens count toward it on Claude 5 models, and add an "Effort by stage" row. Every skill and agent now carries an `effort:` frontmatter value (Opus 5.5 and Sonnet 5.5 default to `medium` when unset)
+- New `templates/rules-templates/_ai-provider-template.md`, rendered by Stage 3 for products with an AI/LLM provider: the request shapes that return 400 on current Claude models (`budget_tokens`, disabled thinking, prefill, forced `tool_choice`, `output_format`, sampling parameters), `stop_reason` handling including `refusal` (HTTP 200), server-side fallbacks, append-only history. `feature-backend` now follows it and writes model calls from current docs rather than memory; Stage 7V Check 11.1 greps for the rejected parameters; Stage 6G's retry rule branches on `stop_reason`
+- Stage 0 asks about the provider SDK, refusal handling and data retention (Claude Fable 5.1 requires 30-day retention)
+
+Prompt tuning for Claude 5 models:
+
+- `transmute-pipeline` gains an Operating Mode block for unattended runs (act without asking except at Stage 0, the manual stages, destructive git operations, FAIL-ESCALATE and missing credentials; never stop on account of context) and an Execution Model block mapping "teammates" onto the Agent tool, with Agent Teams as an opt-in
+- Completion messages of all six teammates and the reviewer's checklist require evidence from a tool result in the session before a claim is reported as done
+- Backend and frontend teammates prefer targeted edits over whole-file rewrites
+- "Fatigued quality gates" / "context window fills" wording in Stage 5, 5B, `templates/CLAUDE.md` and the execution guide rewritten to judge by gate results, not context usage, which current models manage automatically and which this wording caused them to worry about
+- The "generic AI aesthetics" prohibition in `templates/CLAUDE.md` and `feature-frontend` replaced by a list of named default patterns to avoid (cream backgrounds, italic accent words, "01 / 02 / 03" labels, monospace eyebrows, pill buttons, purple gradients, icon-title-copy card grids), which is the form current models act on
+- Smoke and credential checks judge by HTTP status, since `max_tokens: 1` returns an empty body on thinking models
+- Emphasis register lowered across the prompt surface: the generic markers `MUST` / `NEVER` / `ALWAYS` / `DO NOT` and the `IMPORTANT:` / `CRITICAL:` sentence labels (about 900 occurrences) are now plain words. Current models follow instructions literally, and when every line is emphasized none stands out. Gate tokens (`PASS` / `CONDITIONAL PASS` / `FAIL-RETRY` / `FAIL-ESCALATE`, `6V-A/B/C`, `READY` / `NOT READY`), severity levels (`CRITICAL` / `HIGH`), stub markers and the Full-Build `ALL` / `EVERY` are unchanged — those carry meaning, not volume
+- `/transmuter:cast help` prints its help block verbatim; the session-feature-limit rows record which model they were measured on; `docs/plugin-architecture.md` documents `context: fork`, `isolation: worktree` and `allowed-tools` as opt-in modes with the reason each stays off
 
 ### v3.0.1
 

@@ -6,12 +6,14 @@ description: >-
   "create business requirements document", "run Stage 1",
   "generate business requirements", "create BRD from business plan",
   or when the transmute-pipeline agent reaches Stage 1 of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Transmute — BRD Generation (Stage 1)
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/brd-detailed-guide.md` for the complete agent team architecture, teammate spawn prompts, token budget management, review agent checklists, remediation procedures, and writing guidelines.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/brd-detailed-guide.md` for the complete agent team architecture, teammate spawn prompts, token budget management, review agent checklists, remediation procedures, and writing guidelines.
 
 ## Prerequisites
 
@@ -62,7 +64,7 @@ Create `./plancasting/brd/` directory and `./plancasting/brd/_context.md` contai
 
 ### Step 4: Spawn Agent Teams (Phase 2)
 
-Spawn 5 specialized teammates. Each spawn prompt MUST include: CLAUDE.md Part 1 instructions, full `_context.md` content, file assignments with ID ranges, relevant Business Plan sections, full-scope instruction ("IGNORE all phasing — treat every described feature as in-scope"), and the writing guidelines from the detailed guide.
+Spawn 5 specialized teammates. Each spawn prompt must include: CLAUDE.md Part 1 instructions, full `_context.md` content, file assignments with ID ranges, relevant Business Plan sections, full-scope instruction ("IGNORE all phasing — treat every described feature as in-scope"), and the writing guidelines from the detailed guide.
 
 **Known dependency**: Teammate 3 (data-and-integration) depends on Teammate 2 (technical-infrastructure) for security requirements and data privacy classifications. Either spawn Teammate 3 after Teammate 2 completes, or include Teammate 2's security context in Teammate 3's spawn prompt.
 
@@ -92,7 +94,7 @@ Each agent has an output token limit per response (see tech-stack.md § Model Sp
 
 **Before spawning**: Estimate output size per file. If a single file exceeds the safe output budget, split by feature group. `07-functional-requirements.md` with 30+ features almost certainly needs splitting.
 
-**If a teammate fails**: Check which files were written, re-spawn for missing/truncated files. If a re-spawned teammate's output is still truncated after reducing scope, split further. Do NOT proceed to Phase 4 until all files are complete.
+**If a teammate fails**: Check which files were written, re-spawn for missing/truncated files. If a re-spawned teammate's output is still truncated after reducing scope, split further. Do not proceed to Phase 4 until all files are complete.
 
 ### Step 6: Structural Integration (Phase 4)
 
@@ -168,14 +170,14 @@ Issue severity definitions: CRITICAL (blocks development), HIGH (causes rework),
 4. If >15 CRITICAL+HIGH fixes, perform targeted re-review of modified files (single pass — do not enter recursive loop)
 5. Create `./plancasting/brd/_review-log.md` with all findings, including:
    - **Assumption Review Status** section (required if assumption volume ≥ 30%): assumption percentage, CRITICAL flag, operator review marker (operator must update to YES before Stage 2B can pass)
-6. Output Final Summary: requirement counts by category, feature coverage, assumptions flagged, assumption percentage (if ≥ 30%, recommend Business Plan remediation), mermaid diagrams, cross-feature interactions, quality metrics (issues found/resolved/remaining)
+6. Output Final Summary: requirement counts by category, feature coverage, assumptions flagged, assumption percentage, mermaid diagrams, cross-feature interactions, quality metrics (issues found/resolved/remaining). End the summary with one of two lines: `Stage 1 gate: PASS (assumption volume N% < 30%)` or `Stage 1 gate: AWAITING OPERATOR REVIEW (assumption volume N% ≥ 30%)`. The second line means the business plan is too thin to build from unreviewed: the pipeline stops here, and the operator either revises the plan and re-runs Stage 1 or reviews the assumptions and sets `Operator reviewed: YES` in `_review-log.md` (Stage 2B fails without it)
 
 ## Known Failure Patterns to Avoid
 
 1. **Vague acceptance criteria**: Use specific metrics ("response time < 200ms"), not unmeasurable adjectives ("fast").
 2. **Copy-pasting business plan text**: Translate into structured requirement format with IDs and priority.
 3. **MoSCoW inflation**: Maintain reasonable distribution across Must/Should/Could/Won't. Healthy distribution: Must 50-65%, Should 20-30%, Could 10-15%, Won't 0-5%.
-4. **Missing negative requirements**: Specify what the system MUST NOT do.
+4. **Missing negative requirements**: Specify what the system must not do.
 5. **Circular traceability**: Each requirement level must add specificity.
 6. **NFRs without measurement methods**: Define how metrics are measured and monitored.
 7. **Mermaid syntax errors**: Validate syntax before including. Common errors: missing quotes around labels with special characters, incorrect arrow syntax, unclosed subgraph blocks.

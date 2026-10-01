@@ -31,7 +31,7 @@ Before beginning:
    If both 6D and 6F were skipped per `tech-stack.md`, instruct Teammate 3 to note this in findings — do not flag missing docs/seed-data as launch blockers when the tech stack explicitly excludes them.
    For any missing report (except 6D or 6F if skipped per tech-stack.md), STOP — the prerequisite stage was not completed.
    For each existing report, read its `## Gate Decision` heading (case-sensitive, h2 level) and extract the outcome (PASS / CONDITIONAL PASS / FAIL). If any report is missing this heading, STOP — re-run that audit stage with instructions to include the `## Gate Decision` section. If any Stage 6 audit report shows FAIL, STOP — that audit must be resolved before pre-launch verification. If CONDITIONAL PASS, evaluate each documented condition: documented workarounds that don't block core functionality → acceptable for launch; unresolved blockers awaiting human decision → NOT READY unless operator explicitly accepts risk (see execution-guide.md § "Gate Decision Outcomes (Universal)").
-4. Check for unfixable violation files from prior stages (if they exist — not all audit stages produce these files): `./plancasting/_audits/security/unfixable-violations.md`, `./plancasting/_audits/accessibility/unfixable-violations.md`, `./plancasting/_audits/performance/unfixable-violations.md`, `./plancasting/_audits/refactoring/unfixable-violations.md`, `./plancasting/_audits/resilience/unfixable-violations.md`, `./plancasting/_audits/documentation/unfixable-violations.md`, `./plancasting/_audits/seed-data/unfixable-violations.md`. If any exist, read them and treat CRITICAL items as launch blockers — the readiness report MUST flag them. If a file does not exist, that audit stage had no unfixable violations — skip it.
+4. Check for unfixable violation files from prior stages (if they exist — not all audit stages produce these files): `./plancasting/_audits/security/unfixable-violations.md`, `./plancasting/_audits/accessibility/unfixable-violations.md`, `./plancasting/_audits/performance/unfixable-violations.md`, `./plancasting/_audits/refactoring/unfixable-violations.md`, `./plancasting/_audits/resilience/unfixable-violations.md`, `./plancasting/_audits/documentation/unfixable-violations.md`, `./plancasting/_audits/seed-data/unfixable-violations.md`. If any exist, read them and treat CRITICAL items as launch blockers — the readiness report must flag them. If a file does not exist, that audit stage had no unfixable violations — skip it.
 5. Read `./CLAUDE.md` and `./plancasting/tech-stack.md` for project conventions
 6. Read the relevant PRD sections for context on what was implemented
 
@@ -158,7 +158,7 @@ Your tasks:
    - Verify no development/test values remain in production configuration (e.g., test API keys, localhost URLs).
    - Verify no secret values contain placeholder text ('YOUR_KEY_HERE', 'CHANGE_ME', 'test-', 'TODO'). All secret values must be real, non-empty, and non-test credentials for production.
    - Check that client-exposed variables (e.g., `NEXT_PUBLIC_*` for Next.js, `VITE_*` for Vite, `PUBLIC_*` for SvelteKit) only contain values safe for client-side exposure.
-   - **HOSTING PROVIDER ENV VARS**: If deploying to Vercel/Netlify/Railway/similar, verify ALL **production-required** environment variables from `.env.local.example` are configured on the hosting platform. Run your platform's env list command (e.g., `npx vercel env ls`, `netlify env:list`, `railway variables`) and cross-check against `.env.local.example`. **Important**: `.env.local` contains development values (localhost URLs, test API keys) — do NOT copy these to production. Instead, verify production equivalents exist for each variable. Common miss: your backend URL env var (e.g., `NEXT_PUBLIC_CONVEX_URL`, `VITE_SUPABASE_URL`) is often set automatically by the dev server but NOT present in `.env.local` — it must be explicitly added to the hosting provider with the production URL. Missing env vars cause cryptic runtime errors (blank pages, SSR 500s, auth failures) that are hard to diagnose in production.
+   - **HOSTING PROVIDER ENV VARS**: If deploying to Vercel/Netlify/Railway/similar, verify ALL **production-required** environment variables from `.env.local.example` are configured on the hosting platform. Run your platform's env list command (e.g., `npx vercel env ls`, `netlify env:list`, `railway variables`) and cross-check against `.env.local.example`. **Important**: `.env.local` contains development values (localhost URLs, test API keys) — do not copy these to production. Instead, verify production equivalents exist for each variable. Common miss: your backend URL env var (e.g., `NEXT_PUBLIC_CONVEX_URL`, `VITE_SUPABASE_URL`) is often set automatically by the dev server but NOT present in `.env.local` — it must be explicitly added to the hosting provider with the production URL. Missing env vars cause cryptic runtime errors (blank pages, SSR 500s, auth failures) that are hard to diagnose in production.
    - **Cross-check env var naming against codebase**: Run the appropriate grep command for your framework (replace `[backend-dir]` with your actual backend directory):
      - **Next.js / Node.js**: `grep -roh 'process\.env\.\w\+' src/ [backend-dir]/ | sort -u`
      - **Vite / SvelteKit**: `grep -roh 'import\.meta\.env\.\w\+' src/ | sort -u`
@@ -167,7 +167,7 @@ Your tasks:
 
 2. PRODUCTION CONFIGURATION:
    - Verify your framework's config file (e.g., `next.config.ts`, `vite.config.ts`, `svelte.config.js`) has production-appropriate settings (no development-only rewrites or headers).
-   - **If using Next.js — CSP VALIDATION**: If Content-Security-Policy headers are defined, verify `script-src` does NOT include `'strict-dynamic'` unless nonce-based CSP is actually implemented AND verified. `'strict-dynamic'` without nonces blocks ALL Next.js script loading (chunks from `/_next/static/`), causing a completely blank page in production. **Verification steps**: (1) Check `next.config.ts` for CSP header definition, (2) if `'strict-dynamic'` is present, verify `next.config.ts` or middleware generates per-request nonces, (3) inspect an actual HTML response (via `curl` or browser DevTools) to confirm `<script nonce="...">` attributes appear on script tags — do NOT assume nonces are implemented just because they are mentioned in config.
+   - **If using Next.js — CSP VALIDATION**: If Content-Security-Policy headers are defined, verify `script-src` does not include `'strict-dynamic'` unless nonce-based CSP is actually implemented AND verified. `'strict-dynamic'` without nonces blocks ALL Next.js script loading (chunks from `/_next/static/`), causing a completely blank page in production. **Verification steps**: (1) Check `next.config.ts` for CSP header definition, (2) if `'strict-dynamic'` is present, verify `next.config.ts` or middleware generates per-request nonces, (3) inspect an actual HTML response (via `curl` or browser DevTools) to confirm `<script nonce="...">` attributes appear on script tags — do not assume nonces are implemented just because they are mentioned in config.
    - **If using Next.js — i18n ALIAS VALIDATION**: If using an i18n plugin (next-intl, next-international, etc.), verify that config aliases are set for BOTH Turbopack (`turbopack.resolveAlias` with relative paths) AND webpack (`webpack(config)` with absolute paths via `path.resolve`). Many i18n plugins set `experimental.turbo.resolveAlias` which Next.js 15+/16 ignores, causing SSR crashes.
    - **If using Tailwind v4 — CONFIG BRIDGE**: If using Tailwind CSS v4 (`@import "tailwindcss"` syntax in the global CSS file), verify that `@config "../../tailwind.config.ts";` (or correct relative path) is present immediately after the import. Without this line, Tailwind v4 silently ignores the entire JS config — all custom colors, fonts, spacing, and animations produce zero CSS output, resulting in a completely unstyled UI. This is a silent failure with no build error.
    - **If using Tailwind v4 — SEMANTIC COLOR TOKENS**: If using Tailwind v4, verify that semantic utility tokens (`border`, `ring`, `card`, `background`, `foreground`) are defined as top-level entries in `theme.extend.colors` — NOT only in `borderColor`/`ringColor`. In v4, `border-border` looks up `colors.border`, not `borderColor.DEFAULT`. Missing entries cause borders to render as white (browser default) with no build error.
@@ -180,7 +180,7 @@ Your tasks:
    - Verify CI/CD configuration exists (e.g., `.github/workflows/deploy.yml`, `vercel.json`, `netlify.toml`, or your provider's config).
    - Verify the deploy pipeline runs the full test suite before deploying.
    - Verify rollback procedures are documented and mechanism exists.
-   - **Backend rollback caveats**: Some backends have forward-only schema changes that make rollback non-trivial. **If using Convex**: Unlike Vercel (which supports instant rollback to previous deployments), Convex schema changes and data mutations are forward-only. Rollback strategy must rely on: (1) backward-compatible schema changes (new fields MUST have default values), (2) feature flags to disable broken features (verify flags have unit tests covering both states), (3) compensating mutations to fix data if needed. Before deployment, verify backward compatibility: existing queries still work with new schema (`bun run test`). **If using traditional databases (PostgreSQL, etc.)**: Ensure down-migrations exist and are tested. **If using Supabase/Firebase**: Verify that schema changes are backward-compatible.
+   - **Backend rollback caveats**: Some backends have forward-only schema changes that make rollback non-trivial. **If using Convex**: Unlike Vercel (which supports instant rollback to previous deployments), Convex schema changes and data mutations are forward-only. Rollback strategy must rely on: (1) backward-compatible schema changes (new fields must have default values), (2) feature flags to disable broken features (verify flags have unit tests covering both states), (3) compensating mutations to fix data if needed. Before deployment, verify backward compatibility: existing queries still work with new schema (`bun run test`). **If using traditional databases (PostgreSQL, etc.)**: Ensure down-migrations exist and are tested. **If using Supabase/Firebase**: Verify that schema changes are backward-compatible.
    - Verify preview deployment pipeline works for future PRs.
 
 4. MONITORING AND ALERTING:
@@ -193,7 +193,7 @@ When done, message the lead with: env var status, config issues found, CI/CD sta
 ~~~
 
 #### Teammate 3: "user-facing-verifier"
-**Scope**: User-facing launch-blocking completeness (SEO, legal, content). Focus on items that would block launch or damage user trust. Do NOT perform a comprehensive documentation audit (that was Stage 6D) or a full visual polish review (that is Stage 6P).
+**Scope**: User-facing launch-blocking completeness (SEO, legal, content). Focus on items that would block launch or damage user trust. Do not perform a comprehensive documentation audit (that was Stage 6D) or a full visual polish review (that is Stage 6P).
 
 ~~~
 You are performing final user-facing verification before production launch.
@@ -242,7 +242,7 @@ When done, message the lead with: SEO status, legal/compliance status, content i
 
 If a violation cannot be fixed without architectural changes or would break another feature:
 1. Document the full conflict with evidence (what the violation is, what fixing it would break)
-2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do NOT attempt a fix that creates regressions
+2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do not attempt a fix that creates regressions
 3. Include a recommended approach and estimated effort in the report
 4. Continue with remaining fixable violations — do not block the entire audit on one decision
 
@@ -295,7 +295,7 @@ After all teammates complete:
 
    **Operator Override Procedure**: The operator is the person running the Transmute pipeline. If 6H returns NOT READY but the operator decides to launch despite blockers: (1) The operator documents the override in the readiness report under a new '## Launch Override' section with: reason for override, list of accepted blockers, risk assessment, and mitigation plan. (2) Proceed to Stage 6V with the documented override. Note: This override is a human decision point — the pipeline does not have an automated approval mechanism. Override justification must be documented in the readiness report with: (a) the specific blocker being overridden, (b) the risk assessment, and (c) the mitigation plan. Security blockers (CVSS ≥ 9.0) cannot be overridden. **Override verification**: If this stage reads a previous 6H report showing NOT READY, check whether a `## Launch Override` section exists. If NOT READY is present but no override section exists, STOP and require the operator to either fix blockers or document the override decision before proceeding.
 
-   **Launch-blocking definition**: An unfixable violation is launch-blocking ONLY if it prevents core business functionality (auth broken, payment cannot complete, data loss possible). Non-critical unfixable issues (minor accessibility gap on secondary feature, performance slightly over baseline) are NOT launch-blocking — document them as post-launch items. If uncertain, classify as blocking and let the operator override. **Unfixable violations consolidation**: Read all `unfixable-violations.md` files from prior audit stages (`./plancasting/_audits/{security,accessibility,performance,refactoring,resilience}/unfixable-violations.md`) — each stage may have created one. Evaluate each violation against this launch-blocking definition. Reference the source stage and issue in the readiness report.
+   **Launch-blocking definition**: An unfixable violation is launch-blocking ONLY if it prevents core business functionality (auth broken, payment cannot complete, data loss possible). Non-critical unfixable issues (minor accessibility gap on secondary feature, performance slightly over baseline) are not launch-blocking — document them as post-launch items. If uncertain, classify as blocking and let the operator override. **Unfixable violations consolidation**: Read all `unfixable-violations.md` files from prior audit stages (`./plancasting/_audits/{security,accessibility,performance,refactoring,resilience}/unfixable-violations.md`) — each stage may have created one. Evaluate each violation against this launch-blocking definition. Reference the source stage and issue in the readiness report.
 
    **Non-Critical Issues** (can be addressed post-launch):
    - [List any minor issues that don't block launch]
@@ -309,7 +309,7 @@ After all teammates complete:
    - [ ] Send test transactional email from production
    - [ ] Verify auth flow works on production domain
 
-   **IMPORTANT: Next Steps after 6H**:
+   **Next Steps after 6H**:
    - If READY → proceed to Stage 6V (Visual & Functional Verification).
    - If NOT READY → fix blockers and re-run 6H.
 
@@ -324,14 +324,14 @@ After all teammates complete:
 
 ## Critical Rules
 
-1. NEVER launch with failing tests — no exceptions.
-2. NEVER launch with critical-severity dependency vulnerabilities unaddressed. High-severity: must be documented with a post-launch remediation timeline in the readiness report.
-3. NEVER assume environment variables are set just because they exist in `.env.local` — verify on the hosting platform.
-4. NEVER launch without a tested rollback procedure documented.
-5. The readiness report MUST be saved before deployment begins, not generated after.
-6. ALWAYS verify ALL prior stage audit reports exist (security, accessibility, performance, refactoring, resilience — check `./plancasting/_audits/<stage>/report.md` for each). For documentation, verify `./docs/` exists and `./plancasting/_audits/documentation/report.md` exists (Stage 6D generates both `./docs/` and a gate decision report). For seed data, verify `./seed/README.md` exists and `./plancasting/_audits/seed-data/report.md` exists (Stage 6F generates both the `./seed/` directory and a gate decision report). If any are missing, STOP — the prerequisite stage was not completed.
+1. never launch with failing tests — no exceptions.
+2. never launch with critical-severity dependency vulnerabilities unaddressed. High-severity: must be documented with a post-launch remediation timeline in the readiness report.
+3. never assume environment variables are set just because they exist in `.env.local` — verify on the hosting platform.
+4. never launch without a tested rollback procedure documented.
+5. The readiness report must be saved before deployment begins, not generated after.
+6. always verify ALL prior stage audit reports exist (security, accessibility, performance, refactoring, resilience — check `./plancasting/_audits/<stage>/report.md` for each). For documentation, verify `./docs/` exists and `./plancasting/_audits/documentation/report.md` exists (Stage 6D generates both `./docs/` and a gate decision report). For seed data, verify `./seed/README.md` exists and `./plancasting/_audits/seed-data/report.md` exists (Stage 6F generates both the `./seed/` directory and a gate decision report). If any are missing, STOP — the prerequisite stage was not completed.
 7. For backends with forward-only schema changes (e.g., Convex): schema changes are not easily reversible. Verify backward-compatible schema changes and have a feature flag strategy to disable broken features without schema rollback.
-8. ALWAYS verify CORS headers allow the production frontend domain.
+8. always verify CORS headers allow the production frontend domain.
 9. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).
 10. After 6H READY, proceed to 6V. For post-6V routing (6R/6P decisions), see execution-guide.md § "Gate Decision Outcomes" → "Post-6V routing".
 ````

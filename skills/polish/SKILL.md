@@ -7,7 +7,9 @@ description: >-
   "improve the app aesthetics", "run UI refinement", "apply visual
   enhancements", or "fix contrast and layout issues", or when the
   transmute-pipeline agent reaches Stage 6P of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Stage 6P: Visual Polish & UI Refinement
@@ -16,28 +18,28 @@ version: 1.0.0
 
 After Stage 5 implementation and Stage 6 quality passes, the product is functionally complete but often looks "functional rather than polished." Components work correctly but lack the visual refinement that distinguishes a production product from a prototype — inconsistent spacing, missing hover states, contrast issues, and generic typography. This stage transforms a functionally correct app into a visually distinctive product. It runs AFTER 6R (all mechanical issues fixed) and BEFORE deployment.
 
-Analyze the RUNNING application's visual quality, identify UI issues (visibility, layout, typography, spacing, motion, responsiveness), and automatically refine the frontend to production-grade aesthetic quality. Lead a multi-agent visual polish project using Claude Code Agent Teams.
+Analyze the RUNNING application's visual quality, identify UI issues (visibility, layout, typography, spacing, motion, responsiveness), and automatically refine the frontend to production-grade aesthetic quality. Lead a multi-agent visual polish project (teammates are Agent-tool subagents; see the pipeline agent's Execution Model).
 
 **Mutual Exclusivity**: This stage (6P) and Stage 6P-R (Frontend Design Elevation) are alternatives — run exactly ONE, not both. If 6P has already been run and you want to switch to 6P-R, revert 6P changes first (`git revert` the 6P commit). See CLAUDE.md for details.
 
-**Relationship to `frontend-design` skill**: If available, the `frontend-design` skill provides aesthetic guidance and design direction. Polish uses it for enhancement decisions but never replaces the project's existing design system. The lead invokes the skill and saves output; teammates read the saved output -- they do NOT invoke the skill themselves.
+**Relationship to `frontend-design` skill**: If available, the `frontend-design` skill provides aesthetic guidance and design direction. Polish uses it for enhancement decisions but never replaces the project's existing design system. The lead invokes the skill and saves output; teammates read the saved output -- they do not invoke the skill themselves.
 
-**Category System Note**: This stage uses DIFFERENT categories than 6V/6R. 6P categories: O (objective defects), E (enhancements), D (design elevation). 6V/6R categories: A/B (agent-fixable), C (human judgment). Do NOT confuse the two systems when reading 6V/6R reports.
+**Category System Note**: This stage uses DIFFERENT categories than 6V/6R. 6P categories: O (objective defects), E (enhancements), D (design elevation). 6V/6R categories: A/B (agent-fixable), C (human judgment). Do not confuse the two systems when reading 6V/6R reports.
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/polish-detailed-guide.md` for full refinement categories, teammate prompts, design system integration, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/polish-detailed-guide.md` for full refinement categories, teammate prompts, design system integration, and report templates.
 
 ## Prerequisites
 
 0. **Check if 6P-R was run instead**: If `./plancasting/_audits/visual-polish/design-plan.md` exists, check 6P-R completion status:
    - If `progress.md` in the same directory shows all phases completed -- 6P-R is done. Skip this stage (6P).
-   - If `progress.md` is missing or shows incomplete phases -- 6P-R failed mid-execution. Do NOT proceed -- request operator approval before continuing.
+   - If `progress.md` is missing or shows incomplete phases -- 6P-R failed mid-execution. Do not proceed -- request operator approval before continuing.
    - If `design-plan.md` does not exist -- 6P-R was not run. Proceed with 6P.
 
 1. **`frontend-design` plugin** (recommended, has fallback): Check if `/mnt/skills/public/frontend-design/SKILL.md` exists. If not, use project's existing design patterns instead. Fallback: use CLAUDE.md "Design & Visual Identity" (Part 1), `src/styles/design-tokens.ts`, Tailwind configuration, and PRD screen specifications. Focus on Category O/E only; skip Category D.
 
 2. **Stage 6R must PASS or CONDITIONAL PASS** (if 6R was required):
    - **If 6R report exists**: check Gate Decision. FAIL -- STOP, return to 6R. PASS or CONDITIONAL PASS -- proceed.
-   - **If 6R report does NOT exist**: check 6V report:
+   - **If 6R report does not exist**: check 6V report:
      - 6V PASS -- proceed (6R correctly skipped)
      - 6V FAIL -- STOP (fix issues manually and re-run 6V first)
      - 6V CONDITIONAL PASS with only 6V-C issues -- proceed (6R cannot fix 6V-C)
@@ -77,15 +79,15 @@ Adapt to your `plancasting/tech-stack.md`: CSS framework, UI library, component 
 ## Refinement Categories
 
 ### Category O: Objective Defects (Auto-Fix)
-Issues with a clear right/wrong answer: WCAG contrast failures, invisible text, layout overflow, clipped content, skeleton mismatch, missing focus rings, z-index errors, dark mode unstyled sections, broken images, small touch targets. MUST fix all.
+Issues with a clear right/wrong answer: WCAG contrast failures, invisible text, layout overflow, clipped content, skeleton mismatch, missing focus rings, z-index errors, dark mode unstyled sections, broken images, small touch targets. must fix all.
 
 **Category boundary guideline**: If the feature is BROKEN or INACCESSIBLE (violates standards, prevents functionality), it's Category O. If it WORKS but FEELS UNPOLISHED (lacks feedback, delight, or visual consistency), it's Category E. Examples -- Category O: missing focus ring (WCAG violation), layout overflow (content hidden). Category E: missing hover state (button works but lacks feedback), no page entry animation.
 
 ### Category E: Enhancement (Pattern-Based, Apply Where Feasible)
-Category E is discretionary — skip if the enhancement conflicts with the design system, has negligible visual impact, or risks regression. Follow established codebase patterns: missing hover states, missing page transitions, inconsistent spacing, weak empty states (enhance with icon or CTA using existing design assets -- do NOT source new illustrations; document as Category D if none exist), flat typography hierarchy, missing card depth, plain loading states, inconsistent form inputs. Apply then verify visually.
+Category E is discretionary — skip if the enhancement conflicts with the design system, has negligible visual impact, or risks regression. Follow established codebase patterns: missing hover states, missing page transitions, inconsistent spacing, weak empty states (enhance with icon or CTA using existing design assets -- do not source new illustrations; document as Category D if none exist), flat typography hierarchy, missing card depth, plain loading states, inconsistent form inputs. Apply then verify visually.
 
 ### Category D: Design Elevation (Document Only)
-Subjective improvements for human review: font pairing, color palette, hero visual impact, illustration style, micro-interaction opportunities, overall aesthetic direction. Document as suggestions -- do NOT apply. Category D suggestions are for POST-LAUNCH review and do NOT block Stage 7 deployment.
+Subjective improvements for human review: font pairing, color palette, hero visual impact, illustration style, micro-interaction opportunities, overall aesthetic direction. Document as suggestions -- do not apply. Category D suggestions are for POST-LAUNCH review and do not block Stage 7 deployment.
 
 ## Phase 1: Lead Visual Audit
 
@@ -121,20 +123,20 @@ Complete BEFORE spawning teammates:
 Teammates 1 and 2 run in **parallel**. Teammate 3 runs **AFTER** both complete.
 
 ### Teammate 1: "objective-defect-fixer"
-Fix ALL Category O issues. Use ONLY existing design tokens. **Exception**: 6P may modify `design-tokens.ts` ONLY for: (a) adding a missing size to an existing scale, (b) correcting a token value to meet WCAG AA contrast, or (c) fixing a broken variable reference. Do NOT change design direction. Prefer adjusting text color over background for contrast. Include dark mode variants. NEVER change functional behavior. Verify visually with Playwright. Run typecheck + lint after each batch.
+Fix ALL Category O issues. Use ONLY existing design tokens. **Exception**: 6P may modify `design-tokens.ts` ONLY for: (a) adding a missing size to an existing scale, (b) correcting a token value to meet WCAG AA contrast, or (c) fixing a broken variable reference. Do not change design direction. Prefer adjusting text color over background for contrast. Include dark mode variants. never change functional behavior. Verify visually with Playwright. Run typecheck + lint after each batch.
 
 ### Teammate 2: "enhancement-applier"
 Apply ALL Category E enhancements following `design-guidelines.md` (or existing design patterns if unavailable). Group similar enhancements. Focus on HIGH-IMPACT moments for animation. Maximum 3 animations per page. Work within existing type scale. Verify with before/after screenshots.
 
 ### Teammate 3: "responsive-cross-theme-verifier" (after 1+2)
-Re-verify ALL modified screens at 1440px, 768px, 375px plus dark mode. Flag regressions immediately (do NOT fix). Compare with before screenshots. Test mobile touch interactions. Verify performance not degraded. Focus on HIGHEST-IMPACT screens first: (1) landing/home, (2) dashboard, (3) primary feature, (4) auth pages, (5) settings/billing.
+Re-verify ALL modified screens at 1440px, 768px, 375px plus dark mode. Flag regressions immediately (do not fix). Compare with before screenshots. Test mobile touch interactions. Verify performance not degraded. Focus on HIGHEST-IMPACT screens first: (1) landing/home, (2) dashboard, (3) primary feature, (4) auth pages, (5) settings/billing.
 
 ## Phase 3: Integration & Report
 
 1. Collect teammate results. Check for regressions from Teammate 3.
-2. Fix regressions (a regression is a NEGATIVE SIDE EFFECT: visual breakage of unrelated elements, functional breakage, accessibility breakage, or performance degradation -- intentional enhancements are NOT regressions): revert specific change, re-apply with responsive-safe approach, re-verify. **Max iteration guard**: If regressions persist after 2 revert-and-reapply cycles, document as known limitation.
+2. Fix regressions (a regression is a NEGATIVE SIDE EFFECT: visual breakage of unrelated elements, functional breakage, accessibility breakage, or performance degradation -- intentional enhancements are not regressions): revert specific change, re-apply with responsive-safe approach, re-verify. **Max iteration guard**: If regressions persist after 2 revert-and-reapply cycles, document as known limitation.
 3. Run full validation: `bun run typecheck`, `bun run lint`, `bun run test`. ALL must pass.
-4. Generate Category D design brief using `frontend-design` skill (if available). Save as `./plancasting/_audits/visual-polish/design-elevation-brief.md`. Category D is for HUMAN REVIEW ONLY -- do NOT implement.
+4. Generate Category D design brief using `frontend-design` skill (if available). Save as `./plancasting/_audits/visual-polish/design-elevation-brief.md`. Category D is for HUMAN REVIEW ONLY -- do not implement.
 5. Generate Visual Polish Report at `./plancasting/_audits/visual-polish/report.md`.
 6. Save comparison screenshots to `./screenshots/visual-polish/before/` and `./screenshots/visual-polish/after/`. **Before/after screenshots are required** for every change in the report. Note: Screenshot directories are for local reference. Add to `.gitignore` -- do not commit large binary files.
 
@@ -161,32 +163,32 @@ Re-verify ALL modified screens at 1440px, 768px, 375px plus dark mode. Flag regr
 ## Next Steps
 
 - PASS or CONDITIONAL PASS: proceed to Stage 7 (Deploy) -> 7V (Production Smoke) -> 7D (User Guide)
-- FAIL: investigate regressions, fix, revalidate. Do NOT deploy until 6P PASS or CONDITIONAL PASS.
+- FAIL: investigate regressions, fix, revalidate. Do not deploy until 6P PASS or CONDITIONAL PASS.
 - If visual quality needs a full overhaul rather than polish, run Stage 6P-R instead (revert any 6P changes first with `git revert`).
 
 ## Critical Rules
 
-1. NEVER change functional behavior -- only visual presentation. If a fix would alter routing, data flow, API calls, auth, or form submission logic, it is OUT OF SCOPE.
-2. NEVER replace design system components with custom implementations. Work within the UI library's API. Use CSS overrides or wrapper components, not replacements.
-3. NEVER introduce new fonts without human approval (Category D).
-4. NEVER introduce new dependencies without checking `package.json`. Use CSS-only animations if no animation library is installed.
-5. ALWAYS take before/after screenshots for every change.
-6. ALWAYS run validation (typecheck + lint + test) after fixes.
-7. ALWAYS work at all 3 breakpoints (1440, 768, 375).
+1. never change functional behavior -- only visual presentation. If a fix would alter routing, data flow, API calls, auth, or form submission logic, it is OUT OF SCOPE.
+2. never replace design system components with custom implementations. Work within the UI library's API. Use CSS overrides or wrapper components, not replacements.
+3. never introduce new fonts without human approval (Category D).
+4. never introduce new dependencies without checking `package.json`. Use CSS-only animations if no animation library is installed.
+5. always take before/after screenshots for every change.
+6. always run validation (typecheck + lint + test) after fixes.
+7. always work at all 3 breakpoints (1440, 768, 375).
 8. Teammate 3 scope management: focus on HIGHEST-IMPACT screens first in this priority order: (1) landing/home, (2) dashboard, (3) primary feature, (4) auth pages, (5) settings/billing. Verify each at all 3 breakpoints + dark mode. Mark unverified screens as "SPOT-CHECK ONLY".
-9. ALWAYS respect dark mode pattern -- every color change needs a dark mode variant. If the project doesn't support dark mode, don't add it.
+9. always respect dark mode pattern -- every color change needs a dark mode variant. If the project doesn't support dark mode, don't add it.
 10. Category O before Category E. Fix defects first, then enhance.
 11. The `frontend-design` skill guides INTENT, not implementation. Translate aesthetic vision to design system tokens.
 12. Maximum 3 animation additions per page. Restraint is elegance.
 13. AVOID modifying shared UI primitives directly unless fixing Category O or applying global Category E. Prefer page-level or layout-level overrides for page-specific changes.
 14. If 6R report shows FAIL, STOP. Return to 6R first.
 15. WCAG AA contrast ratios are non-negotiable (4.5:1 normal text, 3:1 large text).
-16. ALWAYS preserve accessibility -- focus rings, aria labels, semantic HTML, keyboard nav. If an enhancement would compromise any of these, skip it.
-17. The lead invokes `/frontend-design`, teammates read the output. Teammates do NOT invoke the skill themselves.
+16. always preserve accessibility -- focus rings, aria labels, semantic HTML, keyboard nav. If an enhancement would compromise any of these, skip it.
+17. The lead invokes `/frontend-design`, teammates read the output. Teammates do not invoke the skill themselves.
 18. Teammates 1 and 2 run in parallel, Teammate 3 runs AFTER both complete.
 19. ALL Playwright browser interactions require the dev server to be running. If it crashes, the lead must restart it.
 20. Test user login required for authenticated page screenshots.
-21. ALWAYS check for console errors during screenshots. Log any errors in the report.
+21. always check for console errors during screenshots. Log any errors in the report.
 22. Ensure NO two teammates modify the same file.
 
 ## Output Specification

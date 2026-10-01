@@ -1,9 +1,21 @@
 {
-  "description": "Transmute Framework gate enforcement — validates prerequisites before stage execution",
+  "description": "Transmute Framework gate enforcement — validates prerequisites before stage execution (exit 2 blocks; covers both Skill-tool invocation and direct /transmuter:<stage> input)",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-prerequisites.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "matcher": "^(transmuter:)?(tech-stack|brd|prd|validate-specs|scaffold|implement|audit-completeness|audit-security|audit-a11y|optimize|docs|refactor|seed-data|harden|prelaunch|verify|remediate|polish|redesign|smoke|user-guide|feedback|maintain)$",
         "hooks": [
           {
             "type": "command",

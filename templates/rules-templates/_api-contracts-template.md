@@ -1,11 +1,11 @@
 ---
 description: Template for API contract rules — ensures frontend types match backend responses; coordinates field mapping, projections, and type alignment between frontend and backend.
-globs: ["[BACKEND_DIR]/**", "[HOOKS_DIR]/**", "[FRONTEND_TYPES_DIR]/**"]
+paths: ["[BACKEND_DIR]/**", "[HOOKS_DIR]/**", "[FRONTEND_TYPES_DIR]/**"]
 ---
 
 # API Contract Rules
 
-> **This is a template.** Stage 3 (Scaffold Generation) reads this template and generates `.claude/rules/api-contracts.md` with actual project values. Stage 3 MUST: (1) replace ALL `[BRACKETED]` placeholder markers (e.g., `[BACKEND_DIR]`, `[HOOKS_DIR]`, `[FRONTEND_TYPES_DIR]`, `[TYPECHECK_COMMAND]` — use the project's TypeScript check command from CLAUDE.md Part 2 § Commands), (2) replace each `<!-- TODO -->` HTML comment with a proper `<!-- Source: Stage 3 | Evidence: [ref] | Confidence: HIGH -->` annotation (`// TODO:` inside code blocks are code example placeholders — replace those with actual code patterns), (3) update the globs in frontmatter with actual paths, and (4) remove ALL other HTML comments — these are template-only guidance that must not appear in generated rule files. Stage 4 confirms replacements are complete. After Stage 3 renders this template, verify no placeholders remain: `grep -nE '\[[A-Z_]+\]' .claude/rules/api-contracts.md` — the output should be empty (all `[BRACKETED]` markers replaced with actual values). **Rule count limit**: The rendered output must contain ≤ 15 rules (individual bullet-point directives). This template contains conditional sections — omit sections that don't apply to the selected tech stack. If the rendered output exceeds 15 rules after omitting inapplicable sections, split into two rule files (e.g., `api-contracts.md` → `api-contracts.md` + `api-contracts-versioning.md`) and update CLAUDE.md Part 2 § Path-Scoped Rules accordingly. Do not edit this template directly — edit the generated `.claude/rules/api-contracts.md` instead.
+> **This is a template.** Stage 3 (Scaffold Generation) reads this template and generates `.claude/rules/api-contracts.md` with actual project values. Stage 3 must: (1) replace ALL `[BRACKETED]` placeholder markers (e.g., `[BACKEND_DIR]`, `[HOOKS_DIR]`, `[FRONTEND_TYPES_DIR]`, `[TYPECHECK_COMMAND]` — use the project's TypeScript check command from CLAUDE.md Part 2 § Commands), (2) replace each `<!-- TODO -->` HTML comment with a proper `<!-- Source: Stage 3 | Evidence: [ref] | Confidence: HIGH -->` annotation (`// TODO:` inside code blocks are code example placeholders — replace those with actual code patterns), (3) update the `paths` patterns in frontmatter with actual project paths, and (4) remove ALL other HTML comments — these are template-only guidance that must not appear in generated rule files. Stage 4 confirms replacements are complete. After Stage 3 renders this template, verify no placeholders remain: `grep -nE '\[[A-Z_]+\]' .claude/rules/api-contracts.md` — the output should be empty (all `[BRACKETED]` markers replaced with actual values). **Rule count limit**: The rendered output must contain ≤ 15 rules (individual bullet-point directives). This template contains conditional sections — omit sections that don't apply to the selected tech stack. If the rendered output exceeds 15 rules after omitting inapplicable sections, split into two rule files (e.g., `api-contracts.md` → `api-contracts.md` + `api-contracts-versioning.md`) and update CLAUDE.md Part 2 § Path-Scoped Rules accordingly. Do not edit this template directly — edit the generated `.claude/rules/api-contracts.md` instead.
 
 ## Type Alignment
 
@@ -36,7 +36,7 @@ globs: ["[BACKEND_DIR]/**", "[HOOKS_DIR]/**", "[FRONTEND_TYPES_DIR]/**"]
 
 <!-- TODO: Stage 3 — replace with actual field mapping examples from the project. Source: tech-stack.md | Confidence: HIGH -->
 
-- When the backend returns renamed or computed fields, hooks MUST map them explicitly.
+- When the backend returns renamed or computed fields, hooks must map them explicitly.
 - Never use `as unknown as Type` casts to force type compatibility.
 - Document any field name divergence between backend and frontend with a comment.
 

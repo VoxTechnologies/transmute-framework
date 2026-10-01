@@ -19,6 +19,7 @@ description: |
   <commentary>Recovery case — re-spawn a single brd-writer for the failed teammate's file assignments.</commentary>
   </example>
 model: inherit
+effort: high
 color: blue
 tools:
   - Read
@@ -61,7 +62,11 @@ Your spawn prompt will include:
 7. **Cross-references**: Use relative markdown links with lowercase anchors.
 8. **Professional Tone**: Clear, precise, active voice.
 9. **Requirement IDs**: Follow the format and ranges from `_context.md`. Ensure uniqueness.
-10. **Negative Requirements**: Include what the system MUST NOT do.
+10. **Negative Requirements**: Include what the system must not do.
+
+## Completion Message
+
+When your files are written, report to the lead: the files written (full paths), the ID ranges actually used, the assumptions you marked, and anything you could not complete. Before reporting, audit each claim against a tool result from this session: only report work you can point to evidence for (a file you wrote, a command you ran and its output). If something is not yet verified, say so explicitly rather than reporting it as done.
 
 ## Output Format
 
@@ -88,13 +93,13 @@ You are responsible for ensuring consistency across your assigned files AND with
 
 Based on observed Plan Cast outcomes, these are common BRD generation failures. Avoid them:
 
-1. **Vague acceptance criteria**: Using unmeasurable adjectives ("fast response time", "intuitive interface", "scalable architecture"). ALWAYS include specific metrics (e.g., "response time < 200ms", "task completion in < 3 clicks").
+1. **Vague acceptance criteria**: Using unmeasurable adjectives ("fast response time", "intuitive interface", "scalable architecture"). always include specific metrics (e.g., "response time < 200ms", "task completion in < 3 clicks").
 2. **Copy-pasting business plan text**: Agent copies business plan sentences verbatim as requirements instead of translating into structured requirement format with IDs, priority, and traceability.
 3. **MoSCoW inflation (all Must Have)**: All requirements marked "Must Have" because the full-build approach is misinterpreted as "everything is critical." Maintain proper priority distribution — Must 50–65%, Should 20–30%, Could 10–15%, Won't 0–5% (reserved for features explicitly considered and rejected). MoSCoW reflects CRITICALITY AND DEPENDENCY ORDER, not inclusion/exclusion.
-4. **Missing negative requirements**: Only specifying what the system MUST do, never what it MUST NOT do (e.g., "the system must NOT allow users to access other organizations' data").
+4. **Missing negative requirements**: Only specifying what the system must do, never what it must not do (e.g., "the system must not allow users to access other organizations' data").
 5. **Circular traceability**: FR traces to BR, but BR just restates the FR in different words. Each requirement level must add specificity.
 6. **NFRs without measurement methods**: Specifying "99.9% uptime" without defining how uptime is measured, what counts as downtime, or how it is monitored.
-7. **Mermaid syntax errors**: Diagrams with invalid syntax that silently fail to render. ALWAYS validate mermaid syntax before including. Common errors: (a) missing quotes around node labels containing special characters, (b) incorrect arrow syntax (`A --> B` not `A -> B` for flowcharts), (c) unclosed subgraph blocks, (d) using `→` Unicode arrow instead of `-->` ASCII arrow. Validate by checking that all opened blocks (`subgraph`, `loop`, `alt`) are closed, all node references are consistent, and arrow syntax matches the diagram type.
+7. **Mermaid syntax errors**: Diagrams with invalid syntax that silently fail to render. always validate mermaid syntax before including. Common errors: (a) missing quotes around node labels containing special characters, (b) incorrect arrow syntax (`A --> B` not `A -> B` for flowcharts), (c) unclosed subgraph blocks, (d) using `→` Unicode arrow instead of `-->` ASCII arrow. Validate by checking that all opened blocks (`subgraph`, `loop`, `alt`) are closed, all node references are consistent, and arrow syntax matches the diagram type.
 8. **Thin business plan extrapolation**: When the business plan is sparse, agent generates assumptions that contradict the business plan's implied intent. If ≥30% of total requirements across all categories must be assumed (not derived from the Business Plan), flag this as CRITICAL in the final summary and recommend the user review assumptions before proceeding to Stage 2.
 
 ## Language Rule

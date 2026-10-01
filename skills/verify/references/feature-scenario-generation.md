@@ -3,23 +3,23 @@
 ## Shared Reference for Stages 6V and 7V
 
 > **WARNING**:
-> - **DO NOT PASTE THIS FILE'S CONTENTS INTO CLAUDE CODE AS A PROMPT.** This file is read by the 6V and 7V agents during their scenario generation phases (Phase 1 for 6V, Phase 0 for 7V). They read it as a reference file using their file-reading tools — it is NOT pasted as a prompt. See `prompt_visual_functional_verification.md` or `prompt_production_smoke_verification.md` for the actual prompts to paste.
-> - **DO NOT MODIFY THIS FILE** in project copies. It is project-agnostic and shared across all Transmute projects. Updates should only be made in the Transmute Framework Template repository.
+> - **Do not paste this FILE'S CONTENTS INTO CLAUDE CODE AS A PROMPT.** This file is read by the 6V and 7V agents during their scenario generation phases (Phase 1 for 6V, Phase 0 for 7V). They read it as a reference file using their file-reading tools — it is not pasted as a prompt. See `prompt_visual_functional_verification.md` or `prompt_production_smoke_verification.md` for the actual prompts to paste.
+> - **Do not modify this FILE** in project copies. It is project-agnostic and shared across all Transmute projects. Updates should only be made in the Transmute Framework Template repository.
 >
-> **Scenario Generation**: Stage 6V reads this file during Phase 1 (Lead Analysis); Stage 7V reads it during Phase 0 (Scenario Generation). The agent generates scenarios dynamically by reading the PRD, codebase, and this guide. Do NOT create scenarios manually. This file MUST be copied to `./plancasting/transmute-framework/` in the project directory before running 6V or 7V (see execution-guide.md § "Pre-6V Setup" for copy instructions).
+> **Scenario Generation**: Stage 6V reads this file during Phase 1 (Lead Analysis); Stage 7V reads it during Phase 0 (Scenario Generation). The agent generates scenarios dynamically by reading the PRD, codebase, and this guide. Do not create scenarios manually. This file must be copied to `./plancasting/transmute-framework/` in the project directory before running 6V or 7V (see execution-guide.md § "Pre-6V Setup" for copy instructions).
 
-This file is a **reference guide** for agents running 6V/7V. Agents read it to understand scenario types and generation algorithms, then dynamically generate the actual scenario matrix from the PRD and codebase. This file itself is NOT modified during execution; the generated matrix is saved to the audits directory.
+This file is a **reference guide** for agents running 6V/7V. Agents read it to understand scenario types and generation algorithms, then dynamically generate the actual scenario matrix from the PRD and codebase. This file itself is not modified during execution; the generated matrix is saved to the audits directory.
 
 This document defines how to dynamically generate comprehensive test scenarios from PRD specifications and codebase analysis. It is referenced by:
 - **Stage 6V** (Visual & Functional Verification) — generates FULL scenario matrix
 - **Stage 7V** (Production Smoke Verification) — generates SMOKE scenario matrix (P0/P1 only)
 
-Note: Stage 6R (Runtime Remediation) uses the 6V scenario matrix output (`./plancasting/_audits/visual-verification/feature-scenario-matrix.md`) to verify fixes. 6R does NOT re-generate the scenario matrix — it reuses the 6V matrix to re-test fixed issues.
+Note: Stage 6R (Runtime Remediation) uses the 6V scenario matrix output (`./plancasting/_audits/visual-verification/feature-scenario-matrix.md`) to verify fixes. 6R does not re-generate the scenario matrix — it reuses the 6V matrix to re-test fixed issues.
 
 **Stage usage summary**:
 - **Stage 6V**: Reads this file during Phase 1 to generate the FULL scenario matrix (all 5 scenario types, P0-P3)
 - **Stage 7V**: Reads this file during Phase 0 to generate the SMOKE scenario matrix (FS + AS types only, P0-P1, max 15 scenarios)
-- **Stage 6R**: Does NOT read this file — it uses the 6V scenario matrix output at `./plancasting/_audits/visual-verification/feature-scenario-matrix.md` to verify fixes
+- **Stage 6R**: Does not read this file — it uses the 6V scenario matrix output at `./plancasting/_audits/visual-verification/feature-scenario-matrix.md` to verify fixes
 
 ## Abbreviation Glossary
 
@@ -128,7 +128,7 @@ Create a directed graph of features and their dependencies. Dependencies are ext
 **Cycle detection**: After building the graph, topologically sort all features. If a cycle is detected (e.g., FEAT-A → FEAT-B → FEAT-C → FEAT-A):
 1. Report as ERROR with the full cycle description (list all edges in the cycle and their evidence source — explicit PRD dependency, user story reference, or inferred from state transitions).
 2. Attempt to resolve by checking if any inferred (non-explicit) edges in the cycle are false positives — if an edge was added by the inference algorithm (Step 3, item 3/4) but has weak evidence, remove it and re-attempt topological sort. Document the removal in the scenario matrix with a WARNING.
-3. If all edges in the cycle have strong evidence (explicit in PRD dependency fields or user story prerequisites), halt and ask the operator: the cycle indicates a PRD inconsistency requiring human review. Do NOT silently break strongly-evidenced edges — removing a real dependency distorts the scenario execution order and may mask integration failures. If a cycle is detected, the operator has three options: (a) reorder features to break the cycle (preferred), (b) merge the cyclic features into a single combined scenario, or (c) accept the cycle and test in declared order with a documented note.
+3. If all edges in the cycle have strong evidence (explicit in PRD dependency fields or user story prerequisites), halt and ask the operator: the cycle indicates a PRD inconsistency requiring human review. Do not silently break strongly-evidenced edges — removing a real dependency distorts the scenario execution order and may mask integration failures. If a cycle is detected, the operator has three options: (a) reorder features to break the cycle (preferred), (b) merge the cyclic features into a single combined scenario, or (c) accept the cycle and test in declared order with a documented note.
 
 **Transitive reduction** (recommended): If FEAT-A → FEAT-B → FEAT-C and also FEAT-A → FEAT-C, the direct FEAT-A → FEAT-C edge is redundant (implied by transitivity). Remove it to simplify the graph. This reduces complexity for scenario ordering without losing coverage, and prevents unnecessary blocking cascades during execution (an early failure blocks fewer downstream scenarios).
 
@@ -164,7 +164,7 @@ For each User Flow (UF-NNN):
 3. **Extract happy path**: Convert the Mermaid flowchart steps into a linear test sequence
 4. **Identify auth context**: Does the flow start unauthenticated? Which role is needed?
 5. **Identify entity prerequisites**: What entity states must exist before the flow starts?
-6. **Map to screens**: For each step in the user flow, identify the screen specification (SC-NNN) from `prd/08-screen-specifications.md`. If a user flow step does not map to a screen spec (because the PRD does not specify UI for that step), note it as a gap: "UF-NNN step N maps to [business logic] but no SC-NNN available — infer screen structure from codebase analysis (Step 2)." Do NOT invent screen specs — only reference what exists in the PRD. If a screen spec (SC-NNN) exists in the PRD but is not referenced by any user flow, include it as a standalone page-load scenario to ensure full screen coverage.
+6. **Map to screens**: For each step in the user flow, identify the screen specification (SC-NNN) from `prd/08-screen-specifications.md`. If a user flow step does not map to a screen spec (because the PRD does not specify UI for that step), note it as a gap: "UF-NNN step N maps to [business logic] but no SC-NNN available — infer screen structure from codebase analysis (Step 2)." Do not invent screen specs — only reference what exists in the PRD. If a screen spec (SC-NNN) exists in the PRD but is not referenced by any user flow, include it as a standalone page-load scenario to ensure full screen coverage.
 7. **Identify buttons/actions**: What buttons are clicked, what forms are filled at each step?
 8. **Define expected outcomes**: What should happen after each step? (page transition, data change, toast, redirect)
 
@@ -294,7 +294,7 @@ Example: If 6V generates FS-001, FS-003, FS-007, FS-012 for P0 features, 7V renu
   2. Remove P2 negative variants for non-critical features (error paths are important but less critical than happy paths; keep P0/P1 negative scenarios)
   3. Remove P2 Entity State and Role Permission scenarios, keeping only Feature Scenarios for P2 (ES/RS are detailed behavior tests; FS are end-to-end workflows with higher signal-to-noise ratio)
   4. Consolidate related Feature Scenarios that share the same feature into multi-step test scenarios (reduces redundancy without reducing feature coverage)
-  5. **6V only** (does NOT reduce count — skip to step 6 for 7V): Split the test execution across additional teammates rather than reducing coverage further — parallelism before cutting tests. If teammate capacity is exhausted and count still exceeds the cap, proceed to step 6.
+  5. **6V only** (does not reduce count — skip to step 6 for 7V): Split the test execution across additional teammates rather than reducing coverage further — parallelism before cutting tests. If teammate capacity is exhausted and count still exceeds the cap, proceed to step 6.
      - **7V note**: 7V is single-agent and cannot split. If the count is already ≤15 after initial P0+P1 filtering (P3 scenarios are never generated for 7V), no further trimming is needed — proceed directly to execution. Otherwise, continue to step 6.
   6. **Terminal condition** (use only if product scope is extremely large and timeline is constrained): If count still exceeds the verification scenario cap after all steps, cap at the limit by keeping ONLY Feature Scenarios (P0+P1+P2) + Auth Context (P0+P1) + Negative Scenarios for P0 features only. Remove all Role Permission and Entity State scenarios entirely. Document in the scenario matrix: "Coverage is intentionally limited due to scope — full E2E test suite recommended post-launch."
 
@@ -322,7 +322,7 @@ Apply trimming steps sequentially — check count after each step. **STOP** appl
 - Generate Auth Context Scenarios for unauthenticated + 1 authenticated role only. For Auth Context, test one representative cell per route: the primary role expected to access that route (e.g., admin dashboard with admin, user settings with regular user), rather than testing every route × every role combination. Also test the unauthenticated column (all routes as unauthenticated user — expect redirect to /login or error page).
 - Skip Entity State and Role Permission scenarios entirely (too detailed for smoke test).
 - **Hard cap: 15 scenarios** (not a recommendation — a limit). This ensures 7V completes within 30–45 minutes total (at ~2 min per scenario + scenario generation + infrastructure checks). If trimming produces >15 scenarios, apply the terminal condition (step 6 in "Prioritize and Filter" above) to reduce to 15. If the product scope is so large that trimming to 15 omits critical P1 functionality, escalate to the operator — they may split verification across two 7V runs or extend the session time budget.
-- **Selection criteria**: (1) P0 Feature Scenarios first (typically 5-8), (2) P1 Feature Scenarios if space permits (top 3-5 by user impact), (3) Auth Context: test /login, /dashboard, /settings for unauthenticated and 1 authenticated role. Do NOT include Negative Scenarios in smoke tests — they're too detailed for production validation.
+- **Selection criteria**: (1) P0 Feature Scenarios first (typically 5-8), (2) P1 Feature Scenarios if space permits (top 3-5 by user impact), (3) Auth Context: test /login, /dashboard, /settings for unauthenticated and 1 authenticated role. Do not include Negative Scenarios in smoke tests — they're too detailed for production validation.
 
 ### Step 10: Save the Scenario Matrix
 
@@ -409,7 +409,7 @@ Test user assignments are primary defaults. Teammates testing Auth Context (AS) 
 ## Scenario Execution Rules
 
 1. **Run P0 scenarios first.** If a P0 scenario fails (e.g., Auth fails), mark ALL dependent scenarios as BLOCKED — don't waste time running them. More broadly, if ANY scenario fails, consult the Feature Dependency Graph to identify all transitively dependent scenarios and mark them as BLOCKED.
-   - **Exception for 7V (smoke scope)**: For 7V, use the Feature Dependency Graph to identify immediate dependents only. If Auth (FS-001) fails, mark as BLOCKED only scenarios that explicitly list Auth as a direct prerequisite. Do NOT transitively cascade — 7V's goal is quick validation, not exhaustive dependency tracing (e.g., if Dashboard depends on User Profile which depends on Auth, and Auth fails, mark only User Profile as BLOCKED — Dashboard is not blocked because it has an independent failure mode worth testing).
+   - **Exception for 7V (smoke scope)**: For 7V, use the Feature Dependency Graph to identify immediate dependents only. If Auth (FS-001) fails, mark as BLOCKED only scenarios that explicitly list Auth as a direct prerequisite. Do not transitively cascade — 7V's goal is quick validation, not exhaustive dependency tracing (e.g., if Dashboard depends on User Profile which depends on Auth, and Auth fails, mark only User Profile as BLOCKED — Dashboard is not blocked because it has an independent failure mode worth testing).
 2. **Use the Feature Dependency Graph** to determine execution order. A scenario for FEAT-012 (Deploy) cannot run before FEAT-003 (Project Management) passes.
 3. **Share entity state across scenarios when possible.** If FS-003 creates a project and FS-005 needs a project, use the same project — don't recreate. But ensure scenarios that MODIFY entities use separate instances.
 4. **Record button clicks and page transitions.** Every button clicked, every form filled, every page navigated to should be logged. This data feeds the link integrity and button action reports.
@@ -419,7 +419,7 @@ Test user assignments are primary defaults. Teammates testing Auth Context (AS) 
 
 ## Handling Flaky Scenarios
 
-Re-run a failing scenario once. If it passes on re-run, mark as "Flaky — investigate timing" and include in the report's flaky tests section. If both runs fail, mark as failed. Do not retry more than once. **Stage distinction**: For 6V (dev environment), flaky scenarios are informational — flag for investigation but do NOT block the gate and are EXCLUDED from the pass/fail percentage calculation. They appear in a separate "Flaky Scenarios" section of the report. For 7V (production smoke), a flaky scenario is a FAIL — production instability must be resolved before re-running 7V. Note: Flaky handling differs by stage. In 6V, flaky scenarios are excluded from the pass-rate denominator (informational). In 7V, flaky scenarios count as FAIL (production must be deterministic). This is intentional — see execution-guide.md § Gate Decision Outcomes. Don't exclude flaky scenarios from the matrix, but flag them for developer attention. Flaky scenarios often indicate:
+Re-run a failing scenario once. If it passes on re-run, mark as "Flaky — investigate timing" and include in the report's flaky tests section. If both runs fail, mark as failed. Do not retry more than once. **Stage distinction**: For 6V (dev environment), flaky scenarios are informational — flag for investigation but do not block the gate and are EXCLUDED from the pass/fail percentage calculation. They appear in a separate "Flaky Scenarios" section of the report. For 7V (production smoke), a flaky scenario is a FAIL — production instability must be resolved before re-running 7V. Note: Flaky handling differs by stage. In 6V, flaky scenarios are excluded from the pass-rate denominator (informational). In 7V, flaky scenarios count as FAIL (production must be deterministic). This is intentional — see execution-guide.md § Gate Decision Outcomes. Don't exclude flaky scenarios from the matrix, but flag them for developer attention. Flaky scenarios often indicate:
 1. Missing waits/polling in the test (add `expect.poll()` or `expect.toPass()` for eventually-consistent backends)
 2. Race conditions in the app (add explicit wait states)
 3. External service latency (mock external services for consistent timing)

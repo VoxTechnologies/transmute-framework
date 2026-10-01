@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A **Claude Code plugin**, not an application. Every file is markdown prompt engineering plus one bash hook script. No source code, no `package.json`, no build step, no dependency install, no automated test suite.
 
-The plugin drives a 25-stage pipeline (23 automated skills, 2 manual stages) that turns a business plan into a deployed product. Its doctrine is the **Full-Build Approach**: every feature in the plan gets built, and `P0→P3` sets build *order*, never build *scope*. Reject any edit that introduces MVP-style deferral, phasing, or feature cutting.
+The plugin drives a 26-stage pipeline (23 automated skills, Stage 5V as a mode of one of them, one automated check (Stage 4) and one stage that is manual by default (Stage 7)) that turns a business plan into a deployed product. Its doctrine is the **Full-Build Approach**: every feature in the plan gets built, and `P0→P3` sets build *order*, never build *scope*. Reject any edit that introduces MVP-style deferral, phasing, or feature cutting.
 
 The plugin is named `transmuter`; the repo and framework are named "Transmute". Commands are therefore `/transmuter:cast` and `/transmuter:<stage>`. That mismatch shipped as a user-facing bug in v3.0.0 — every documented command matched no installed plugin until v3.0.1 fixed it.
 
 ## Commands
 
-Nothing to build or lint. To validate a change:
+Run `scripts/conformance.sh` (static, seconds) after any change, and `scripts/conformance.sh --live` before a release — it loads the plugin with `claude -p` in a temp directory and checks routing and the gate hook. `examples/sample-plan/` is the fixture business plan. To validate a change by hand:
 
 ```bash
 # Load the plugin for one session, from inside a test project directory
@@ -38,9 +38,9 @@ A test project needs a business plan at `plancasting/businessplan/*.md` (or `.pd
 | `agents/*.md` (6 others) | Teammates spawned by skills, never invoked directly |
 | `skills/<stage>/` | One directory per stage, two-file pattern (below) |
 | `templates/` | Files copied into generated projects |
-| `hooks/` | Live gate-enforcement hook — **not** `.claude-plugin/hooks/`, which is stale |
+| `hooks/` | Gate-enforcement hook: `PreToolUse` (Skill tool) and `UserPromptExpansion` (direct `/transmuter:<stage>` input), blocking with exit 2 |
 
-Each skill splits into `SKILL.md` (always loaded: prerequisites, framing, flow) and `references/<stage>-detailed-guide.md` (loaded on demand via `${CLAUDE_SKILL_ROOT}`: spawn prompts, report templates, gate tables). Keep the split. Use `${CLAUDE_SKILL_ROOT}` and `${CLAUDE_PLUGIN_ROOT}`; never hardcode paths.
+Each skill splits into `SKILL.md` (always loaded: prerequisites, framing, flow) and `references/<stage>-detailed-guide.md` (loaded on demand via `${CLAUDE_SKILL_DIR}`: spawn prompts, report templates, gate tables). Keep the split. Use `${CLAUDE_SKILL_DIR}` (the only skill-directory variable Claude Code substitutes — `${CLAUDE_SKILL_ROOT}` does not exist) and `${CLAUDE_PLUGIN_ROOT}`; never hardcode paths. Command arguments are 0-based (`$0` is the first). Hooks block with exit code 2; exit 1 is non-blocking. `.claude/rules/*.md` are scoped with `paths:`, not `globs:`. Every skill and agent declares `effort:`; the values are explained in `templates/execution-guide.md` § Model Specifications.
 
 ## Before calling a stage change complete
 
