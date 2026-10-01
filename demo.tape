@@ -16,7 +16,7 @@ Enter
 Sleep 1s
 
 # Pipeline output
-Type "# ⚡ Transmute Framework v3.0.0 — Plan Casting Pipeline"
+Type "# ⚡ Transmute Framework v3.2.0 — Plan Casting Pipeline"
 Enter
 Sleep 400ms
 Type "# "
@@ -33,11 +33,13 @@ Type "# │  Stage 2B: Spec Validation        ✅ Done   │"
 Enter
 Type "# │  Stage 3: Scaffold Generation     ✅ Done   │"
 Enter
-Type "# │  Stage 4: CLAUDE.md Verification  ✅ Done   │"
+Type "# │  Stage 4: CLAUDE.md Check (auto)  ✅ Done   │"
 Enter
 Type "# │  Stage 5: Feature Implementation  ✅ Done   │"
 Enter
 Type "# │  Stage 5B: Implementation Audit   ✅ Done   │"
+Enter
+Type "# │  Stage 5V: Early Runtime Check    ✅ Done   │"
 Enter
 Type "# │  Stage 6A: Security Audit         ✅ Done   │"
 Enter
