@@ -14,6 +14,10 @@
 #   MAX_TURNS    per stage (default: 300)
 #   EXTRA_PROMPT text appended to every stage invocation (operator answers,
 #                dry-run instructions, etc.)
+#   ACCEPT_ASSUMPTIONS=1  after Stage 1, mark the BRD assumptions as reviewed
+#                (`Operator reviewed: YES`). Only for fixture plans such as
+#                examples/sample-plan, which are deliberately thin: without it
+#                the Stage 1 gate stops the trial before Stage 2.
 #
 # Output: <project-dir>/plancasting/_trial/<stage>.json (full result),
 #         <project-dir>/plancasting/_trial/usage.tsv (one row per stage).
@@ -28,6 +32,7 @@ PLUGIN_DIR="${PLUGIN_DIR:-$ROOT}"
 MODEL="${MODEL:-claude-opus-5-5}"
 MAX_TURNS="${MAX_TURNS:-300}"
 EXTRA_PROMPT="${EXTRA_PROMPT:-}"
+ACCEPT_ASSUMPTIONS="${ACCEPT_ASSUMPTIONS:-0}"
 export PATH="$HOME/.local/bin:$PATH"
 # In print mode Claude Code terminates background subagents (the stage teammates) after
 # 600 s unless this is 0 — measured 2026-10-02: Stage 1 lost 3 of 5 writers and ended with
@@ -85,8 +90,12 @@ EOF
   if [[ $rc -ne 0 ]]; then result="claude-exit-$rc"
   elif [[ -n "$exp" && ! -e "$exp" ]]; then result="missing:$exp"
   else result="ok"; fi
+  if [[ "$stage" == brd && "$result" == ok && "$ACCEPT_ASSUMPTIONS" == 1 ]]; then
+    sed -i.bak -E 's/(Operator reviewed[*]*:[*[:space:]]*)NO/\1YES/' plancasting/brd/_review-log.md && rm -f plancasting/brd/_review-log.md.bak
+    result="ok (assumptions accepted by ACCEPT_ASSUMPTIONS)"
+  fi
   printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$stage" "$started" "$dur" "$turns" "$inp" "$out" "$cr" "$cc" "$result" >> "$TSV"
   echo "   $result  ${dur} min  turns=$turns  out=$out  cache_read=$cr"
-  [[ "$result" == "ok" ]] || { echo "stopping at $stage ($result); see plancasting/_trial/$stage.err" >&2; exit 1; }
+  [[ "$result" == ok* ]] || { echo "stopping at $stage ($result); see plancasting/_trial/$stage.err" >&2; exit 1; }
 done
 echo "trial complete"; column -t -s $'\t' "$TSV"

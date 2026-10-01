@@ -18,11 +18,13 @@ Operator answers for Stage 0 (use these instead of asking; if a question is not 
 - Deployment: manual. Credentials: write placeholder values (YOUR_*_HERE) into .env.local; do not validate keys.
 ```
 
+The plan is thin on purpose, so Stage 1 marks well over 30% of the BRD as assumptions (60% in the 2026-10-02 trial) and the Stage 1 gate stops the pipeline before Stage 2 until an operator reviews them. For a trial on this fixture, set `ACCEPT_ASSUMPTIONS=1`: the runner then sets `Operator reviewed: YES` in `plancasting/brd/_review-log.md` after Stage 1. Never use it on a real plan.
+
 Example:
 
 ```bash
 mkdir -p ~/trial && cp -R examples/sample-plan/plancasting ~/trial/ && cd ~/trial && git init -q
-EXTRA_PROMPT="$(sed -n '/^```text$/,/^```$/p' ~/transmute-framework/examples/sample-plan/README.md | sed '1d;$d')" \
+ACCEPT_ASSUMPTIONS=1 EXTRA_PROMPT="$(sed -n '/^```text$/,/^```$/p' ~/transmute-framework/examples/sample-plan/README.md | sed '1d;$d')" \
   ~/transmute-framework/scripts/trial-run.sh ~/trial tech-stack brd prd validate-specs scaffold
 ```
 

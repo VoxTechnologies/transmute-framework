@@ -82,6 +82,10 @@ run_hook() { echo "$1" | bash "$HOOK" >/dev/null 2>&1; echo $?; }
 [[ "$(run_hook '{"tool_name":"Skill","tool_input":{"skill":"feedback"}}')" == 0 ]] && pass "feedback (no prerequisites) passes" || fail "feedback should pass"
 mkdir -p plancasting/businessplan plancasting/_audits/spec-validation && touch plancasting/businessplan/plan.md plancasting/_audits/spec-validation/report.md plancasting/tech-stack.md
 [[ "$(run_hook '{"tool_name":"Skill","tool_input":{"skill":"brd"}}')" == 0 ]] && pass "brd passes with business plan + tech-stack.md" || fail "brd should pass once prerequisites exist"
+mkdir -p plancasting/brd && printf -- '- **Assumption volume**: 60.1%% (193 / 321)\n- **Operator reviewed**: NO\n' > plancasting/brd/_review-log.md
+[[ "$(run_hook '{"tool_name":"Skill","tool_input":{"skill":"prd"}}')" == 2 ]] && pass "prd blocked by the Stage 1 gate (assumptions >= 30%, not reviewed)" || fail "prd should block on unreviewed assumptions"
+sed -i.bak 's/\*\*Operator reviewed\*\*: NO/**Operator reviewed**: YES/' plancasting/brd/_review-log.md
+[[ "$(run_hook '{"tool_name":"Skill","tool_input":{"skill":"prd"}}')" == 0 ]] && pass "prd passes once the operator marks the assumptions reviewed" || fail "prd should pass with Operator reviewed: YES"
 printf 'TRANSMUTER_ANTHROPIC_API_KEY=YOUR_KEY_HERE\nRESEND_API_KEY=CHANGE_ME\n' > .env.local
 [[ "$(run_hook '{"tool_name":"Skill","tool_input":{"skill":"scaffold"}}')" == 2 ]] && pass "scaffold blocked on placeholder pipeline-infrastructure credential (red tier)" || fail "scaffold should block on red-tier placeholder"
 printf 'TRANSMUTER_ANTHROPIC_API_KEY=sk-ant-real\nRESEND_API_KEY=CHANGE_ME\n' > .env.local

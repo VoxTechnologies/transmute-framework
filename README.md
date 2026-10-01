@@ -307,6 +307,7 @@ Contributors: run `scripts/conformance.sh` before a release (`--live` also loads
 ### v3.2.1
 
 - A lead whose teammate spawn is refused (concurrency cap, rate or usage limit, a hook) now continues in smaller waves instead of stopping to ask the operator. Found in a trial run where a machine-local cap of three concurrent subagents stopped Stage 1 with a question. The rule is in the pipeline agent's Execution Model and in the generated project's `CLAUDE.md` § Safety-Critical Rules, so stages invoked directly follow it too
+- The gate hook now enforces the Stage 1 stop condition: `prd` and `validate-specs` are blocked while the BRD is 30% or more assumptions and `_review-log.md` does not say `Operator reviewed: YES`. In the 2026-10-02 trial the sample plan came out at 60% assumptions, Stage 2 ran for 51 minutes anyway, and Stage 2B could only end in FAIL. `scripts/trial-run.sh` gains `ACCEPT_ASSUMPTIONS=1` for fixture plans
 
 ### v3.2.0
 

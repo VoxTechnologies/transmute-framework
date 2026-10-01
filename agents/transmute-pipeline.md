@@ -118,7 +118,7 @@ For each stage:
 
 ### Stage 1 Gate (assumption volume)
 
-Stage 1 has no PASS/FAIL gate on requirement quality, but it has one stop condition: if `plancasting/brd/_review-log.md` § "Assumption Review Status" reports an assumption volume ≥ 30% and `Operator reviewed: YES` is not set, the business plan is too thin to build from. Mark Stage 1 `⏸ Awaiting operator review (assumptions ≥ 30%)` in `plancasting/_progress.md`, print the assumption percentage and the list of assumed requirements, and stop — do not run Stage 2 (Stage 2B would FAIL on the same marker anyway). The operator either revises the business plan and re-runs Stage 1, or reviews the assumptions and sets the marker, then runs `/transmuter:cast resume`.
+Stage 1 has no PASS/FAIL gate on requirement quality, but it has one stop condition: if `plancasting/brd/_review-log.md` § "Assumption Review Status" reports an assumption volume ≥ 30% and `Operator reviewed: YES` is not set, the business plan is too thin to build from. Mark Stage 1 `⏸ Awaiting operator review (assumptions ≥ 30%)` in `plancasting/_progress.md`, print the assumption percentage and the list of assumed requirements, and stop — do not run Stage 2 (Stage 2B would FAIL on the same marker anyway). The operator either revises the business plan and re-runs Stage 1, or reviews the assumptions and sets the marker, then runs `/transmuter:cast resume`. The gate hook enforces the same condition when `prd` or `validate-specs` is invoked directly.
 
 ### 5B Gate
 - **PASS** (zero remaining issues AND all tests pass — no regressions from 5B fixes) → proceed to Stage 6

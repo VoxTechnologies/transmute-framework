@@ -41,6 +41,19 @@ block() {
   exit 2
 }
 
+# Stage 1 stop condition (agents/transmute-pipeline.md § Stage 1 Gate). A plan whose BRD is
+# >= 30% assumptions fails Stage 2B unless the operator has reviewed them, so block Stage 2
+# up front instead of spending a PRD run on it. The marker is matched loosely because the
+# review log writes it as a bold list item ("- **Operator reviewed**: YES").
+assumption_gate() {
+  local log="./plancasting/brd/_review-log.md" pct
+  [[ -f "$log" ]] || return 0
+  pct=$(sed -n 's/.*Assumption volume[*]*:[*[:space:]]*\([0-9][0-9]*\)\(\.[0-9]*\)\{0,1\}%.*/\1/p' "$log" | head -1)
+  [[ -n "$pct" && "$pct" -ge 30 ]] || return 0
+  grep -qiE 'Operator reviewed[*]*:[*[:space:]]*YES' "$log" && return 0
+  block "$1 is stopped by the Stage 1 gate: the BRD is ${pct}% assumptions and $log does not say 'Operator reviewed: YES'. Revise the business plan and re-run Stage 1, or review the assumptions and set the marker."
+}
+
 # Define prerequisite checks for each stage
 case "$SKILL_NAME" in
   tech-stack)
@@ -65,6 +78,7 @@ case "$SKILL_NAME" in
     if [[ ! -d "./plancasting/brd" ]]; then
       block "Stage 2 (PRD) requires ./plancasting/brd/ from Stage 1. Run '/transmuter:cast brd' first."
     fi
+    assumption_gate "Stage 2 (PRD)"
     ;;
 
   validate-specs)
@@ -72,6 +86,7 @@ case "$SKILL_NAME" in
     if [[ ! -d "./plancasting/brd" ]] || [[ ! -d "./plancasting/prd" ]]; then
       block "Stage 2B (Spec Validation) requires both ./plancasting/brd/ and ./plancasting/prd/. Run Stages 1 and 2 first."
     fi
+    assumption_gate "Stage 2B (Spec Validation)"
     ;;
 
   scaffold)
