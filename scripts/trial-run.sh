@@ -29,6 +29,10 @@ MODEL="${MODEL:-claude-opus-5-5}"
 MAX_TURNS="${MAX_TURNS:-300}"
 EXTRA_PROMPT="${EXTRA_PROMPT:-}"
 export PATH="$HOME/.local/bin:$PATH"
+# In print mode Claude Code terminates background subagents (the stage teammates) after
+# 600 s unless this is 0 — measured 2026-10-02: Stage 1 lost 3 of 5 writers and ended with
+# 6 of 21 BRD files. Never run a stage with -p without it.
+export CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS="${CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS:-0}"
 
 cd "$PROJECT" || exit 2
 mkdir -p plancasting/_trial
@@ -39,8 +43,8 @@ TSV=plancasting/_trial/usage.tsv
 expected() {
   case "$1" in
     tech-stack) echo plancasting/tech-stack.md ;;
-    brd) echo plancasting/brd ;;
-    prd) echo plancasting/prd ;;
+    brd) echo plancasting/brd/_review-log.md ;;   # written in Phase 6, after every writer and reviewer
+    prd) echo plancasting/prd/18-glossary-and-cross-references.md ;;   # the last PRD file
     validate-specs) echo plancasting/_audits/spec-validation/report.md ;;
     scaffold) echo plancasting/_scaffold-manifest.md ;;
     implement) echo plancasting/_implementation-report.md ;;

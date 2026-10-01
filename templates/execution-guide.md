@@ -97,6 +97,8 @@ Note: Additional cloud accounts, API keys, and tool installations for the produc
 
 **`--dangerously-skip-permissions` flag**: This flag allows Claude Code to read/write files and run commands without per-action confirmation. It is required for autonomous pipeline execution but should only be used in trusted project directories.
 
+**Non-interactive runs (`claude -p`)**: set `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0` in the environment. In print mode Claude Code otherwise terminates background subagents, which is how the stage teammates run, after 600 seconds — a Stage 1 run measured on 2026-10-02 lost three of its five writers that way and ended with 6 of 21 BRD files while reporting normally. `scripts/trial-run.sh` sets it; any other `-p` harness (CI, a hosted executor) must set it too.
+
 ---
 
 ## Stage 0: Tech Stack Discovery
