@@ -28,7 +28,12 @@ check() { # check "<label>" <command...>  (passes when the command succeeds)
 STAGES=(tech-stack brd prd validate-specs scaffold implement audit-completeness audit-security audit-a11y optimize docs refactor seed-data harden prelaunch verify remediate polish redesign smoke user-guide feedback maintain)
 
 echo "== Structure =="
-check "plugin manifest validates" claude plugin validate .
+if command -v claude >/dev/null 2>&1; then
+  check "plugin manifest validates" claude plugin validate .
+else
+  # CI runners have no Claude Code CLI; fall back to a JSON parse of both manifests.
+  check "plugin manifests parse as JSON (claude CLI not installed)" python3 -c "import json;[json.load(open(f)) for f in ('.claude-plugin/plugin.json','.claude-plugin/marketplace.json','hooks/hooks.json')]"
+fi
 for s in "${STAGES[@]}"; do
   [[ -f "skills/$s/SKILL.md" ]] || fail "skills/$s/SKILL.md missing"
 done
