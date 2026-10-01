@@ -13,7 +13,7 @@ You are a senior technical writer acting as the TEAM LEAD for a multi-agent user
 
 Stage 6D generates **internal documentation** (developer guide, API reference, architecture docs) stored in `docs/`. This stage generates **user-facing documentation** — how-to guides, getting started, FAQ, troubleshooting — as a standalone Mintlify site deployable to a `docs.yourproduct.com` subdomain.
 
-Internal docs (`docs/`) are for developers. User guide (`user-guide/` or hosted site) is for end-users. Do NOT duplicate content between them. Reference internal docs only if the user-facing guide needs to link to API reference (rare). Maintain separation: avoid overly technical language in the user guide.
+Internal docs (`docs/`) are for developers. User guide (`user-guide/` or hosted site) is for end-users. Do not duplicate content between them. Reference internal docs only if the user-facing guide needs to link to API reference (rare). Maintain separation: avoid overly technical language in the user guide.
 
 Stage 7D runs AFTER Stage 7V because:
 - The product must be verified-stable in production before documenting it
@@ -26,7 +26,7 @@ Stage 7D runs AFTER Stage 7V because:
 
 ## Input
 
-**Prerequisite**: Stage 7V must be PASS or CONDITIONAL PASS. If 7V is FAIL, do NOT run this stage — fix production issues first.
+**Prerequisite**: Stage 7V must be PASS or CONDITIONAL PASS. If 7V is FAIL, do not run this stage — fix production issues first.
 
 - **Production URL**: The live application URL (from Stage 7 deployment)
 - **Stage 7V Report**: `./plancasting/_audits/production-smoke/report.md` — confirms production is stable (prerequisite gate) and informs troubleshooting content (common production issues, error states, integration failures). If 7V status is PASS or CONDITIONAL PASS → proceed. If 7V status is FAIL, STOP immediately and report: "Stage 7D requires a passing 7V. Production must be stable before generating user documentation." If the report file does not exist, STOP and report: "Stage 7V has not been run yet. Run Stage 7V first." If 7V was CONDITIONAL PASS, reference the documented minor issues in the troubleshooting page.
@@ -46,7 +46,7 @@ Stage 7D runs AFTER Stage 7V because:
 - **BRD**: `./plancasting/brd/` — especially:
   - `11-user-experience-requirements.md` — UX requirements
   - `14-business-rules-and-logic.md` — business rules affecting user behavior
-- **Existing Developer Docs** (Stage 6D): `./docs/` — if a help section exists (e.g., `./docs/help/`), reuse as content source (adapt to user-friendly language, do NOT copy verbatim)
+- **Existing Developer Docs** (Stage 6D): `./docs/` — if a help section exists (e.g., `./docs/help/`), reuse as content source (adapt to user-friendly language, do not copy verbatim)
 - **Product Logo** (Stage 0): If Stage 0 collected a product logo, it is recorded in `plancasting/tech-stack.md` under the Design Direction section. Copy to `./user-guide/public/` for Mintlify branding.
 - **Tech Stack**: `./plancasting/tech-stack.md` — product name, design direction, branding, documentation platform config. Check `plancasting/tech-stack.md` under the Documentation section for this configuration. If the Documentation section says "No — not needed," STOP immediately, create the skip note at `./plancasting/_audits/user-guide/report.md` (per Skip Condition above), and report: "Stage 7D skipped — user opted out of user-facing documentation in Stage 0."
 - **Project Rules**: `./CLAUDE.md`
@@ -260,36 +260,36 @@ Based on observed documentation generation outcomes:
 6. **Jargon leakage**: Technical terms from PRD/BRD leak into user guides — "mutation," "query," "pipeline stage," "schema," "validator," "FEAT-007," "US-*," "SC-*," "FR-*," "BR-* (or BRL-*)," "UF-*." Use the product's user-facing terminology exclusively.
 7. **Screenshots described but not captured**: Agent writes "see screenshot below" but never provides actual images. This stage solves this by capturing screenshots programmatically via Playwright MCP tools in Phase 1 step 10 — the lead captures all required screenshots before teammates start writing, and provides the screenshot manifest in `_guide-context.md`. Teammates reference only screenshots that exist in the manifest.
 7a. **CDN cache serving stale assets**: After a fresh deployment (especially after 6P-R redesign), CDN edge caches may serve old CSS/JS while HTML references new assets — screenshots capture the stale visual state. Mitigate by: (a) adding a cache-busting query parameter when navigating (e.g., `?v=<timestamp>`), (b) waiting 2-5 minutes after deployment for CDN propagation before capturing screenshots, or (c) using the hosting platform's cache purge command (e.g., `vercel redeploy --force`) before screenshot capture.
-8. **docs.json syntax errors**: Invalid JSON in the Mintlify config file causes deployment failure. Always validate JSON syntax before finalizing. **CRITICAL**: Always run `npx mint validate` (or `bunx mint validate`) before committing docs.json — this catches schema errors that JSON parsing alone cannot detect (e.g., navigation structure, footer field names).
+8. **docs.json syntax errors**: Invalid JSON in the Mintlify config file causes deployment failure. Always validate JSON syntax before finalizing. Always run `npx mint validate` (or `bunx mint validate`) before committing docs.json — this catches schema errors that JSON parsing alone cannot detect (e.g., navigation structure, footer field names).
 8a. **docs.json navigation must be an object, not an array**: The `navigation` field in `docs.json` must be an object containing `tabs`, `anchors`, or `dropdowns` — NOT a bare array of groups. A bare array `[{ "group": "...", "pages": [...] }]` will fail Mintlify's build validation. Correct: `{ "tabs": [{ "tab": "Guides", "groups": [{ "group": "...", "pages": [...] }] }] }`.
 8b. **docs.json footer uses label/href, not name/url**: Footer link items require `label` and `href` fields, not `name` and `url`. Footer links must be nested: `{ "title": "Legal", "items": [{ "label": "Privacy", "href": "..." }] }`.
-8c. **Duplicate h1 heading in MDX pages**: Mintlify auto-renders the frontmatter `title` as the page's h1 heading. If the MDX body ALSO starts with `# Title`, the title appears twice. NEVER include a `# Title` (h1) line in the MDX body when the frontmatter has a `title` field. Start the body with a paragraph or h2 (`##`) instead.
+8c. **Duplicate h1 heading in MDX pages**: Mintlify auto-renders the frontmatter `title` as the page's h1 heading. If the MDX body ALSO starts with `# Title`, the title appears twice. never include a `# Title` (h1) line in the MDX body when the frontmatter has a `title` field. Start the body with a paragraph or h2 (`##`) instead.
 9. **llms.txt too shallow**: Agent generates a one-line summary. Mintlify auto-generates `llms.txt` from docs.json navigation + page frontmatter descriptions — so ensure every page has a meaningful `description` in frontmatter.
 10. **Documenting incomplete features**: Agent documents features from PRD that were marked incomplete in Stage 5B. Cross-reference `./plancasting/_audits/implementation-completeness/report.md` — incomplete features must be "Coming Soon" or omitted.
-11. **Translation inconsistency**: Translated version diverges structurally from English base — different sections, different page count, different navigation groups. The session-language version MUST mirror the English structure exactly.
+11. **Translation inconsistency**: Translated version diverges structurally from English base — different sections, different page count, different navigation groups. The session-language version must mirror the English structure exactly.
 12. **Language config mismatch**: Root `docs.json` `languages` array doesn't match actual language directories on disk.
 13. **Wrong config field**: Using `versions` for languages (should be `languages`), or `mint.json` filename (should be `docs.json`).
-14. **Missing per-language navigation**: The recommended approach embeds all language navigation in the root `docs.json`'s `navigation.languages` array — do NOT create per-language `docs.json` files. Verify your root `docs.json` has a `navigation.languages` entry for each language directory on disk.
+14. **Missing per-language navigation**: The recommended approach embeds all language navigation in the root `docs.json`'s `navigation.languages` array — do not create per-language `docs.json` files. Verify your root `docs.json` has a `navigation.languages` entry for each language directory on disk.
 15. **Deeply nested groups**: Mintlify supports one level of group nesting (a top-level group's `pages` array can contain sub-group objects), but nesting sub-groups inside sub-groups causes confusing sidebar UX. Limit to one level of nesting and use `anchors` for top-level organization.
-16. **Screenshots show loading/skeleton state**: Playwright captures before data finishes loading — screenshot shows spinners instead of content. ALWAYS wait for data to settle: use `browser_wait_for` with the `text` parameter set to visible text that indicates the page has loaded (e.g., `"Dashboard"`, `"Your Projects"`, a heading or label) — or use `textGone` to wait for loading indicators to disappear (e.g., `"Loading..."`, `"Please wait"`). Do NOT capture immediately after navigation.
+16. **Screenshots show loading/skeleton state**: Playwright captures before data finishes loading — screenshot shows spinners instead of content. always wait for data to settle: use `browser_wait_for` with the `text` parameter set to visible text that indicates the page has loaded (e.g., `"Dashboard"`, `"Your Projects"`, a heading or label) — or use `textGone` to wait for loading indicators to disappear (e.g., `"Loading..."`, `"Please wait"`). Do not capture immediately after navigation.
 17. **Screenshots expose test/seed data**: Screenshots captured with test user show identifiable test data ("Test User", "smoke-test@..."). Use realistic-looking seed data or crop screenshots to exclude personal data.
-18. **Screenshot paths and embed syntax**: Place screenshots in the `images/` directory at the docs root (e.g., `user-guide/images/`). Use **standard markdown syntax** for embedding: `![Alt text](/images/page-desktop.png)`. Do NOT use `<Frame><img src="..." /></Frame>` — this can cause 403 errors on Mintlify's CDN. Do NOT place images in `public/screenshots/` — Mintlify's monorepo mode may not serve files from `public/` subdirectories correctly. The `images/` directory at the docs root is the Mintlify convention. Also ensure `screenshots/` is not in `.gitignore` (a common pattern for E2E test screenshots that accidentally blocks user-guide images too — add `!user-guide/images/` exception if needed).
+18. **Screenshot paths and embed syntax**: Place screenshots in the `images/` directory at the docs root (e.g., `user-guide/images/`). Use **standard markdown syntax** for embedding: `![Alt text](/images/page-desktop.png)`. Do not use `<Frame><img src="..." /></Frame>` — this can cause 403 errors on Mintlify's CDN. Do not place images in `public/screenshots/` — Mintlify's monorepo mode may not serve files from `public/` subdirectories correctly. The `images/` directory at the docs root is the Mintlify convention. Also ensure `screenshots/` is not in `.gitignore` (a common pattern for E2E test screenshots that accidentally blocks user-guide images too — add `!user-guide/images/` exception if needed).
 19. **Too many screenshots per page**: Agent screenshots every single step — user guide becomes an image gallery. Limit to 1-3 screenshots per guide page: hero/overview shot + 1-2 key interaction shots. Use text descriptions for intermediate steps.
-20. **Zero screenshots deployed**: Agent sets screenshot mode to `text-only` because authenticated page login fails, even though public pages (landing, signup, pricing, help) are fully capturable without auth. The result is a documentation site with NO visual context — completely unacceptable for non-technical users. ALWAYS capture public page screenshots first. Auth failure only blocks authenticated page screenshots — public pages should always succeed. See Phase 1 Step 8g tiered failure handling.
-21. **Mintlify build validation not run before commit**: Agent generates docs.json with schema errors (wrong navigation structure, wrong footer field names) that only surface when Mintlify tries to build, causing repeated deployment failures. ALWAYS run `npx mint validate` (or `bunx mint validate`) in the `user-guide/` directory before committing. This catches schema errors locally — fix them before pushing.
-22. **Dollar signs rendered as LaTeX math**: MDX interprets `$...$` as inline LaTeX math. Any `$` followed by a number (e.g., `$69`, `$149`, `$59 + ~$40`) will be parsed as a math expression, producing garbled output. ALWAYS escape dollar signs before numbers with a backslash: `\$69`, `\$149`, `\$59 + ~\$40 = ~\$99`. This affects pricing tables, cost comparisons, and any mention of currency amounts. Teammates MUST escape all `$` before digits in MDX content.
+20. **Zero screenshots deployed**: Agent sets screenshot mode to `text-only` because authenticated page login fails, even though public pages (landing, signup, pricing, help) are fully capturable without auth. The result is a documentation site with NO visual context — completely unacceptable for non-technical users. always capture public page screenshots first. Auth failure only blocks authenticated page screenshots — public pages should always succeed. See Phase 1 Step 8g tiered failure handling.
+21. **Mintlify build validation not run before commit**: Agent generates docs.json with schema errors (wrong navigation structure, wrong footer field names) that only surface when Mintlify tries to build, causing repeated deployment failures. always run `npx mint validate` (or `bunx mint validate`) in the `user-guide/` directory before committing. This catches schema errors locally — fix them before pushing.
+22. **Dollar signs rendered as LaTeX math**: MDX interprets `$...$` as inline LaTeX math. Any `$` followed by a number (e.g., `$69`, `$149`, `$59 + ~$40`) will be parsed as a math expression, producing garbled output. always escape dollar signs before numbers with a backslash: `\$69`, `\$149`, `\$59 + ~\$40 = ~\$99`. This affects pricing tables, cost comparisons, and any mention of currency amounts. Teammates must escape all `$` before digits in MDX content.
 
 ## Critical Rules
 
-1. NEVER include a `# Title` (h1) heading in MDX body content — Mintlify auto-renders the frontmatter `title` as h1. Start body content with a paragraph or `##` (h2). Violation = doubled heading on every page.
-2. ALWAYS include `"theme"` in docs.json — it is a REQUIRED field. Valid values: `mint`, `maple`, `palm`, `willow`, `linden`, `almond`, `aspen`, `luma`, `sequoia`.
-3. ALWAYS structure `navigation` in docs.json as an OBJECT, not an array. For multi-language: `{ "navigation": { "languages": [{ "language": "en", "groups": [...] }, ...] } }`. For single-language: `{ "navigation": { "groups": [...] } }`. A bare array `[{ "group": "...", "pages": [...] }]` WILL fail.
-4. NEVER use `colors.anchors` or top-level `anchors` in docs.json — these are deprecated. Use only `colors.primary`, `colors.light`, `colors.dark`.
-5. ALWAYS capture public page screenshots — landing, login, signup, pricing, privacy, terms require NO auth and must ALWAYS succeed. Only set `text-only` mode if the production URL is completely inaccessible.
-6. ALWAYS run `npx mint validate` (or `bunx mint validate`) in the user-guide/ directory before committing docs.json — catches schema errors locally.
-7. ALWAYS escape dollar signs before numbers in MDX: `\$60` not `$60` — MDX interprets `$...$` as LaTeX math.
-8. NEVER copy PRD text verbatim — rewrite in user-friendly, non-technical language.
-9. Use `![Alt text](/images/file.png)` markdown syntax for screenshots — images go in `images/` directory at docs root. Do NOT use `<Frame><img src="..." /></Frame>`.
+1. never include a `# Title` (h1) heading in MDX body content — Mintlify auto-renders the frontmatter `title` as h1. Start body content with a paragraph or `##` (h2). Violation = doubled heading on every page.
+2. always include `"theme"` in docs.json — it is a REQUIRED field. Valid values: `mint`, `maple`, `palm`, `willow`, `linden`, `almond`, `aspen`, `luma`, `sequoia`.
+3. always structure `navigation` in docs.json as an OBJECT, not an array. For multi-language: `{ "navigation": { "languages": [{ "language": "en", "groups": [...] }, ...] } }`. For single-language: `{ "navigation": { "groups": [...] } }`. A bare array `[{ "group": "...", "pages": [...] }]` WILL fail.
+4. never use `colors.anchors` or top-level `anchors` in docs.json — these are deprecated. Use only `colors.primary`, `colors.light`, `colors.dark`.
+5. always capture public page screenshots — landing, login, signup, pricing, privacy, terms require NO auth and must always succeed. Only set `text-only` mode if the production URL is completely inaccessible.
+6. always run `npx mint validate` (or `bunx mint validate`) in the user-guide/ directory before committing docs.json — catches schema errors locally.
+7. always escape dollar signs before numbers in MDX: `\$60` not `$60` — MDX interprets `$...$` as LaTeX math.
+8. never copy PRD text verbatim — rewrite in user-friendly, non-technical language.
+9. Use `![Alt text](/images/file.png)` markdown syntax for screenshots — images go in `images/` directory at docs root. Do not use `<Frame><img src="..." /></Frame>`.
 
 ## Session Recovery
 
@@ -305,17 +305,17 @@ If resuming from a prior incomplete Stage 7D session:
 
 As the team lead, complete the following BEFORE spawning any teammates:
 
-**Gate: Stage 7V Must PASS or CONDITIONAL PASS First** — This stage requires PASS or CONDITIONAL PASS from Stage 7V (Production Smoke Verification). If 7V has not been run or returned FAIL, do NOT proceed.
+**Gate: Stage 7V Must PASS or CONDITIONAL PASS First** — This stage requires PASS or CONDITIONAL PASS from Stage 7V (Production Smoke Verification). If 7V has not been run or returned FAIL, do not proceed.
 
 **Upstream Gate**: Verify `./plancasting/_audits/production-smoke/report.md` exists and shows PASS or CONDITIONAL PASS. If 7V shows FAIL, STOP — do not run 7D. Fix production issues first, re-run 7V, then proceed.
 
-**6P/6P-R Gate Prerequisite**: Also verify that `./plancasting/_audits/visual-polish/report.md` shows PASS or CONDITIONAL PASS (or that `./plancasting/_audits/visual-polish/design-plan.md` exists if 6P-R was used). If 6P/6P-R is FAIL, do NOT proceed — return to Stage 6P to resolve visual defects before documenting the product.
+**6P/6P-R Gate Prerequisite**: Also verify that `./plancasting/_audits/visual-polish/report.md` shows PASS or CONDITIONAL PASS (or that `./plancasting/_audits/visual-polish/design-plan.md` exists if 6P-R was used). If 6P/6P-R is FAIL, do not proceed — return to Stage 6P to resolve visual defects before documenting the product.
 
-**Directory Clarification**: This stage creates `./user-guide/` (user-facing Mintlify documentation site). Do NOT confuse this with `./docs/` created by Stage 6D (internal developer documentation). Separation of concerns: internal devs read `./docs/`, end-users read `./user-guide/`.
+**Directory Clarification**: This stage creates `./user-guide/` (user-facing Mintlify documentation site). Do not confuse this with `./docs/` created by Stage 6D (internal developer documentation). Separation of concerns: internal devs read `./docs/`, end-users read `./user-guide/`.
 
 **Pre-generation cleanup**: If `./user-guide/` already exists from a prior run, delete the entire directory before proceeding. Before deletion, apply this safety protocol:
    1. Run `git status ./user-guide/` and `git diff ./user-guide/` to detect both uncommitted and staged changes.
-   2. If uncommitted, unstaged, or untracked changes exist, STOP — do not proceed. Report: "user-guide/ has uncommitted changes. Commit or discard them before re-running Stage 7D." Do NOT silently delete work-in-progress content.
+   2. If uncommitted, unstaged, or untracked changes exist, STOP — do not proceed. Report: "user-guide/ has uncommitted changes. Commit or discard them before re-running Stage 7D." Do not silently delete work-in-progress content.
    3. If `./plancasting/_audits/visual-polish/design-plan.md` exists (6P-R was run), record image paths before deletion: `grep -r 'src="' user-guide/ --include='*.mdx' > /tmp/7d-prior-image-paths.txt 2>/dev/null || true`. This file is used in step 3 below for screenshot path alignment.
    4. Only delete after explicit operator confirmation or after verifying zero uncommitted changes.
    This ensures a clean slate — stale pages from previous runs cannot linger and create orphans. This is what makes Stage 7D idempotent: every run produces a fresh, complete site derived from the current PRD state. The lead (not a teammate) performs this deletion.
@@ -361,7 +361,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
    g. Check `prd/12-api-specifications.md` (if it exists) and the feature map — determine whether the product has a **public API** that end users interact with. If yes, note whether an OpenAPI spec file exists in the codebase. Record the decision (yes/no) and OpenAPI spec path (if any) for the content map — Teammate 2 uses this to decide whether to write API reference pages, and Teammate 3 uses it to include/exclude the API Reference tab in docs.json navigation.
 
-9. **Build content map** — create `./_guide-context.md` in the same directory as `CLAUDE.md` (teammates MUST read this file before starting — it contains the authoritative content map and branding). Save to `./_guide-context.md` (same directory as `CLAUDE.md`). If `_guide-context.md` already exists (retained from a prior FAIL'd run — see Phase 5 step 2), read it first: if PRD files have been modified since the prior run (check `git diff` on `prd/`), regenerate the content map from scratch rather than reusing the stale context. Otherwise, reuse the content map and branding sections, then update only the screenshot mode and manifest fields in step 10. Include:
+9. **Build content map** — create `./_guide-context.md` in the same directory as `CLAUDE.md` (teammates must read this file before starting — it contains the authoritative content map and branding). Save to `./_guide-context.md` (same directory as `CLAUDE.md`). If `_guide-context.md` already exists (retained from a prior FAIL'd run — see Phase 5 step 2), read it first: if PRD files have been modified since the prior run (check `git diff` on `prd/`), regenerate the content map from scratch rather than reusing the stale context. Otherwise, reuse the content map and branding sections, then update only the screenshot mode and manifest fields in step 10. Include:
    - Product name, tagline, production URL
    - Journey groups with their pages and source UF-*/SC-*/US-* references
    - Concept pages and their sources
@@ -374,7 +374,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
    - Language config: session language code, multi-language yes/no, directory model — en/ + <lang>/ for multi-language, root-level for English-only (from step 5)
    - Incomplete features list (from Stage 5B) — mark as "Coming Soon" or omit
    - API reference: yes/no + OpenAPI spec path if exists (from step 8g)
-   - Screenshot mode: initially set to `pending` — updated to `images`, `images-partial`, or `text-only` after step 10 completes (see step 10g). Screenshot mode selection: `images` = production URL is accessible AND Playwright is installed; `images-partial` = only some pages are accessible (e.g., behind auth wall without test credentials); `text-only` = Playwright unavailable OR no accessible URL. Teammates MUST check this field before embedding screenshots — if `text-only`, use `<Note>` callouts instead of `<Frame>` with `<img>`. If `images-partial`, use screenshots for pages that have them and `<Note>` callouts for pages marked SKIPPED in the manifest.
+   - Screenshot mode: initially set to `pending` — updated to `images`, `images-partial`, or `text-only` after step 10 completes (see step 10g). Screenshot mode selection: `images` = production URL is accessible AND Playwright is installed; `images-partial` = only some pages are accessible (e.g., behind auth wall without test credentials); `text-only` = Playwright unavailable OR no accessible URL. Teammates must check this field before embedding screenshots — if `text-only`, use `<Note>` callouts instead of `<Frame>` with `<img>`. If `images-partial`, use screenshots for pages that have them and `<Note>` callouts for pages marked SKIPPED in the manifest.
    - Feature priority mapping: P0/P1 = full guide pages, P2 = brief mention within related pages, P3+ = omit
 
 10. **Capture screenshots via Playwright** (CRITICAL — must complete before spawning teammates):
@@ -383,7 +383,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
    **Fallback**: If Playwright MCP browser tools are not available (MCP server not configured), set `Screenshot mode: text-only` in `_guide-context.md` and skip this step entirely. Teammates will use `<Note>` callouts with textual UI descriptions instead of screenshot embeds.
 
-   **IMPORTANT — Do NOT default to text-only mode**: User documentation without screenshots is incomplete and unacceptable for non-technical users. The `text-only` fallback exists ONLY for environments where Playwright MCP tools are genuinely unavailable (no MCP server configured). If Playwright tools ARE available but some screenshots fail (e.g., auth login fails), capture ALL public page screenshots first — public pages (landing, login, signup, pricing, help, terms, privacy) require NO authentication and should ALWAYS succeed. Only authenticated page screenshots should be marked as "SKIPPED" individually. A documentation site with public page screenshots + text descriptions for authenticated pages is far better than zero screenshots everywhere.
+   **IMPORTANT — Do not default to text-only mode**: User documentation without screenshots is incomplete and unacceptable for non-technical users. The `text-only` fallback exists ONLY for environments where Playwright MCP tools are genuinely unavailable (no MCP server configured). If Playwright tools ARE available but some screenshots fail (e.g., auth login fails), capture ALL public page screenshots first — public pages (landing, login, signup, pricing, help, terms, privacy) require NO authentication and should always succeed. Only authenticated page screenshots should be marked as "SKIPPED" individually. A documentation site with public page screenshots + text descriptions for authenticated pages is far better than zero screenshots everywhere.
 
    **a. Generate the Screenshot Manifest**:
    Map each journey page from the content map to specific screenshots needed:
@@ -403,7 +403,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
    **b. Determine capture target**:
    - **Preferred**: Production URL (from Stage 7 — reflects real deployed state, production CSS/fonts)
    - **Fallback**: Dev server — BUT be aware of dev server limitations:
-     - Dev servers (Next.js dev mode) may have race conditions where `ConvexProviderWithAuth` (or similar real-time auth providers) fails on the first token fetch during navigation (`net::ERR_ABORTED`), causing permanent "Session expired" error boundaries. Production builds do NOT have this issue.
+     - Dev servers (Next.js dev mode) may have race conditions where `ConvexProviderWithAuth` (or similar real-time auth providers) fails on the first token fetch during navigation (`net::ERR_ABORTED`), causing permanent "Session expired" error boundaries. Production builds do not have this issue.
      - If authenticated pages show "Session expired" on dev but the token endpoint returns 200, this is the dev-mode race condition — switch to production URL for authenticated captures.
    - If using production: verify the URL is accessible by using `browser_navigate` and confirming the page loads without error
    - If using dev: start the dev server using the command from `CLAUDE.md` or `plancasting/tech-stack.md`
@@ -411,8 +411,8 @@ As the team lead, complete the following BEFORE spawning any teammates:
    **c. Screenshot capture rules**:
    - **Viewports**: Desktop (1440×900) for ALL pages. Mobile (375×812) for key pages only (landing, dashboard, core feature page — max 5 mobile screenshots). `browser_resize` requires BOTH `width` AND `height` — always provide both values. Capture viewport-only screenshots (NOT full-page) — full-page captures of long pages produce unwieldy tall images that look poor in documentation.
    - **Screenshot budget**: Maximum **30 screenshots total**. Prioritize: landing/hero (1-2), quickstart flow (3-5), one screenshot per journey section (1 each), settings/billing (1-2). If the content map has 15+ journey pages, not every page needs a screenshot.
-   - **Wait for content**: ALWAYS wait for data to finish loading before capturing. Use `browser_wait_for` with the `text` parameter targeting visible text that confirms the page has loaded (e.g., `text: "Dashboard"`, `text: "Your Projects"`) — or use `textGone` to wait for loading text to disappear (e.g., `textGone: "Loading..."`). NEVER capture while loading spinners are visible.
-   - **Hide UI overlays**: ALWAYS hide development and compliance overlays before capturing. Inject CSS to hide: Next.js dev indicator badge (bottom-left `nextjs-portal` element), cookie consent banners, and any other fixed-position dev/debug overlays. These elements are dev/compliance artifacts that clutter documentation screenshots and confuse users. Use `browser_evaluate` to inject:
+   - **Wait for content**: always wait for data to finish loading before capturing. Use `browser_wait_for` with the `text` parameter targeting visible text that confirms the page has loaded (e.g., `text: "Dashboard"`, `text: "Your Projects"`) — or use `textGone` to wait for loading text to disappear (e.g., `textGone: "Loading..."`). never capture while loading spinners are visible.
+   - **Hide UI overlays**: always hide development and compliance overlays before capturing. Inject CSS to hide: Next.js dev indicator badge (bottom-left `nextjs-portal` element), cookie consent banners, and any other fixed-position dev/debug overlays. These elements are dev/compliance artifacts that clutter documentation screenshots and confuse users. Use `browser_evaluate` to inject:
      ~~~javascript
      const style = document.createElement('style');
      style.textContent = 'nextjs-portal, [data-nextjs-dialog-overlay], [data-nextjs-toast], [class*="cookie" i], [id*="cookie" i], [class*="consent" i], [id*="consent" i] { display: none !important; }';
@@ -447,8 +447,8 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
    **e. Save screenshots**:
    - Save ALL screenshots to `./user-guide/images/` using `browser_take_screenshot`'s `filename` parameter (e.g., `filename: "./user-guide/images/dashboard-desktop.png"`). If the `browser_take_screenshot` tool does not support a `filename` parameter, use `browser_evaluate` to trigger `page.screenshot({ path: '...' })` via Playwright's page API, or save the returned screenshot data to the target path using a file-write tool.
-   - **IMPORTANT**: Use `images/` directory at the docs root — NOT `public/screenshots/`. Mintlify's monorepo mode may not correctly serve files from `public/` subdirectories, causing 403 errors on the CDN. The `images/` directory is Mintlify's conventional static asset location.
-   - **IMPORTANT**: If the project's `.gitignore` contains `screenshots/` (common for E2E test artifacts), add `!user-guide/images/` exception to ensure doc images are tracked by git. Verify with `git ls-files user-guide/images/` after staging.
+   - Use `images/` directory at the docs root — NOT `public/screenshots/`. Mintlify's monorepo mode may not correctly serve files from `public/` subdirectories, causing 403 errors on the CDN. The `images/` directory is Mintlify's conventional static asset location.
+   - If the project's `.gitignore` contains `screenshots/` (common for E2E test artifacts), add `!user-guide/images/` exception to ensure doc images are tracked by git. Verify with `git ls-files user-guide/images/` after staging.
    - Naming convention: `<page-slug>-<viewport>.png` (e.g., `dashboard-desktop.png`, `signup-mobile.png`)
    - For dark mode: `<page-slug>-<viewport>-dark.png`
    - For element highlights: `<page-slug>-<element>-highlight.png`
@@ -456,24 +456,24 @@ As the team lead, complete the following BEFORE spawning any teammates:
    **f. Add the screenshot manifest to `_guide-context.md`**:
    Append the completed manifest (with actual filenames and paths) so teammates know exactly which screenshots exist and can reference them. Include the Mintlify-relative path for each: `/images/<filename>` (served from docs root `images/` directory).
 
-   **g. Screenshot failure handling** (tiered — NEVER skip all screenshots without trying):
+   **g. Screenshot failure handling** (tiered — never skip all screenshots without trying):
 
-   **Tier 1 — Public pages (MUST capture, no auth required)**:
-   Public pages (landing, login, signup, pricing, help, terms, privacy, forgot-password) require NO authentication. These screenshots MUST be captured regardless of auth status. If ANY public page fails to load, investigate (DNS, SSL, server error) before skipping. Public page screenshot failure is a BLOCKER — resolve it or document the specific error.
+   **Tier 1 — Public pages (must capture, no auth required)**:
+   Public pages (landing, login, signup, pricing, help, terms, privacy, forgot-password) require NO authentication. These screenshots must be captured regardless of auth status. If ANY public page fails to load, investigate (DNS, SSL, server error) before skipping. Public page screenshot failure is a BLOCKER — resolve it or document the specific error.
 
    **Tier 2 — Authenticated pages (best-effort, PRODUCTION FIRST)**:
-   - ALWAYS attempt production first for authenticated captures — production builds handle auth correctly
+   - always attempt production first for authenticated captures — production builds handle auth correctly
    - If login succeeds on production → capture all authenticated page screenshots
    - If login fails on production → try dev server login as fallback. BUT: if dev server shows "Session expired" on dashboard/settings after successful login redirect, this is a dev-mode auth race condition (NOT a credentials issue). Switch back to production and investigate the login failure there.
-   - If login fails on both → mark authenticated screenshots as "SKIPPED — auth login unavailable" individually in the manifest. Do NOT set the entire mode to `text-only`.
-   - **Common auth pitfall**: The login form may succeed (URL redirects to /dashboard) but the page shows "Session expired" because the real-time auth provider's token fetch was aborted during the hard navigation. This is a dev-mode-only issue. If this happens, ALWAYS try production URL before giving up.
+   - If login fails on both → mark authenticated screenshots as "SKIPPED — auth login unavailable" individually in the manifest. Do not set the entire mode to `text-only`.
+   - **Common auth pitfall**: The login form may succeed (URL redirects to /dashboard) but the page shows "Session expired" because the real-time auth provider's token fetch was aborted during the hard navigation. This is a dev-mode-only issue. If this happens, always try production URL before giving up.
 
    **Tier 3 — Overall mode decision**:
    - If Tier 1 (public) screenshots ALL succeed → set mode to `images` regardless of Tier 2 results
    - If some Tier 2 (authenticated) screenshots are skipped → set mode to `images-partial` and note which authenticated pages lack screenshots
    - ONLY set `text-only` if the production URL AND dev server are BOTH completely inaccessible (no pages load at all)
 
-   After capture completes: update the `Screenshot mode` field in `_guide-context.md` from `pending` to `images` (all captured), `images-partial` (public captured, some auth skipped), or `text-only` (nothing capturable). **CRITICAL**: The screenshot mode in `_guide-context.md` MUST be finalized BEFORE spawning any teammates in Phase 2.
+   After capture completes: update the `Screenshot mode` field in `_guide-context.md` from `pending` to `images` (all captured), `images-partial` (public captured, some auth skipped), or `text-only` (nothing capturable). The screenshot mode in `_guide-context.md` must be finalized BEFORE spawning any teammates in Phase 2.
 
    **h. Animated recordings (optional enhancement)**:
    If the project has Playwright recording scripts at `./e2e/doc-recordings/`, capture animated screen recordings for interactive flows. Animated recordings provide significantly better visual context than static screenshots for form filling, navigation, and toggle interactions. When a page has an animated recording, it REPLACES the static screenshot (do not show both — the video's first frame acts as the static image).
@@ -496,7 +496,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
      bunx playwright test --config=e2e/doc-recordings/playwright.recordings.config.ts \
      e2e/doc-recordings/record-flows.spec.ts
 
-   # Auth pages (MUST use production URL — dev server has auth race conditions)
+   # Auth pages (must use production URL — dev server has auth race conditions)
    TEST_EMAIL=user@example.com TEST_PASSWORD=password \
    PLAYWRIGHT_BASE_URL=https://your-production-url.com \
      bunx playwright test --config=e2e/doc-recordings/playwright.recordings.config.ts \
@@ -506,8 +506,8 @@ As the team lead, complete the following BEFORE spawning any teammates:
    ./e2e/doc-recordings/convert-recordings.sh
    ~~~
 
-   **CRITICAL — Auth recordings MUST target production**:
-   Dev servers (Next.js dev mode) have a known race condition where the first `POST /api/auth/token` gets `net::ERR_ABORTED` during navigation, causing React error boundaries to permanently show "Session expired". This does NOT happen in production builds. Always use the production URL for authenticated recordings. The conversion script trims the first ~10 seconds (login/navigation) from auth recordings using `ffmpeg -ss`.
+   **CRITICAL — Auth recordings must target production**:
+   Dev servers (Next.js dev mode) have a known race condition where the first `POST /api/auth/token` gets `net::ERR_ABORTED` during navigation, causing React error boundaries to permanently show "Session expired". This does not happen in production builds. Always use the production URL for authenticated recordings. The conversion script trims the first ~10 seconds (login/navigation) from auth recordings using `ffmpeg -ss`.
 
    **Overlay hiding**:
    Both recording scripts inject CSS to hide Next.js dev badge, cookie consent banners, and other overlays via a `hideOverlays()` function called after each `page.goto()`. This uses `page.addStyleTag()` with selectors targeting `nextjs-portal`, `[class*="cookie" i]`, `[class*="consent" i]`, etc. The overlays are hidden from the FIRST frame of the recording.
@@ -539,11 +539,11 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Documentation Teammates
 
-Spawn the following 3 teammates. Each teammate's spawn prompt MUST include the content map from `./_guide-context.md`.
+Spawn the following 3 teammates. Each teammate's spawn prompt must include the content map from `./_guide-context.md`.
 
-**Dependency model**: Teammates 1, 2, and 3 run **in parallel** for their content/config creation work. However, Teammate 3's **validation step** (task 5) MUST wait until Teammates 1 and 2 have completed — it needs the final MDX files to validate navigation, links, and jargon. The lead MUST coordinate this: spawn all 3 at once, but instruct Teammate 3 to complete tasks 1-4 first, then message the lead and wait for clearance before running task 5.
+**Dependency model**: Teammates 1, 2, and 3 run **in parallel** for their content/config creation work. However, Teammate 3's **validation step** (task 5) must wait until Teammates 1 and 2 have completed — it needs the final MDX files to validate navigation, links, and jargon. The lead must coordinate this: spawn all 3 at once, but instruct Teammate 3 to complete tasks 1-4 first, then message the lead and wait for clearance before running task 5.
 
-**If a teammate fails**: If any teammate encounters an unrecoverable error (e.g., missing PRD files, unresolvable branding), it MUST message the lead immediately with the blocker. The lead should attempt to resolve the issue (provide missing input, adjust content map) and resume the teammate. Do NOT spawn replacement teammates — resume the original.
+**If a teammate fails**: If any teammate encounters an unrecoverable error (e.g., missing PRD files, unresolvable branding), it must message the lead immediately with the blocker. The lead should attempt to resolve the issue (provide missing input, adjust content map) and resume the teammate. Do not spawn replacement teammates — resume the original.
 
 #### Teammate 1: "journey-writer"
 **Scope**: All journey guide pages + introduction + quickstart
@@ -562,7 +562,7 @@ For EACH journey page assigned in the content map:
 
 For each page, write:
 - Frontmatter: title (user's goal, not feature name), description (what they'll accomplish), icon, sidebarTitle
-- **NEVER start the body with a `# Title` heading** — Mintlify auto-renders the frontmatter `title` as the page's h1. Adding `# Title` in the body creates a duplicate. Start with a paragraph or `##` subheading.
+- **never start the body with a `# Title` heading** — Mintlify auto-renders the frontmatter `title` as the page's h1. Adding `# Title` in the body creates a duplicate. Start with a paragraph or `##` subheading.
 - Opening paragraph: what the user wants to accomplish and why
 - **Hero visual** (check manifest for recordings first, then screenshots):
   - If an animated recording (MP4) exists for this page in the manifest `Recordings` section, embed it using a `<video>` tag — this REPLACES the static screenshot:
@@ -573,8 +573,8 @@ For each page, write:
     ~~~mdx
     ![Project dashboard with active projects listed](/images/dashboard-desktop.png)
     ~~~
-  - **IMPORTANT**: Use markdown `![alt](/images/file.png)` syntax for screenshots — NOT `<Frame><img src="..." /></Frame>`. The Frame+img pattern can cause 403 CDN errors on Mintlify's hosting. Standard markdown images work reliably.
-  - **IMPORTANT**: Do NOT embed both a recording AND a static screenshot for the same page. The video's first frame serves as the static visual. Showing both creates redundant, cluttered content.
+  - Use markdown `![alt](/images/file.png)` syntax for screenshots — NOT `<Frame><img src="..." /></Frame>`. The Frame+img pattern can cause 403 CDN errors on Mintlify's hosting. Standard markdown images work reliably.
+  - Do not embed both a recording AND a static screenshot for the same page. The video's first frame serves as the static visual. Showing both creates redundant, cluttered content.
 - Step-by-step instructions using <Steps>/<Step> components
 - **Step screenshots** (if available in the manifest): embed within the relevant `<Step>` to show what the user should see at that point. Maximum 1-2 inline screenshots per page — use text descriptions for other steps.
 - Reference UI elements by their VISIBLE LABELS (button text, field labels from SC-* specs)
@@ -595,21 +595,21 @@ For each page, write:
     </Tab>
   </Tabs>
   ~~~
-- NEVER reference a screenshot that is NOT in the manifest. If a screenshot is listed as "SKIPPED" in the manifest, use a `<Note>` text description instead.
-- If `_guide-context.md` indicates screenshot mode is `text-only`, do NOT embed any screenshots — use `<Note>` callouts describing the UI for ALL pages instead.
-- **ALWAYS escape dollar signs before numbers** — MDX interprets `$...$` as LaTeX math. Write `\$69`, `\$149`, NOT `$69`, `$149`. This applies to ALL currency amounts in pricing tables, cost comparisons, and inline text.
+- never reference a screenshot that is not in the manifest. If a screenshot is listed as "SKIPPED" in the manifest, use a `<Note>` text description instead.
+- If `_guide-context.md` indicates screenshot mode is `text-only`, do not embed any screenshots — use `<Note>` callouts describing the UI for ALL pages instead.
+- **always escape dollar signs before numbers** — MDX interprets `$...$` as LaTeX math. Write `\$69`, `\$149`, NOT `$69`, `$149`. This applies to ALL currency amounts in pricing tables, cost comparisons, and inline text.
 
 ALSO write:
 - introduction.mdx: Welcome page with product overview (from PRD 01), value proposition, navigation guide using <Card> components
 - quickstart.mdx: The shortest path from signup to first meaningful action — use the first UF-* flow, condensed to essential steps
 
-If multi-language: Generate English first under en/. Then translate all pages to session language under <session-lang>/. The translated version MUST have identical page structure — same files, same sections, same MDX components.
+If multi-language: Generate English first under en/. Then translate all pages to session language under <session-lang>/. The translated version must have identical page structure — same files, same sections, same MDX components.
 
 If single-language (English only): Generate all pages directly under the user-guide/ root (NOT under an en/ subdirectory). Do not create language subdirectories.
 
 Component usage guide:
-- <Steps>/<Step> for all procedures (NEVER use numbered markdown lists for instructions)
-- <Note>, <Warning>, <Tip>, <Info>, <Check>, <Danger> for callouts (do NOT use markdown blockquotes)
+- <Steps>/<Step> for all procedures (never use numbered markdown lists for instructions)
+- <Note>, <Warning>, <Tip>, <Info>, <Check>, <Danger> for callouts (do not use markdown blockquotes)
 - <Card title="..." icon="..." href="/path"> for feature highlights and "next steps"
 - <Tabs>/<Tab> when showing alternatives (e.g., "Desktop" vs "Mobile" instructions)
 - <AccordionGroup>/<Accordion> for in-page FAQs or optional details
@@ -654,7 +654,7 @@ Your tasks:
 
 4. CHANGELOG (changelog.mdx):
    - Read `./plancasting/prd/03-release-plan.md` (if exists) for feature release information
-   - If `./plancasting/prd/03-release-plan.md` does NOT exist, derive release information from `./plancasting/prd/02-feature-map-and-prioritization.md` (list P0/P1 features as the initial release)
+   - If `./plancasting/prd/03-release-plan.md` does not exist, derive release information from `./plancasting/prd/02-feature-map-and-prioritization.md` (list P0/P1 features as the initial release)
    - Use <Update label="v1.0" description="Initial Release" tags={["feature"]}> components
    - List features with user-facing descriptions (not FEAT-IDs)
 
@@ -663,11 +663,11 @@ Your tasks:
    - If the content map says "yes" with an OpenAPI spec path: skip writing manual pages — Teammate 3 will configure the API tab in docs.json using the OpenAPI spec for auto-generated endpoint pages
    - If the content map says "yes" but no OpenAPI spec: create manual API reference pages under api-reference/ using <ParamField>, <ResponseField>, <Expandable>, deriving endpoint documentation from prd/12-api-specifications.md
 
-**Visual embedding**: First check the `Screenshot mode` field in `_guide-context.md` — if `text-only`, skip ALL visual embedding and use `<Note>` callouts describing the UI instead. If mode is `images`: check BOTH the `Recordings` section (MP4 videos) and the screenshot manifest. If an animated recording exists for a page, use `<video autoPlay muted loop playsInline className="w-full aspect-video rounded-xl" src="/images/<name>.mp4"></video>` INSTEAD of a static screenshot (same rules as Teammate 1 — recordings replace screenshots, never alongside). If no recording exists, use markdown syntax: `![Alt text](/images/file.png)`. NEVER reference a media file that is NOT in the manifest.
+**Visual embedding**: First check the `Screenshot mode` field in `_guide-context.md` — if `text-only`, skip ALL visual embedding and use `<Note>` callouts describing the UI instead. If mode is `images`: check BOTH the `Recordings` section (MP4 videos) and the screenshot manifest. If an animated recording exists for a page, use `<video autoPlay muted loop playsInline className="w-full aspect-video rounded-xl" src="/images/<name>.mp4"></video>` INSTEAD of a static screenshot (same rules as Teammate 1 — recordings replace screenshots, never alongside). If no recording exists, use markdown syntax: `![Alt text](/images/file.png)`. never reference a media file that is not in the manifest.
 
-**ALWAYS escape dollar signs before numbers** — MDX interprets `$...$` as LaTeX math. Write `\$69`, `\$149`, NOT `$69`, `$149`. This applies to ALL currency amounts in pricing tables, cost comparisons, FAQ answers, and inline text.
+**always escape dollar signs before numbers** — MDX interprets `$...$` as LaTeX math. Write `\$69`, `\$149`, NOT `$69`, `$149`. This applies to ALL currency amounts in pricing tables, cost comparisons, FAQ answers, and inline text.
 
-- **NEVER start the body with a `# Title` heading** — Mintlify auto-renders the frontmatter `title` as the page's h1. Start with a paragraph or `##` subheading.
+- **never start the body with a `# Title` heading** — Mintlify auto-renders the frontmatter `title` as the page's h1. Start with a paragraph or `##` subheading.
 
 If multi-language: Generate English first under en/, then translate to session language under <session-lang>/. Same structure, same page count.
 
@@ -685,7 +685,7 @@ You are setting up the Mintlify project structure, configuration, and validating
 Read CLAUDE.md first. Then verify ./_guide-context.md exists — if it does not, message the lead immediately. Read it for the content map, branding, and language config.
 Read tech-stack.md for product name, design direction (colors, typography).
 
-- CRITICAL: Do NOT include `# Title` (h1) as the first line of MDX body content. Mintlify auto-renders the frontmatter `title` as h1 — a duplicate h1 in the body doubles the heading. Start with a paragraph or `## Heading`.
+- Do not include `# Title` (h1) as the first line of MDX body content. Mintlify auto-renders the frontmatter `title` as h1 — a duplicate h1 in the body doubles the heading. Start with a paragraph or `## Heading`.
 
 Your tasks:
 
@@ -725,7 +725,7 @@ Your tasks:
      ]
    }
    ~~~
-   If single-language (English only): Do NOT add the `languages` array. Instead, add the navigation block from task 2 directly into this root docs.json (combine branding config + navigation into one file). Skip task 2 entirely.
+   If single-language (English only): Do not add the `languages` array. Instead, add the navigation block from task 2 directly into this root docs.json (combine branding config + navigation into one file). Skip task 2 entirely.
 
    Use this VALIDATED template as the starting point for docs.json (adapt names, colors, and pages):
    ~~~json
@@ -750,7 +750,7 @@ Your tasks:
      }
    }
    ~~~
-   DO NOT add: `colors.anchors`, top-level `anchors` array, or `navigation` as a bare array. The `languages` array belongs inside the `navigation` object, not at the root level.
+   Do not add: `colors.anchors`, top-level `anchors` array, or `navigation` as a bare array. The `languages` array belongs inside the `navigation` object, not at the root level.
 
 2. NAVIGATION STRUCTURE (defines the navigation hierarchy for the validated template above):
    For multi-language: replace the minimal `groups` in each `navigation.languages[]` entry (task 1 template) with this full anchors → groups → pages hierarchy. For single-language: use this structure directly as the `navigation` object in the root docs.json.
@@ -803,7 +803,7 @@ Your tasks:
    - support-cta.mdx: Reusable support call-to-action (e.g., "Need help? Contact support at...")
 
 5. VALIDATION (BLOCKED — wait for teammates 1 and 2 to complete before running this task):
-   After completing tasks 1-4, message the lead and WAIT. The lead will message: 'Teammates 1 and 2 are done. Proceed with task 5 validation.' Do NOT proceed until you receive clearance. Then:
+   After completing tasks 1-4, message the lead and WAIT. The lead will message: 'Teammates 1 and 2 are done. Proceed with task 5 validation.' Do not proceed until you receive clearance. Then:
 
    **a. Structure & link validation** — prefer the Mintlify CLI (install with `npm i -g mint` or use `npx mint`). From the `./user-guide/` directory:
    - Run `mint validate` — catches invalid docs.json, missing nav pages, and build errors
@@ -833,7 +833,7 @@ When done, message the lead with: docs.json structure, navigation groups, valida
 While teammates are working:
 1. Monitor progress via the shared task list.
 2. Coordinate content consistency:
-   - If a teammate needs to deviate from the content map (e.g., splitting a page into two, merging pages, or adding an unplanned page), they MUST message the lead. The lead updates the content map and notifies Teammate 3 to adjust navigation.
+   - If a teammate needs to deviate from the content map (e.g., splitting a page into two, merging pages, or adding an unplanned page), they must message the lead. The lead updates the content map and notifies Teammate 3 to adjust navigation.
    - When concepts-and-reference-writer finalizes terminology in concept pages, verify journey-writer uses the same terms.
 3. Ensure all cross-page links are consistent between teammates' output.
 4. When Teammates 1 and 2 both report completion, notify Teammate 3 to proceed with task 5 (validation).
@@ -937,12 +937,12 @@ After Stage 7D completes:
 - **PASS or WARN**: The product is documented and ready for post-launch. Proceed to **Stage 8 (Feedback Loop)** when user feedback is collected, or **Stage 9 (Dependency Maintenance)** on a monthly/quarterly cadence.
 - **FAIL**: Fix documentation issues and re-run 7D before proceeding.
 
-**CRITICAL**: Stages 8 and 9 are NEVER concurrent — both modify `package.json` and source code. Run one, commit all changes, then start the other in a new session. See execution-guide.md § "Stage 9" for coordination details.
+Stages 8 and 9 are never concurrent — both modify `package.json` and source code. Run one, commit all changes, then start the other in a new session. See execution-guide.md § "Stage 9" for coordination details.
 
 ### Phase 5: Shutdown
 
 1. Verify all teammates have sent completion messages. Teammates terminate automatically after completing their tasks.
-2. After stage completion: if PASS or WARN, delete `./_guide-context.md` (temporary artifact). If FAIL, retain it to avoid regenerating the content map on re-run. Do NOT commit `_guide-context.md` to version control — add it to `.gitignore` if not already present (`echo '_guide-context.md' >> .gitignore`). The lead (not a teammate) performs the deletion after all teammates have shut down.
+2. After stage completion: if PASS or WARN, delete `./_guide-context.md` (temporary artifact). If FAIL, retain it to avoid regenerating the content map on re-run. Do not commit `_guide-context.md` to version control — add it to `.gitignore` if not already present (`echo '_guide-context.md' >> .gitignore`). The lead (not a teammate) performs the deletion after all teammates have shut down.
 3. Output summary: total pages created, languages, content coverage, gate decision.
 
 ### Gate Decision Criteria
@@ -990,7 +990,7 @@ For each guide page, follow this transformation pipeline:
 
 5. **Embed visuals** (from the manifest in `_guide-context.md`):
    - First check the screenshot mode field in `_guide-context.md` — if `text-only`, skip ALL visual embedding and use `<Note>` callouts for every page instead
-   - Check the `Recordings` section of the manifest first — if an MP4 recording exists for this page, embed it with `<video autoPlay muted loop playsInline className="w-full aspect-video rounded-xl" src="/images/<name>.mp4"></video>` INSTEAD of a static screenshot (do NOT show both)
+   - Check the `Recordings` section of the manifest first — if an MP4 recording exists for this page, embed it with `<video autoPlay muted loop playsInline className="w-full aspect-video rounded-xl" src="/images/<name>.mp4"></video>` INSTEAD of a static screenshot (do not show both)
    - If no recording exists, check the screenshot manifest — embed with `![alt](/images/file.png)` markdown syntax
    - Place the hero visual after the opening paragraph, before the first `<Steps>` block
    - Place step-level screenshots inside the relevant `<Step>` element
@@ -1004,7 +1004,7 @@ For each guide page, follow this transformation pipeline:
 
 ## Cross-Stage References
 
-- **If 7V FAIL**: Do NOT run this stage. Fix production issues first, re-run 7V, then proceed to 7D.
+- **If 7V FAIL**: Do not run this stage. Fix production issues first, re-run 7V, then proceed to 7D.
 - **After generating user guide**: Push to trigger Mintlify auto-deploy. Verify the deployed docs site is accessible.
 - **If UI changes are made after 7D** (via Stage 8 Feedback Loop or hotfixes): Re-run the affected journey pages to keep docs in sync, or update MDX files directly. Stage 8's test-and-docs-updater teammate is configured to update `./user-guide/` when UI changes occur. If UI changes affect screenshotted/recorded pages, recapture the affected media:
   - For screenshots: re-run Phase 1 step 10 with a filtered manifest (only the changed pages)
@@ -1012,35 +1012,35 @@ For each guide page, follow this transformation pipeline:
 - **Stage 8 integration**: Stage 8 (Feedback Loop) includes a "Documentation" feedback category. User feedback about unclear or missing documentation routes back to updating the Mintlify site. Stage 8's test-and-docs-updater teammate generates documentation fixes. After Stage 8 completes, if documentation was updated: either (a) manually edit the affected MDX files in `./user-guide/`, or (b) re-run Stage 7D in full to regenerate all pages with latest production state (recommended if >3 pages affected).
 - **After Stage 6P-R merge**: If 6P-R was used (design overhaul), always re-run 7D to recapture screenshots reflecting the new design. Verify image paths: `grep -r 'src="' user-guide/ --include='*.mdx'`.
 - **Stage 9 integration**: If dependency updates change UI behavior or component APIs, re-verify affected journey pages.
-- **Re-running 7D**: This stage is idempotent — re-running it deletes and recreates the entire `./user-guide/` directory with fresh content derived from the current PRD. WARNING: Custom content manually added after a prior 7D run will be DESTROYED. Commit or backup any custom changes before re-running 7D. **Pre-flight cleanup**: Follow the Phase 1 pre-generation cleanup safety protocol (check git status, verify no custom content via `git diff ./user-guide/`, get operator confirmation before deletion). Do NOT use `rm -rf` without these safety checks. Use this after significant PRD changes or major feature releases.
+- **Re-running 7D**: This stage is idempotent — re-running it deletes and recreates the entire `./user-guide/` directory with fresh content derived from the current PRD. WARNING: Custom content manually added after a prior 7D run will be DESTROYED. Commit or backup any custom changes before re-running 7D. **Pre-flight cleanup**: Follow the Phase 1 pre-generation cleanup safety protocol (check git status, verify no custom content via `git diff ./user-guide/`, get operator confirmation before deletion). Do not use `rm -rf` without these safety checks. Use this after significant PRD changes or major feature releases.
 
 ## Critical Rules
 
-1. NEVER copy PRD text verbatim into user documentation — rewrite for non-technical users.
-2. NEVER organize by feature ID — organize by user journey (what the user wants to accomplish).
-3. NEVER use numbered markdown lists for procedures — ALWAYS use `<Steps>`/`<Step>` components.
-4. NEVER use markdown blockquotes for callouts — ALWAYS use `<Note>`/`<Warning>`/`<Tip>`/`<Info>`/`<Check>`/`<Danger>`.
+1. never copy PRD text verbatim into user documentation — rewrite for non-technical users.
+2. never organize by feature ID — organize by user journey (what the user wants to accomplish).
+3. never use numbered markdown lists for procedures — always use `<Steps>`/`<Step>` components.
+4. never use markdown blockquotes for callouts — always use `<Note>`/`<Warning>`/`<Tip>`/`<Info>`/`<Check>`/`<Danger>`.
 5. Limit group nesting to ONE level deep in docs.json (a top-level group containing a sub-group is fine; a sub-group inside a sub-group is too deep). Use anchors for top-level organization.
-6. NEVER reference pages with file extensions in docs.json navigation — use paths without `.mdx`.
-7. ALWAYS validate docs.json as valid JSON before finalizing.
-8. ALWAYS include meaningful `description` in every page's frontmatter (Mintlify uses this for llms.txt auto-generation and search).
-9. ALWAYS cross-reference Stage 5B to avoid documenting incomplete features as available.
-10. ALWAYS extract branding (colors, product name, logo) from tech-stack.md — never use placeholders.
-11. If multi-language: ALWAYS generate English first, then translate — never generate languages independently from PRD.
-12. If multi-language: ALWAYS verify translated version has identical structure to English version.
-13. ALWAYS include a "Next steps" section at the bottom of each journey page linking to the next logical page.
-14. NEVER include technical identifiers in user-facing content — no FEAT-*, US-*, SC-*, FR-*, BR-* (or BRL-*), UF-*, FS-*, AS-*, ES-*, RS-*, NS-*, SS-*.
+6. never reference pages with file extensions in docs.json navigation — use paths without `.mdx`.
+7. always validate docs.json as valid JSON before finalizing.
+8. always include meaningful `description` in every page's frontmatter (Mintlify uses this for llms.txt auto-generation and search).
+9. always cross-reference Stage 5B to avoid documenting incomplete features as available.
+10. always extract branding (colors, product name, logo) from tech-stack.md — never use placeholders.
+11. If multi-language: always generate English first, then translate — never generate languages independently from PRD.
+12. If multi-language: always verify translated version has identical structure to English version.
+13. always include a "Next steps" section at the bottom of each journey page linking to the next logical page.
+14. never include technical identifiers in user-facing content — no FEAT-*, US-*, SC-*, FR-*, BR-* (or BRL-*), UF-*, FS-*, AS-*, ES-*, RS-*, NS-*, SS-*.
 15. Use `<Accordion>` for optional/advanced content that most users can skip.
 16. Use `<Tabs>` when the same task has different instructions for different contexts (desktop/mobile, plan tiers, etc.).
-17. NEVER reference a screenshot that doesn't exist in the manifest — teammates MUST check `_guide-context.md` for the screenshot manifest before embedding any image references.
-18. ALWAYS wait for page content to fully load before capturing screenshots — loading spinners and skeleton screens in documentation screenshots look unprofessional and confuse users.
-19. ALWAYS include meaningful `alt` text on screenshot images — describe what the screenshot shows for accessibility and for users with images disabled.
+17. never reference a screenshot that doesn't exist in the manifest — teammates must check `_guide-context.md` for the screenshot manifest before embedding any image references.
+18. always wait for page content to fully load before capturing screenshots — loading spinners and skeleton screens in documentation screenshots look unprofessional and confuse users.
+19. always include meaningful `alt` text on screenshot images — describe what the screenshot shows for accessibility and for users with images disabled.
 20. Maximum 30 screenshots total across the entire user guide (for products with 15+ screens, this limit may need adjustment — use judgment but keep the guide concise). Maximum 3 screenshots per journey page (1 hero + 2 key steps). Prioritize quality over quantity — a well-described text step is better than a redundant screenshot.
-21. ALWAYS use standard markdown image syntax `![Alt text](/images/file.png)` for screenshots. Do NOT use `<Frame><img>` wrapping — it can cause CDN 403 errors.
-22. If screenshot capture is in text-only fallback mode (see Phase 1 step 10g), ALL teammates MUST use `<Note>` callouts describing the UI instead of `<Frame>` with images. Do NOT mix screenshot and text-only approaches within the same guide.
-23. ALWAYS hide UI overlays (Next.js dev badge, cookie consent banners) before capturing screenshots or recordings. These development/compliance artifacts should never appear in user-facing documentation.
+21. always use standard markdown image syntax `![Alt text](/images/file.png)` for screenshots. Do not use `<Frame><img>` wrapping — it can cause CDN 403 errors.
+22. If screenshot capture is in text-only fallback mode (see Phase 1 step 10g), ALL teammates must use `<Note>` callouts describing the UI instead of `<Frame>` with images. Do not mix screenshot and text-only approaches within the same guide.
+23. always hide UI overlays (Next.js dev badge, cookie consent banners) before capturing screenshots or recordings. These development/compliance artifacts should never appear in user-facing documentation.
 24. When an animated recording (MP4) exists for a page, embed it with `<video>` INSTEAD of the static screenshot — NOT alongside it. Showing both is redundant. The video replaces the screenshot.
-25. ALWAYS use PRODUCTION URL for authenticated page captures (screenshots and recordings). Dev servers have known race conditions with real-time auth providers (Convex, Firebase, Supabase) where the initial token fetch gets aborted during navigation, causing permanent "Session expired" error boundaries. Production builds do not have this issue.
-26. For animated recordings, ALWAYS trim the login/navigation portion from auth recordings during conversion (use `ffmpeg -ss <seconds>`). The video should start on the feature page with content visible — NOT on the login form.
-27. ALWAYS verify captured screenshots/recordings show actual content before embedding. Check for: loading spinners, "Session expired" screens, error boundaries, blank pages, cookie banners, dev badges. If any of these appear, retry with longer wait times, overlay hiding, or switch capture targets.
+25. always use PRODUCTION URL for authenticated page captures (screenshots and recordings). Dev servers have known race conditions with real-time auth providers (Convex, Firebase, Supabase) where the initial token fetch gets aborted during navigation, causing permanent "Session expired" error boundaries. Production builds do not have this issue.
+26. For animated recordings, always trim the login/navigation portion from auth recordings during conversion (use `ffmpeg -ss <seconds>`). The video should start on the feature page with content visible — NOT on the login form.
+27. always verify captured screenshots/recordings show actual content before embedding. Check for: loading spinners, "Session expired" screens, error boundaries, blank pages, cookie banners, dev badges. If any of these appear, retry with longer wait times, overlay hiding, or switch capture targets.
 ````

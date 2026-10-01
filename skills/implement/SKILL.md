@@ -6,14 +6,16 @@ description: >-
   "build the product", "run feature implementation", "orchestrate implementation",
   "run Stage 5", "start the feature build", or "implement from PRD",
   or when the transmute-pipeline agent reaches Stage 5 of the pipeline.
-version: 1.1.0
+metadata:
+  version: 1.1.0
+effort: high
 ---
 
 # Transmute Implement — Stage 5: Feature Implementation Orchestrator
 
-Orchestrate the implementation of a COMPLETE product using Claude Code Agent Teams. Read the PRD, identify ALL features, and systematically implement every one — including backend, frontend, and tests — with quality gates between features and a final full-product integration verification.
+Orchestrate the implementation of a COMPLETE product with a team of subagents (each "teammate" below is an Agent-tool subagent — `feature-backend`, `feature-frontend`, `feature-tests`, `feature-reviewer` — whose final message is its completion message; Claude Code's experimental Agent Teams can be used instead when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set). Read the PRD, identify ALL features, and systematically implement every one — including backend, frontend, and tests — with quality gates between features and a final full-product integration verification.
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/implementation-detailed-guide.md` for the complete teammate instructions, testing pitfalls, and coordination protocol.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/implementation-detailed-guide.md` for the complete teammate instructions, testing pitfalls, and coordination protocol.
 
 ## Critical Framing: Full-Build Approach
 
@@ -62,6 +64,8 @@ Build the implementation queue from PRD `02-feature-map-and-prioritization.md`:
 - ALL priorities are included — P0-P3 determines ORDER, not SCOPE
 
 Skip features already marked as Done in `plancasting/_progress.md`. Resume features marked as In Progress. Skip features marked as `⏸ Blocked` (treat like Done for resumption, but retain their blocked status).
+
+**Parallel waves (opt-in)**: `plancasting/tech-stack.md` § Model Specifications "Stage 5 parallel waves" sets how many features may be in flight at once (default 1 = the sequential cycle below). When it is above 1, build waves from the dependency order: a wave holds up to N features that (a) have no unmet dependency, (b) touch no shared UI (navigation, dashboard, shared layout — read the Cross-feature integration points of each brief: features with a `UI reference` or `Workflow` integration level to another feature in the same wave are serialized), and (c) are not sub-features of the same parent. Each feature in a wave runs its Step 1–5 cycle in its own git worktree (`git worktree add ../<project>-FEAT-NNN -b feat/FEAT-NNN`; every teammate prompt names that directory and all file operations stay inside it). When a feature's quality gate passes, merge its branch into the main working tree (`git merge --no-ff feat/FEAT-NNN`), run the full typecheck and test suite on the merged tree, and only then mark it Done; resolve merge conflicts yourself and re-run the suite. A wave ends when all its features are merged. The time saved comes from the waves; the risk is in shared files, which is why rule (b) exists. Keep the default at 1 until a measured run on the project shows the merges stay clean.
 
 **Feature Splitting**: If a feature requires creating or substantially modifying more than ~15 files total, split into sub-features and implement sequentially. Identify logical sub-features from user stories. Each sub-feature should be independently testable. Update `_progress.md` with IDs like `FEAT-003a`, `FEAT-003b`. Parent feature is marked Done only when all sub-features are Done.
 
@@ -135,7 +139,7 @@ After all teammates complete:
 7. Update scaffold manifest if new files were created
 8. Update `plancasting/_progress.md` — mark feature as Done
 9. Shutdown teammates
-10. Proceed to next feature — do NOT stop at any priority boundary
+10. Proceed to next feature — do not stop at any priority boundary
 
 ## Anti-Stub Quality Gates (Critical)
 
@@ -160,7 +164,7 @@ for file in <new-component-files>; do
 done
 ```
 
-If either scan finds issues, the feature MUST be sent back to the responsible teammate. Do NOT mark as Done.
+If either scan finds issues, the feature must be sent back to the responsible teammate. Do not mark as Done.
 
 ### Structural Checks
 
@@ -182,11 +186,11 @@ After ALL features are Done in `plancasting/_progress.md`:
 
 1. **Full Integration Test Suite**: Run typecheck, lint, all tests, all E2E. All must pass.
 
-2. **Cross-Feature Integration Sweep**: Spawn "cross-feature-auditor" to verify cross-feature user flows, data flows, shared UI aggregations, and write additional E2E tests for gaps. Priority order: (1) Flag but do NOT fix data model inconsistencies. (2) Flag navigation gaps but do not add links. (3) Fix simple integration issues.
+2. **Cross-Feature Integration Sweep**: Spawn "cross-feature-auditor" to verify cross-feature user flows, data flows, shared UI aggregations, and write additional E2E tests for gaps. Priority order: (1) Flag but do not fix data model inconsistencies. (2) Flag navigation gaps but do not add links. (3) Fix simple integration issues.
 
 3. **Onboarding Flow Verification**: Spawn "onboarding-auditor" (if PRD specifies onboarding) to verify progressive disclosure, first-time experience, and empty states.
 
-4. **Performance Validation**: Spawn "performance-auditor" for lightweight sanity check — bundle size, Lighthouse scores, query performance. Flag critical blockers only (page load >10s on 4G throttle, bundle >100% over budget); optimization happens in Stage 6C. Do NOT implement optimization fixes in this stage.
+4. **Performance Validation**: Spawn "performance-auditor" for lightweight sanity check — bundle size, Lighthouse scores, query performance. Flag critical blockers only (page load >10s on 4G throttle, bundle >100% over budget); optimization happens in Stage 6C. Do not implement optimization fixes in this stage.
 
 5. **Final Implementation Report**: Generate `./plancasting/_implementation-report.md` with completion summary (features, files, functions, components, hooks, tests), PRD coverage (target: 100%), cross-feature integration metrics, quality metrics (zero errors, test pass rates, bundle/lighthouse), assumptions, PRD gaps, known issues, and launch readiness assessment.
 
@@ -196,25 +200,25 @@ After ALL features are Done in `plancasting/_progress.md`:
 
 If resuming a previously interrupted implementation:
 1. Read `plancasting/_progress.md` for feature status. Perform a **positional scan** (top-to-bottom, not status-prioritized).
-2. For In Progress features: check `plancasting/_briefs/` to determine where implementation stopped. Inspect the codebase to establish sub-status: (a) Backend: check if backend functions exist with real logic (not just scaffolds), (b) Frontend: check if components/pages render real UI connected to hooks, (c) Tests: check if test files exist with passing assertions. Resume from the first incomplete layer — do NOT re-spawn teammates for layers that are already complete.
+2. For In Progress features: check `plancasting/_briefs/` to determine where implementation stopped. Inspect the codebase to establish sub-status: (a) Backend: check if backend functions exist with real logic (not just scaffolds), (b) Frontend: check if components/pages render real UI connected to hooks, (c) Tests: check if test files exist with passing assertions. Resume from the first incomplete layer — do not re-spawn teammates for layers that are already complete.
 3. For Needs Re-implementation features (set by Stage 5B): read `./plancasting/_audits/implementation-completeness/report.md` for specific gaps. Focus frontend teammate on replacing stubs. Only re-run backend teammate if audit explicitly flags backend issues. For features with `🔄` status: keep as 🔄 (not 🔧) so next session rebuilds from scratch.
 4. For `⏸ Blocked` features: check if blocking dependency is now Done. If yes, unblock and add to queue.
-5. Resume from first incomplete step. Do NOT restart from beginning.
+5. Resume from first incomplete step. Do not restart from beginning.
 
 ## Critical Rules
 
-1. NEVER skip a feature. Every feature in the PRD must be implemented.
-2. NEVER skip the Feature Analysis step. Every feature must have a brief.
-3. NEVER spawn frontend until backend confirms completion.
-4. NEVER spawn E2E until frontend confirms completion.
-5. NEVER proceed to next feature until quality gate passes (including regression tests).
-6. NEVER proceed past a cross-feature break. Fix immediately.
-7. ALWAYS read CLAUDE.md at startup. NEVER modify Part 1.
-8. ALWAYS update `plancasting/_progress.md` after each feature cycle.
-9. ALWAYS run FULL test suite at each quality gate.
+1. never skip a feature. Every feature in the PRD must be implemented.
+2. never skip the Feature Analysis step. Every feature must have a brief.
+3. never spawn frontend until backend confirms completion.
+4. never spawn E2E until frontend confirms completion.
+5. never proceed to next feature until quality gate passes (including regression tests).
+6. never proceed past a cross-feature break. Fix immediately.
+7. always read CLAUDE.md at startup. never modify Part 1.
+8. always update `plancasting/_progress.md` after each feature cycle.
+9. always run FULL test suite at each quality gate.
 10. Split features requiring 15+ files into sub-features.
-11. ALWAYS run the Full-Product Completion Sequence before the final report. If `plancasting/_implementation-report.md` exists but lacks a 'Launch Readiness Assessment' section, re-run the Full-Product Completion Sequence.
-12. The final report must show 100% PRD coverage. All features MUST show Done (or Blocked with documented reason).
+11. always run the Full-Product Completion Sequence before the final report. If `plancasting/_implementation-report.md` exists but lacks a 'Launch Readiness Assessment' section, re-run the Full-Product Completion Sequence.
+12. The final report must show 100% PRD coverage. All features must show Done (or Blocked with documented reason).
 
 ## Output Specification
 

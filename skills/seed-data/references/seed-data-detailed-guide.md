@@ -19,13 +19,13 @@ Without realistic seed data:
 
 Based on observed seed data generation outcomes:
 
-1. **Foreign key reference failures**: Teammate 2 creates projects referencing organization IDs from Teammate 1, but uses hardcoded strings instead of actual returned IDs. ALWAYS pass IDs through the seed script's shared state, never hardcode.
+1. **Foreign key reference failures**: Teammate 2 creates projects referencing organization IDs from Teammate 1, but uses hardcoded strings instead of actual returned IDs. always pass IDs through the seed script's shared state, never hardcode.
 2. **Identical timestamps**: All seed records created with `Date.now()` in a loop have the same timestamp. Add small increments (e.g., `Date.now() - i * 86400000`) to create realistic time distributions.
-3. **Business rule violations**: Seed data violates constraints added after schema design (e.g., unique email per org, max projects per plan tier). ALWAYS go through your backend's mutation functions (e.g., Convex mutations), not direct inserts. If mutations require authentication context, create an internal/admin-level seed function that bypasses auth checks but still validates schema constraints. Check Stage 6A security audit for any recently added auth requirements.
+3. **Business rule violations**: Seed data violates constraints added after schema design (e.g., unique email per org, max projects per plan tier). always go through your backend's mutation functions (e.g., Convex mutations), not direct inserts. If mutations require authentication context, create an internal/admin-level seed function that bypasses auth checks but still validates schema constraints. Check Stage 6A security audit for any recently added auth requirements.
 4. **Non-idempotent seeds**: Running `seed:dev` twice creates duplicate records. Either implement upsert logic or require `seed:reset` before re-seeding.
-5. **Auth credential gaps**: Creating users in the database without corresponding auth provider accounts means those users can't actually log in. ALWAYS consider the auth flow when creating persona users.
+5. **Auth credential gaps**: Creating users in the database without corresponding auth provider accounts means those users can't actually log in. always consider the auth flow when creating persona users.
 6. **Missing soft-deleted records**: All seed data is active. Include some soft-deleted records (with `deletedAt` set) to verify queries correctly filter them.
-7. **Orphaned references**: Seed data creates records with foreign keys that reference non-existent parent records (e.g., a project owned by a user ID that was never created). ALWAYS verify all foreign key references exist in the core data (`.seed-ids.json`) before creating dependent records.
+7. **Orphaned references**: Seed data creates records with foreign keys that reference non-existent parent records (e.g., a project owned by a user ID that was never created). always verify all foreign key references exist in the core data (`.seed-ids.json`) before creating dependent records.
 
 ## Input
 
@@ -121,7 +121,7 @@ Read ./plancasting/prd/01-product-overview.md for persona definitions.
 
 Your tasks:
 1. Create `./seed/core.ts` — a TypeScript module that exports seed data functions:
-   - **SAFETY**: All seed functions MUST include a production environment check at the top.
+   - **SAFETY**: All seed functions must include a production environment check at the top.
      **Important**: Read the Serverless Runtime Note below before implementing — some backends require different environment variable access patterns.
      **Stack Adaptation**: The code below shows Convex as the primary example. For other backends, uncomment and adapt the relevant section. Add your stack's production detection logic to the Stack Adaptation section at the top of this prompt.
      ```typescript
@@ -140,7 +140,7 @@ Your tasks:
      Adapt the check to your backend's environment detection (e.g., `CONVEX_DEPLOYMENT`, `NODE_ENV`, `VERCEL_ENV`).
      **Note**: Production safety and idempotency are orthogonal concerns. Production safety = kill-switch that prevents ANY seed operations in production. Idempotency = re-running seed scripts in the SAME environment (dev/test) produces the same data state (upsert logic, no duplicates).
      **Production safety check location**: For Convex, the production check must live in the seed script (the Node.js code that calls Convex mutations), NOT inside Convex query/mutation functions (`process.env` is only available in Convex actions). For other backends: if `process.env` is available in all function types, add the check inside each seed function. When in doubt, add the check at the calling script level (safest).
-     **Serverless runtime note**: Some backend runtimes (e.g., Convex internal functions) do NOT support `process.env` directly. For Convex: `process.env` is available in Convex actions and in Node.js scripts, but NOT in Convex query/mutation functions. Place the production safety check in the Node.js seed runner script (before calling Convex mutations), not inside Convex query/mutation functions. Example: check `process.env.NODE_ENV` or `process.env.CONVEX_DEPLOYMENT` at the script entry point.
+     **Serverless runtime note**: Some backend runtimes (e.g., Convex internal functions) do not support `process.env` directly. For Convex: `process.env` is available in Convex actions and in Node.js scripts, but NOT in Convex query/mutation functions. Place the production safety check in the Node.js seed runner script (before calling Convex mutations), not inside Convex query/mutation functions. Example: check `process.env.NODE_ENV` or `process.env.CONVEX_DEPLOYMENT` at the script entry point.
    - Functions that use your backend's mutation functions (e.g., Convex mutations) to insert seed data.
    - Data must respect all schema validators and business rules.
    - Create user accounts for each PRD persona with realistic names, emails, and profile data.
@@ -177,7 +177,7 @@ Include 2-3 soft-deleted records per entity type (set the soft-delete field from
 
 After creating all core entities, write the map of created IDs to `./seed/.seed-ids.json`. (The lead verifies `.gitignore` includes this file in Phase 1 — do not modify `.gitignore` yourself.) Teammates 2 and 3 will read this file.
 
-> **CRITICAL**: Store only DATABASE IDs (primary keys returned by backend mutations) in `.seed-ids.json`, NOT auth provider IDs. If creating users through an auth provider (Clerk, Auth0, WorkOS), map the auth provider ID to the database ID before storing.
+> Store only DATABASE IDs (primary keys returned by backend mutations) in `.seed-ids.json`, NOT auth provider IDs. If creating users through an auth provider (Clerk, Auth0, WorkOS), map the auth provider ID to the database ID before storing.
 
 Example: `{"users": {"admin_user": "v_abc123def456"}}` where `v_abc123def456` is the Convex document `_id`, not an Auth0 `user_id`. Complete JSON schema example:
    ~~~json
@@ -187,7 +187,7 @@ Example: `{"users": {"admin_user": "v_abc123def456"}}` where `v_abc123def456` is
    }
    ~~~
 
-When done, message the lead with: entities created, user accounts per tier. ALWAYS include the full ID map in your completion message as a JSON block, even if `.seed-ids.json` was written successfully. This is the lead's validation reference AND fallback data source. Example format: `{"users": {"admin": "id_abc"}, "organizations": {"acme": "org_xyz"}}`.
+When done, message the lead with: entities created, user accounts per tier. always include the full ID map in your completion message as a JSON block, even if `.seed-ids.json` was written successfully. This is the lead's validation reference AND fallback data source. Example format: `{"users": {"admin": "id_abc"}, "organizations": {"acme": "org_xyz"}}`.
 ~~~
 
 #### Teammate 2: "feature-data-seeder"
@@ -198,7 +198,7 @@ When done, message the lead with: entities created, user accounts per tier. ALWA
 ~~~
 You are generating seed data for all feature-specific entities.
 
-Read CLAUDE.md first. Then read ./seed/README.md for the seed data plan — it contains the idempotency approach decided by the lead (upsert, deterministic keys, or seed:reset). Your seed functions MUST follow the same approach. Do NOT invent a different idempotency strategy.
+Read CLAUDE.md first. Then read ./seed/README.md for the seed data plan — it contains the idempotency approach decided by the lead (upsert, deterministic keys, or seed:reset). Your seed functions must follow the same approach. Do not invent a different idempotency strategy.
 Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write all reports and README content in that language.
 Read `./plancasting/_audits/implementation-completeness/report.md` — skip generating seed data for features marked as incomplete (Category C).
 Read your schema file (e.g., `./convex/schema.ts`) for the complete data model.
@@ -242,7 +242,7 @@ When done, message the lead with: entities created per feature, items per tier, 
 ~~~
 You are generating edge case and stress test seed data.
 
-Read CLAUDE.md first. Then read ./seed/README.md for the seed data plan — it contains the idempotency approach decided by the lead. Your seed functions MUST follow the same approach. Do NOT invent a different idempotency strategy.
+Read CLAUDE.md first. Then read ./seed/README.md for the seed data plan — it contains the idempotency approach decided by the lead. Your seed functions must follow the same approach. Do not invent a different idempotency strategy.
 Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write all reports and README content in that language.
 Read `./plancasting/_audits/implementation-completeness/report.md` — skip generating seed data for features marked as incomplete (Category C).
 Read your schema file (e.g., `./convex/schema.ts`) for field types and constraints.
@@ -293,7 +293,7 @@ While teammates are working:
 
 IDs are shared via `./seed/.seed-ids.json`. Teammate 1 writes it after creating base entities. Lead validates it before spawning Teammates 2/3. Only Teammate 1 writes to this file. Teammates 2 and 3 read it but do not modify it — they run in parallel and must not create write conflicts. If Teammates 2 and 3 need to reference each other's entities, they should create their own entities independently rather than sharing IDs. Each teammate's seed functions should be self-contained within their dependency on Teammate 1's core entities.
 
-1. **Lead responsibility**: After Teammate 1 completes, the lead MUST validate `.seed-ids.json`.
+1. **Lead responsibility**: After Teammate 1 completes, the lead must validate `.seed-ids.json`.
    **Timeline**: (1) Teammate 1 creates all core entities, (2) Teammate 1 writes `./seed/.seed-ids.json` with complete ID map, (3) Teammate 1 reports completion with entity summary, (4) Lead validates `.seed-ids.json` exists and contains valid JSON, (5) Lead spawns Teammates 2 and 3. If validation fails, re-instruct Teammate 1 to fix.
    Validation checks:
    - File exists at `./seed/.seed-ids.json`
@@ -301,7 +301,7 @@ IDs are shared via `./seed/.seed-ids.json`. Teammate 1 writes it after creating 
    - Contains expected top-level keys: `users`, `organizations`, and any other core entity types from the schema
    - Each key maps to an object of `{ label: id }` pairs (not empty)
    IDs in `.seed-ids.json` must be the database IDs (used for foreign keys), not auth-provider IDs. If the auth provider returns a separate ID, map it to the database ID before storing.
-   If ANY check fails, do NOT spawn Teammates 2/3 — re-spawn Teammate 1 with explicit instructions to fix the file.
+   If ANY check fails, do not spawn Teammates 2/3 — re-spawn Teammate 1 with explicit instructions to fix the file.
 2. **Fallback**: If `.seed-ids.json` doesn't exist after Teammate 1 reports completion, the lead extracts IDs from Teammate 1's completion message and writes the file manually following the JSON schema example in Teammate 1's instructions.
 3. **Error handling**: If Teammates 2 or 3 report "seed IDs not found," the lead pauses them, verifies the file path and contents, and re-spawns with explicit ID context in the prompt.
 
@@ -323,7 +323,7 @@ After all teammates complete:
 2. Create `./seed/reset.ts` — function to clear all tables (for re-seeding):
    - Delete all documents from all tables.
    - Use with caution — include a confirmation parameter.
-   - Include a production safety check: verify the environment is NOT production before executing reset (check `CONVEX_DEPLOYMENT`, `NODE_ENV`, or equivalent env var). Abort with an error message if production is detected.
+   - Include a production safety check: verify the environment is not production before executing reset (check `CONVEX_DEPLOYMENT`, `NODE_ENV`, or equivalent env var). Abort with an error message if production is detected.
 
 3. Add seed commands to `package.json` (adapt to your backend runner):
    ~~~json
@@ -405,18 +405,18 @@ If integrity checks fail:
 
 ## Critical Rules
 
-1. NEVER use real personal data (real emails, real names) in seed data.
-2. NEVER bypass schema validators — all seed data must go through your backend's mutation functions (e.g., Convex mutations). If mutations require authentication context, create an internal/admin-level seed function that bypasses auth checks but still validates schema constraints. Check Stage 6A security audit for any recently added auth requirements.
-3. NEVER hardcode document IDs — always use the IDs returned from insert operations.
-4. Seed scripts MUST be idempotent (upsert logic preferred). **Upsert implementation**: Use a natural unique key per entity (e.g., email for users, slug for projects) to check existence before inserting. If no natural unique key exists, use a deterministic seed ID (e.g., `seed-user-admin-01`) stored alongside the record. If upsert is not feasible for the backend (e.g., no native upsert support and no natural unique key), provide a `seed:reset` command and document that it must be run before re-seeding. Document the chosen approach in `seed/README.md`.
-5. ALWAYS include some soft-deleted records to verify query filtering.
-6. ALWAYS verify seed data renders correctly in the UI, not just that it inserts without errors. After seeding, start the dev server and navigate key screens to verify: lists display items without truncation or crashes, edge case data (long strings, special characters) renders without layout breaks, and soft-deleted records are correctly hidden.
-7. ALWAYS include realistic timestamps (not all identical) with proper chronological ordering.
+1. never use real personal data (real emails, real names) in seed data.
+2. never bypass schema validators — all seed data must go through your backend's mutation functions (e.g., Convex mutations). If mutations require authentication context, create an internal/admin-level seed function that bypasses auth checks but still validates schema constraints. Check Stage 6A security audit for any recently added auth requirements.
+3. never hardcode document IDs — always use the IDs returned from insert operations.
+4. Seed scripts must be idempotent (upsert logic preferred). **Upsert implementation**: Use a natural unique key per entity (e.g., email for users, slug for projects) to check existence before inserting. If no natural unique key exists, use a deterministic seed ID (e.g., `seed-user-admin-01`) stored alongside the record. If upsert is not feasible for the backend (e.g., no native upsert support and no natural unique key), provide a `seed:reset` command and document that it must be run before re-seeding. Document the chosen approach in `seed/README.md`.
+5. always include some soft-deleted records to verify query filtering.
+6. always verify seed data renders correctly in the UI, not just that it inserts without errors. After seeding, start the dev server and navigate key screens to verify: lists display items without truncation or crashes, edge case data (long strings, special characters) renders without layout breaks, and soft-deleted records are correctly hidden.
+7. always include realistic timestamps (not all identical) with proper chronological ordering.
 8. Demo data dates should be relative to "now" so demos always look current. Calculate timestamps at runtime in the seed function, not hardcoded values. Example: instead of `created: new Date('2024-01-15')`, use `created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)` for 30 days ago. Avoid hardcoded dates like `2024-01-15` that will look stale.
 9. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).
 10. If the auth provider requires API calls to create users (e.g., WorkOS, Clerk), document this as a manual step or implement it in the seed script.
 11. If seed data generation encounters a schema constraint that prevents realistic data creation (e.g., circular foreign key dependencies, missing required fields with no default, auth provider limitations), document the constraint in `./plancasting/_audits/seed-data/report.md` under a "Seed Data Constraints" section. Provide a workaround (e.g., manual setup steps in `seed/MANUAL_SETUP.md`) and continue with the remaining seed data.
 12. Verify the schema's soft-delete field name early in Phase 1 (common names: `deletedAt`, `deleted_at`, `isDeleted`, `deletionTimestamp`). Use the actual field name consistently across all teammate instructions. If no soft-delete field exists in the schema, skip soft-deleted record generation for that entity (do not assume a `deletedAt` field — adding it would alter the schema).
-13. NEVER hard-code API keys, secrets, or real credentials in seed scripts. Use environment variables or placeholder values (e.g., `test-api-key-seed-001`). Seed scripts may be committed to version control.
-14. If Stage 6A has added rate limiting (check `./plancasting/_audits/security/report.md`), seed scripts MUST either: (a) use internal/admin-level functions that bypass rate limiting while still validating schema constraints, or (b) add delays between batch operations to stay within rate limits. This is especially critical for stress-tier data (500+ records). Note: Stage 6G runs AFTER 6F per pipeline ordering, so 6G rate limiting is not yet in effect. If 6G later adds rate limiting on endpoints used by seed scripts, re-run seed scripts with appropriate delays.
+13. never hard-code API keys, secrets, or real credentials in seed scripts. Use environment variables or placeholder values (e.g., `test-api-key-seed-001`). Seed scripts may be committed to version control.
+14. If Stage 6A has added rate limiting (check `./plancasting/_audits/security/report.md`), seed scripts must either: (a) use internal/admin-level functions that bypass rate limiting while still validating schema constraints, or (b) add delays between batch operations to stay within rate limits. This is especially critical for stress-tier data (500+ records). Note: Stage 6G runs AFTER 6F per pipeline ordering, so 6G rate limiting is not yet in effect. If 6G later adds rate limiting on endpoints used by seed scripts, re-run seed scripts with appropriate delays.
 ````

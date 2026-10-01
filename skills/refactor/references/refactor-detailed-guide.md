@@ -17,26 +17,26 @@ The Feature Orchestrator builds features one at a time, with each cycle's teamma
 - Overly coupled code where cross-feature integration was added reactively
 - Dead code from iterative fixes during the quality gate cycles
 
-This refactoring stage addresses these issues while preserving ALL external behavior. Every test that passed before refactoring MUST still pass after.
+This refactoring stage addresses these issues while preserving ALL external behavior. Every test that passed before refactoring must still pass after.
 
 ## Known Failure Patterns
 
 Based on observed refactoring outcomes:
 
 1. **Behavioral changes disguised as refactoring**: Renaming a function AND changing its default behavior in the same commit. The cardinal rule is violated. Every refactoring must preserve behavior.
-2. **Dead code that isn't dead**: Code that appears unused but is dynamically imported (`require()`, route-based code splitting, or referenced in configuration files). Also beware module-level side effects: bare imports (`import './module'` or `import 'module'`) that register middleware, error handlers, plugins, or polyfills may appear unused (no named exports referenced) but removing them removes the registration. ALWAYS search for string-based references AND bare imports before deleting.
+2. **Dead code that isn't dead**: Code that appears unused but is dynamically imported (`require()`, route-based code splitting, or referenced in configuration files). Also beware module-level side effects: bare imports (`import './module'` or `import 'module'`) that register middleware, error handlers, plugins, or polyfills may appear unused (no named exports referenced) but removing them removes the registration. always search for string-based references AND bare imports before deleting.
 3. **Parallel teammate file conflicts**: Two teammates modify the same file. One teammate's import reorganization breaks another's extracted function. Coordinate shared file modifications.
-4. **Schema index removal**: Index appears unused in code but is relied on by a production query pattern not covered by tests. NEVER remove indexes without verifying all query patterns.
-5. **Extract-and-replace subtle changes**: Extracting code into a new function introduces slightly different default parameter handling. ALWAYS verify exact behavioral equivalence. After extracting shared logic into a helper, add a brief verification test that the extracted function returns the same result as the original inline pattern. Example: after extracting `calculateDiscount(price, tier)` from two feature files, add a test that calls the extracted function with sample inputs (price=100, tier='pro') and asserts the result matches the original inline computation.
+4. **Schema index removal**: Index appears unused in code but is relied on by a production query pattern not covered by tests. never remove indexes without verifying all query patterns.
+5. **Extract-and-replace subtle changes**: Extracting code into a new function introduces slightly different default parameter handling. always verify exact behavioral equivalence. After extracting shared logic into a helper, add a brief verification test that the extracted function returns the same result as the original inline pattern. Example: after extracting `calculateDiscount(price, tier)` from two feature files, add a test that calls the extracted function with sample inputs (price=100, tier='pro') and asserts the result matches the original inline computation.
 6. **Missing test coverage for refactored code**: Refactoring code that has no tests means regressions cannot be detected. Add tests BEFORE refactoring, not after.
-7. **Stale import paths after extraction**: After extracting shared logic into a new module, old import paths may still exist and be used by some call sites. ALWAYS search all files for the old import path after extraction and update every reference. Also check for re-exports from the old location — delete old re-exports after verifying no consumers use them.
-8. **Stale `.claude/rules/` paths after refactoring**: If refactoring moves or renames files, the `globs` patterns in `.claude/rules/*.md` files may become stale and stop matching. After any file move or rename, check if any `.claude/rules/` file references the old path in its `globs` frontmatter and update accordingly.
+7. **Stale import paths after extraction**: After extracting shared logic into a new module, old import paths may still exist and be used by some call sites. always search all files for the old import path after extraction and update every reference. Also check for re-exports from the old location — delete old re-exports after verifying no consumers use them.
+8. **Stale `.claude/rules/` paths after refactoring**: If refactoring moves or renames files, the `paths` patterns in `.claude/rules/*.md` files may become stale and stop matching. After any file move or rename, check if any `.claude/rules/` file references the old path in its `paths` frontmatter and update accordingly.
 
 ## Prerequisites
 
 This stage runs AFTER Stages 6A (Security), 6B (Accessibility), and 6C (Performance) and BEFORE Stages 6F (Seed Data), 6G (Error Resilience Hardening), and 6D (Documentation) — per CLAUDE.md Stage 6 ordering. Refactoring follows audits that modify code (6A-6C) and precedes resilience hardening (6G), which may modify error handling patterns. Before beginning:
 1. Verify `./plancasting/_audits/implementation-completeness/report.md` exists and shows PASS or CONDITIONAL PASS. If missing, STOP — Stage 5B must complete before Stage 6E. If the gate shows FAIL-RETRY or FAIL-ESCALATE (see execution-guide.md § "Gate Decision Outcomes" for definitions), STOP — re-run Stage 5/5B until PASS or CONDITIONAL PASS before proceeding.
-2. If 5B shows CONDITIONAL PASS, review the documented Category C issues — proceed with awareness of known gaps. Do NOT refactor Category C features (see item 5 below).
+2. If 5B shows CONDITIONAL PASS, review the documented Category C issues — proceed with awareness of known gaps. Do not refactor Category C features (see item 5 below).
 3. Read `./CLAUDE.md` and `./plancasting/tech-stack.md` for project conventions.
 4. Verify `./plancasting/_audits/security/report.md` (6A), `./plancasting/_audits/accessibility/report.md` (6B), and `./plancasting/_audits/performance/report.md` (6C) exist. If any are missing, WARN: "Stage 6[A/B/C] has not completed. Refactoring may conflict with pending audit changes. Proceed with caution and document this in the report." If present, read them and note which files/sections were modified by 6A/6B/6C — during refactoring, avoid moving, renaming, or restructuring these sections without verifying the original intent is preserved (e.g., don't rename a security error handler that 6A added, don't restructure semantic HTML that 6B changed, don't undo lazy-loading that 6C added).
 5. **Incomplete features (5B Category C)**: Skip refactoring features marked as incomplete in Stage 5B. However, DO refactor shared utilities/hooks that incomplete features use (since other complete features may also depend on them). Document skipped features in the report.
@@ -65,7 +65,7 @@ Stage 6E generates:
 
 Test classification during refactoring:
 - Tests validating **implementation details** (private functions, internal state shape) MAY be restructured or removed without indicating a behavioral change.
-- Tests validating **user-facing behavior** (API contracts, acceptance criteria from PRD) MUST NOT be changed. If refactoring requires changing such a test, the refactoring introduces a behavioral change and must be reconsidered.
+- Tests validating **user-facing behavior** (API contracts, acceptance criteria from PRD) must not be changed. If refactoring requires changing such a test, the refactoring introduces a behavioral change and must be reconsidered.
 
 **Scope clarification**: 'No behavioral changes' means no changes to external APIs or user-facing behavior. Internal function signatures MAY change if all call sites are updated atomically in the same commit.
 
@@ -107,9 +107,9 @@ As the team lead, complete the following BEFORE spawning any teammates:
      bun run test:e2e
      ~~~
      Save results to `./plancasting/_audits/refactoring/baseline-test-results.md`.
-     After running tests, verify test counts are non-zero. Check the test runner output for lines like "Tests: X passed", "X test suites", or "X passed, Y failed". If the output shows 0 tests found, 0 test suites, or "no tests found", treat as 0 test files — do NOT rely solely on exit codes (some runners exit 0 with no tests).
-     (1) Run full test suite. (2) Parse output for test count. (3) IF test count == 0 in total (cumulatively across all suites): STOP. Output: 'Stage 6E requires test coverage. Run Stage 5 to generate tests, then Stage 5B to verify coverage, then retry Stage 6E.' (4) IF test count > 0 in some suites but 0 in others (e.g., backend tests exist but no frontend tests): WARN and proceed with refactoring limited to code paths covered by existing tests. Do NOT refactor code in untested areas — document those areas as 'refactoring deferred pending test coverage' in the report. (5) IF test count > 0 across all suites: proceed normally.
-     If the test suite fails to execute (error code != 0, output cannot be parsed): run `bun run test -- --verbose` to see detailed errors, verify no syntax errors via `bun run typecheck`. If test infrastructure is broken, fix it before proceeding with refactoring — do NOT refactor without a working test suite.
+     After running tests, verify test counts are non-zero. Check the test runner output for lines like "Tests: X passed", "X test suites", or "X passed, Y failed". If the output shows 0 tests found, 0 test suites, or "no tests found", treat as 0 test files — do not rely solely on exit codes (some runners exit 0 with no tests).
+     (1) Run full test suite. (2) Parse output for test count. (3) IF test count == 0 in total (cumulatively across all suites): STOP. Output: 'Stage 6E requires test coverage. Run Stage 5 to generate tests, then Stage 5B to verify coverage, then retry Stage 6E.' (4) IF test count > 0 in some suites but 0 in others (e.g., backend tests exist but no frontend tests): WARN and proceed with refactoring limited to code paths covered by existing tests. Do not refactor code in untested areas — document those areas as 'refactoring deferred pending test coverage' in the report. (5) IF test count > 0 across all suites: proceed normally.
+     If the test suite fails to execute (error code != 0, output cannot be parsed): run `bun run test -- --verbose` to see detailed errors, verify no syntax errors via `bun run typecheck`. If test infrastructure is broken, fix it before proceeding with refactoring — do not refactor without a working test suite.
      If baseline tests fail, STOP — do not refactor code with a failing test suite. Report to the pipeline operator and resolve test failures before proceeding.
    - Count total files, functions, components, hooks, and lines of code.
    - Identify the largest files (likely candidates for splitting).
@@ -135,7 +135,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Refactoring Teammates
 
-Spawn the following 4 teammates. Each teammate's spawn prompt MUST include the refactoring plan and the cardinal rule about no behavioral changes.
+Spawn the following 4 teammates. Each teammate's spawn prompt must include the refactoring plan and the cardinal rule about no behavioral changes.
 
 #### Teammate 1: "backend-refactorer"
 **Scope**: Backend functions (e.g., Convex functions), schema, and server-side code
@@ -164,7 +164,7 @@ Your tasks:
    - BEFORE REMOVING ANY INDEX: (1) search all backend files for `.withIndex('indexName')` references, (2) check schema comments for documented usage rationale, (3) if production query logs are accessible, verify the index is truly unused in production patterns. If zero code references found AND no documented rationale AND production usage verified as zero: safe to remove. If production usage is unknown (logs unavailable), KEEP the index with a code comment: '// Unknown production usage — keeping for safety.' The cost of a redundant index is negligible; the cost of a production outage from a removed index is severe. If any uncertainty remains, KEEP the index with a code comment explaining the uncertainty. If any reference or rationale exists: keep and document in the report. For pre-launch products (not yet deployed), production query log verification is N/A — rely on code analysis of all query patterns only.
    - Identify fields that are defined but never written or read.
    - Remove only redundant indexes (subsets of other indexes) that are provably unused. Add comments explaining why each remaining index exists.
-   - DO NOT remove tables or rename fields — only remove provably unused indexes and fields.
+   - Do not remove tables or rename fields — only remove provably unused indexes and fields.
 
 3. CONSISTENCY ENFORCEMENT: Scan all backend functions.
    - Unify error handling patterns (ensure all use your backend error type consistently, e.g., `ConvexError` for Convex). If shared error handling utilities (e.g., `withRetry()`, `handleApiError()`, error boundary wrappers) are used by 2+ functions, extract into a shared file (e.g., `convex/_internal/error-utils.ts` or `src/lib/error-utils.ts`). Stage 6G (Error Resilience Hardening) reuses these — see the 'Stage 6G Handoff' note below.
@@ -180,7 +180,7 @@ Your tasks:
    - Search for string-based references across the codebase using code search tools (or `grep -r` as fallback, excluding `node_modules/`, `.next/`, `dist/`). Also search for dynamic imports and bracket notation access patterns.
    - Search config files (next.config.ts, vite.config.ts, tsconfig.json) for references
    - Search route-based code splitting patterns
-   - Before deleting any export, also check for module-level side effects: bare imports (`import './setup'`), middleware registration patterns (`app.use(middleware)`), and configuration effects (`register()`). These are NEVER dead code even if no named exports are referenced.
+   - Before deleting any export, also check for module-level side effects: bare imports (`import './setup'`), middleware registration patterns (`app.use(middleware)`), and configuration effects (`register()`). These are never dead code even if no named exports are referenced.
    **Warning**: grep patterns may miss dynamic imports, config file references, and bracket notation access (e.g., `obj["functionName"]`). If any doubt remains about usage, mark as a dead code candidate for manual review rather than deleting.
    Only delete if zero references found across all search methods.
 
@@ -223,7 +223,7 @@ Your tasks:
    - Ensure the shared components use design tokens from the project's design token file (see CLAUDE.md Part 2 Technology Stack table or `plancasting/tech-stack.md` for the path).
 
 2. PATTERN EXTRACTION: Identify repeated UI patterns.
-   - Form patterns: if multiple features have forms with similar structure (validation, submission, error display), extract a shared form wrapper component. If a shared form HOOK is needed, document the requirement and send to Teammate 3 (hooks-and-logic-refactorer) — do NOT create hooks yourself. Document the required hook signature by appending to `./plancasting/_audits/refactoring/plan.md` (do not overwrite existing content) and notify the lead. The lead assigns hook extraction to the appropriate teammate.
+   - Form patterns: if multiple features have forms with similar structure (validation, submission, error display), extract a shared form wrapper component. If a shared form HOOK is needed, document the requirement and send to Teammate 3 (hooks-and-logic-refactorer) — do not create hooks yourself. Document the required hook signature by appending to `./plancasting/_audits/refactoring/plan.md` (do not overwrite existing content) and notify the lead. The lead assigns hook extraction to the appropriate teammate.
    - List/table patterns: if multiple features display lists/tables with similar features (sorting, filtering, pagination), extract shared list components.
    - Modal/dialog patterns: unify modal usage across features.
    - Loading/empty/error state patterns: ensure all features use the same state components.
@@ -311,7 +311,7 @@ When done, message the lead with: hooks refactored, utilities consolidated, type
 ~~~
 You are refactoring tests and project structure for improved quality and maintainability.
 
-CARDINAL RULE: Tests must continue to validate the same behaviors. You may restructure, deduplicate, and improve tests, but you must NOT remove test coverage.
+CARDINAL RULE: Tests must continue to validate the same behaviors. You may restructure, deduplicate, and improve tests, but you must not remove test coverage.
 
 Read CLAUDE.md first. Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write all findings in that language. Then read ./plancasting/_audits/refactoring/plan.md for your assigned refactoring tasks.
 
@@ -437,17 +437,17 @@ If a refactoring improvement requires architectural changes beyond the scope of 
 
 ## Critical Rules
 
-1. NEVER refactor and add features in the same change — refactoring must preserve behavior.
-2. NEVER delete a public export without verifying zero external consumers.
-3. NEVER refactor code that lacks test coverage for its external behavior — add tests first, then refactor. If only partial test coverage exists, see Phase 1 step 3 for the limited-scope approach.
-4. NEVER remove database indexes without verifying all query patterns (including production query logs).
-5. ALWAYS commit after each logical refactoring unit for granular rollback.
-6. ALWAYS run the full test suite after every refactoring step, not just at the end.
+1. never refactor and add features in the same change — refactoring must preserve behavior.
+2. never delete a public export without verifying zero external consumers.
+3. never refactor code that lacks test coverage for its external behavior — add tests first, then refactor. If only partial test coverage exists, see Phase 1 step 3 for the limited-scope approach.
+4. never remove database indexes without verifying all query patterns (including production query logs).
+5. always commit after each logical refactoring unit for granular rollback.
+6. always run the full test suite after every refactoring step, not just at the end.
 7. If a refactoring reduces test count, it is a regression — investigate.
-8. Test changes during refactoring: Adding new tests is acceptable. Restructuring or removing tests that validated implementation details (private functions, internal state) is acceptable. Changing assertions in tests that validate user-facing behavior is NOT acceptable — if such a test must change, the refactoring is introducing a behavioral change.
+8. Test changes during refactoring: Adding new tests is acceptable. Restructuring or removing tests that validated implementation details (private functions, internal state) is acceptable. Changing assertions in tests that validate user-facing behavior is not acceptable — if such a test must change, the refactoring is introducing a behavioral change.
    **Definitions**: An *implementation detail test* validates internal mechanisms not observable by users (e.g., "internal helper returns formatted string", "state shape has specific keys", "private method called N times"). A *user-facing behavior test* validates outcomes visible to users or API consumers (e.g., "clicking Submit creates a project", "API returns 200 with user data", "error toast appears on failure", "page redirects after login"). When in doubt, ask: "Would a user notice if this assertion changed?" If yes, it's user-facing.
 9. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).
 10. Reference Stage 5B output to avoid refactoring features that are still incomplete.
-11. If a refactoring opportunity would require architectural changes beyond scope (e.g., restructuring the database schema, changing the auth model, redesigning the API contract), document it in `./plancasting/_audits/refactoring/report.md` under a "Deferred Architectural Improvements" section with the rationale, estimated effort, and recommended approach. Do NOT attempt the change — it requires a dedicated Stage 5 re-run or a new pipeline cycle.
+11. If a refactoring opportunity would require architectural changes beyond scope (e.g., restructuring the database schema, changing the auth model, redesigning the API contract), document it in `./plancasting/_audits/refactoring/report.md` under a "Deferred Architectural Improvements" section with the rationale, estimated effort, and recommended approach. Do not attempt the change — it requires a dedicated Stage 5 re-run or a new pipeline cycle.
 12. If refactoring changes module boundaries, public APIs, or directory structure, update `ARCHITECTURE.md` (if it exists) to reflect the new structure.
 ````

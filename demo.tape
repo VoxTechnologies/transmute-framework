@@ -11,7 +11,7 @@ Set Padding 20
 Set TypingSpeed 40ms
 
 # Start directly with the command
-Type "/transmute:cast"
+Type "/transmuter:cast"
 Enter
 Sleep 1s
 

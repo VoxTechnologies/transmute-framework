@@ -33,19 +33,19 @@ You are a senior frontend designer and engineer leading an interactive frontend 
 
 Based on observed frontend redesign outcomes:
 
-1. **Replacing UI library components wholesale**: Agent replaces component library buttons/cards with custom-styled HTML to achieve a design effect. This breaks accessibility (ARIA), variant consistency, and future library updates. ALWAYS use the library's component API (className, variant props, theming) — never replace the component.
+1. **Replacing UI library components wholesale**: Agent replaces component library buttons/cards with custom-styled HTML to achieve a design effect. This breaks accessibility (ARIA), variant consistency, and future library updates. always use the library's component API (className, variant props, theming) — never replace the component.
 2. **CSS specificity wars**: Agent adds Tailwind utility classes that are overridden by the UI library's base styles. Fix: use the library's theming/customization API, or `!important` as a last resort.
-3. **Breaking existing dark mode**: Agent fixes a light-mode color by hardcoding a value (e.g., `text-gray-900`) without adding the `dark:` variant, breaking dark mode. ALWAYS add both light and dark variants when modifying colors.
+3. **Breaking existing dark mode**: Agent fixes a light-mode color by hardcoding a value (e.g., `text-gray-900`) without adding the `dark:` variant, breaking dark mode. always add both light and dark variants when modifying colors.
 4. **Animation performance regression**: Agent adds CSS transitions that trigger layout recalculation (animating `width`, `height`, `top`, `left`). ONLY animate `transform` and `opacity` for performant animations.
 5. **Font loading FOUT/FOIT**: Agent adds a display font via CDN `<link>` without `font-display: swap` or preloading, causing Flash of Unstyled/Invisible Text. Use `next/font` (or equivalent) with `display: swap`.
-6. **Font not available on Google Fonts**: Agent configures `next/font/google` with a font name (e.g., "Satoshi") that doesn't exist on Google Fonts — build fails at compile time. ALWAYS verify font availability before configuring: Google Fonts fonts work with `next/font/google`; other fonts (Fontshare, paid fonts) require `next/font/local` with downloaded `.woff2` files.
+6. **Font not available on Google Fonts**: Agent configures `next/font/google` with a font name (e.g., "Satoshi") that doesn't exist on Google Fonts — build fails at compile time. always verify font availability before configuring: Google Fonts fonts work with `next/font/google`; other fonts (Fontshare, paid fonts) require `next/font/local` with downloaded `.woff2` files.
 7. **Overzealous scope**: Agent modifies 50+ components when only 10-15 key screens need redesign attention. Focus on high-impact pages — landing, dashboard, core workflows. Polish lesser screens only if time permits.
 8. **Silent design deviation**: Agent encounters a design decision that doesn't work (e.g., pill border-radius on data tables) and silently changes it instead of going back to the user. The approved design plan is a contract — deviations require explicit user approval.
-9. **Credentials in committed files**: Agent stores user-provided credentials in the context summary file which then gets committed. NEVER write raw credentials to files — reference the source (e.g., "from e2e/constants.ts") instead of the values.
+9. **Credentials in committed files**: Agent stores user-provided credentials in the context summary file which then gets committed. never write raw credentials to files — reference the source (e.g., "from e2e/constants.ts") instead of the values.
 10. **Old token remnants**: Agent updates the design token source files but dozens of components have hardcoded hex values that bypass tokens. After Step 3.1 (tokens), Step 3.4 (component audit) must grep for hardcoded values and replace them — otherwise the redesign looks half-applied.
-11. **Hybrid theme: `setTheme()` persists to localStorage**: When implementing a Hybrid theme (light marketing, dark app), calling next-themes' `setTheme("light")` to force light mode on public routes writes `"light"` to localStorage. When the user navigates to authenticated pages, next-themes reads `"light"` from localStorage and renders light mode — causing a light→dark flicker or the dashboard stuck in light mode. FIX: Manipulate the `dark` class on `<html>` directly (`document.documentElement.classList.remove("dark")`) WITHOUT calling `setTheme()`. On cleanup (unmount), restore the class AND ensure localStorage is set to `"dark"` so next-themes doesn't override the restored class. NEVER let route-scoped theme forcing write to persistent storage.
-12. **Hybrid theme: stale localStorage from prior deployments**: Even after fixing the ForceLightMode component, users who visited the site during the broken deployment still have `"light"` in localStorage. The fixed component must ALSO include a migration step: on mount, check localStorage and reset stale `"light"` values to `"dark"`. Without this, returning users remain stuck in light mode on authenticated pages.
-13. **Docs screenshots saved to wrong path**: When recapturing screenshots for a docs site (Mintlify, Docusaurus), the agent saves images to an obvious directory (e.g., `user-guide/images/`) but the docs `.mdx` files reference a DIFFERENT path (e.g., `user-guide/public/screenshots/`). ALWAYS grep the docs content files for image references FIRST to discover the actual path pattern, then save screenshots to that path. Verify by checking the `<img src=` or `![](` patterns in the `.mdx`/`.md` files before capturing.
+11. **Hybrid theme: `setTheme()` persists to localStorage**: When implementing a Hybrid theme (light marketing, dark app), calling next-themes' `setTheme("light")` to force light mode on public routes writes `"light"` to localStorage. When the user navigates to authenticated pages, next-themes reads `"light"` from localStorage and renders light mode — causing a light→dark flicker or the dashboard stuck in light mode. FIX: Manipulate the `dark` class on `<html>` directly (`document.documentElement.classList.remove("dark")`) WITHOUT calling `setTheme()`. On cleanup (unmount), restore the class AND ensure localStorage is set to `"dark"` so next-themes doesn't override the restored class. never let route-scoped theme forcing write to persistent storage.
+12. **Hybrid theme: stale localStorage from prior deployments**: Even after fixing the ForceLightMode component, users who visited the site during the broken deployment still have `"light"` in localStorage. The fixed component must also include a migration step: on mount, check localStorage and reset stale `"light"` values to `"dark"`. Without this, returning users remain stuck in light mode on authenticated pages.
+13. **Docs screenshots saved to wrong path**: When recapturing screenshots for a docs site (Mintlify, Docusaurus), the agent saves images to an obvious directory (e.g., `user-guide/images/`) but the docs `.mdx` files reference a DIFFERENT path (e.g., `user-guide/public/screenshots/`). always grep the docs content files for image references FIRST to discover the actual path pattern, then save screenshots to that path. Verify by checking the `<img src=` or `![](` patterns in the `.mdx`/`.md` files before capturing.
 14. **Docs config colors not updated with accent change**: When changing the accent color, the docs site config file (`docs.json` for Mintlify, `docusaurus.config.js` for Docusaurus) has its own `colors.primary` / `colors.light` / `colors.dark` values that are separate from the app's CSS tokens. These must be updated in the SAME commit as the accent color change, not as an afterthought.
 
 ## Recovery & Resume
@@ -169,7 +169,7 @@ if git branch --list redesign/frontend-elevation | grep -q .; then
   echo "Branch 'redesign/frontend-elevation' already exists from a previous run."
   echo "Options: (a) delete it: git branch -d redesign/frontend-elevation  # use -D only if -d refuses (unmerged)"
   echo "         (b) resume on it: git checkout redesign/frontend-elevation"
-  # Ask the operator which option to take before proceeding — do NOT proceed until they choose
+  # Ask the operator which option to take before proceeding — do not proceed until they choose
   exit 1
 else
   git checkout -b redesign/frontend-elevation
@@ -197,13 +197,13 @@ Save the results. ALL implementation changes must maintain or improve this basel
 
 ## Phase 0: Interactive Project Context Collection
 
-**CRITICAL**: Collect ALL context BEFORE any design work. Ask each question ONE AT A TIME, waiting for the user's response before proceeding.
+Collect ALL context BEFORE any design work. Ask each question ONE AT A TIME, waiting for the user's response before proceeding.
 
 **Fast-path option**: After presenting the Step 0.1 scan results, offer: "I have 9 questions to collect context (brand color, screenshots, references, Figma, logo, UI library, production URL, credentials). Would you like to answer them one at a time, or provide all answers in a single message?" If the user chooses batch mode, present all questions at once and parse the combined response. This saves time for experienced users who know their answers.
 
 ### Step 0.1 — Automated Project Scan
 
-**First**, read the project's conventions file (`./CLAUDE.md` or equivalent) and tech stack documentation (`./plancasting/tech-stack.md` or README). These determine where to scan, what CSS framework to expect, and what coding rules apply to all changes. **Icon library constraint**: All UI icons must use the project's icon library (see CLAUDE.md Rule 6 and `plancasting/tech-stack.md` "Icon library" field). During the redesign, add any new icons to `src/components/ui/icons.ts` — do NOT use inline SVG `<path>` elements for standard icons. Inline SVGs are permitted only for logos, brand marks, or custom illustrations.
+**First**, read the project's conventions file (`./CLAUDE.md` or equivalent) and tech stack documentation (`./plancasting/tech-stack.md` or README). These determine where to scan, what CSS framework to expect, and what coding rules apply to all changes. **Icon library constraint**: All UI icons must use the project's icon library (see CLAUDE.md Rule 6 and `plancasting/tech-stack.md` "Icon library" field). During the redesign, add any new icons to `src/components/ui/icons.ts` — do not use inline SVG `<path>` elements for standard icons. Inline SVGs are permitted only for logos, brand marks, or custom illustrations.
 
 **Then**, scan the project:
 
@@ -268,7 +268,7 @@ For each URL provided:
 3. If the product has a dashboard/app view visible without login, capture that too
 4. Analyze and document: color palette, typography choices, spacing rhythm, layout patterns, animation style, dark/light approach
 
-**If Playwright is blocked** (Cloudflare challenge, bot detection, CAPTCHA): inform the user and ask them to provide screenshots manually. Do NOT retry in a loop — some sites actively block headless browsers. The user can screenshot the reference product themselves and provide the images.
+**If Playwright is blocked** (Cloudflare challenge, bot detection, CAPTCHA): inform the user and ask them to provide screenshots manually. Do not retry in a loop — some sites actively block headless browsers. The user can screenshot the reference product themselves and provide the images.
 
 ### Step 0.5 — Reference Product Credentials (if needed)
 
@@ -367,7 +367,7 @@ Ask:
 
 If "use e2e constants": read `./e2e/constants.ts` and extract credentials.
 
-**SECURITY**: NEVER write raw credentials (passwords, tokens) into any file that will be committed to git. In the context summary, reference the source (e.g., "from e2e/constants.ts" or "provided by user — stored in session only") — not the actual values.
+**SECURITY**: never write raw credentials (passwords, tokens) into any file that will be committed to git. In the context summary, reference the source (e.g., "from e2e/constants.ts" or "provided by user — stored in session only") — not the actual values.
 
 ### Step 0.11 — Context Summary
 
@@ -690,7 +690,7 @@ Re-save the updated plan to `design-plan.md` and re-present for approval. Repeat
 
 **If the user rejects the design plan**: (1) Rename (not copy) `design-plan.md` to `design-plan-rejected.md` so that Stage 6P's detection check does not trigger a false positive: `mv ./plancasting/_audits/visual-polish/design-plan.md ./plancasting/_audits/visual-polish/design-plan-rejected.md` (2) Abandon the feature branch (`git checkout main`). (3) Clean up the abandoned branch: `git branch -d redesign/frontend-elevation` (use `-D` only if `-d` refuses due to unmerged commits — safe in this case because no work has been merged to main). (4) Either retry 6P-R in a new session with different design decisions, or switch to standard Stage 6P for incremental polish.
 
-**DO NOT proceed to Phase 3 until the user explicitly approves.**
+**Do not proceed to Phase 3 until the user explicitly approves.**
 
 ---
 
@@ -725,7 +725,7 @@ Install and configure the approved font pairing:
    - Check if the font is available on Google Fonts (works with `next/font/google`)
    - If NOT on Google Fonts (e.g., Satoshi, Cabinet Grotesk, General Sans from Fontshare), download `.woff2` files and use `next/font/local`
    - If font files cannot be obtained, inform the user and suggest an available alternative
-   - NEVER configure a font import that will fail at build time
+   - never configure a font import that will fail at build time
 
 2. **Package installation** (if using `next/font` or local files):
    - For `next/font/google`: import from `next/font/google` with correct font name and subsets
@@ -756,7 +756,7 @@ Install and configure the approved font pairing:
 
 Update theme configuration for correct default mode and switching behavior:
 - Set default theme to match Decision 1 (light/dark/system)
-- **If Hybrid theme** (light marketing / dark app): see Known Failure Patterns #11-#12 for critical `setTheme()` / localStorage pitfalls. NEVER use `setTheme()` to force light mode — use CSS `prefers-color-scheme` media queries or a manual theme toggle without localStorage persistence for marketing pages.
+- **If Hybrid theme** (light marketing / dark app): see Known Failure Patterns #11-#12 for critical `setTheme()` / localStorage pitfalls. never use `setTheme()` to force light mode — use CSS `prefers-color-scheme` media queries or a manual theme toggle without localStorage persistence for marketing pages.
 - Ensure theme toggle component uses the correct token set
 - Verify CSS variables switch correctly between light and dark
 
@@ -773,7 +773,7 @@ Search for:
 - Inline styles (style={{ ... }}) — move to CSS framework classes
 ```
 
-Only modify shared components to use tokens — do NOT restructure or redesign them here.
+Only modify shared components to use tokens — do not restructure or redesign them here.
 
 **CSS specificity troubleshooting**: If a token reference (e.g., `text-primary` or `var(--color-text)`) is overridden by the component library's base styles, resolve in this priority order:
 1. Use the library's theming API (e.g., shadcn/ui's CSS variables, Chakra's theme config, MUI's `createTheme`)
@@ -850,7 +850,7 @@ Update each public page. Order by user impact:
 |---|---|
 | **Product Screenshot** | Heading + subtext + CTA above or beside a large app screenshot (browser mockup frame optional). Screenshot should be max-width ~900px with subtle shadow. |
 | **Abstract** | Heading + subtext + CTA over an abstract background (CSS gradient mesh, SVG noise texture, or `radial-gradient` composition). Keep text on a semi-transparent Surface overlay if contrast is insufficient. |
-| **Illustration** | Text block (50-60% width) beside illustration (40-50% width). Illustration aligned to bottom or right edge. If no illustration asset exists, document as a requirement — do NOT generate placeholder art. |
+| **Illustration** | Text block (50-60% width) beside illustration (40-50% width). Illustration aligned to bottom or right edge. If no illustration asset exists, document as a requirement — do not generate placeholder art. |
 | **Split** | Two-column asymmetric layout: text + CTA on left (55-60%), visual on right (40-45%). Stacks vertically on mobile (text first). |
 | **Video** | Heading overlaid on or above an auto-playing muted video (or a static poster image with play button). Ensure text contrast with a dark overlay or text-shadow. |
 | **Minimal Text-only** | Large heading (use Display size from type scale), generous top/bottom padding (8-12rem), minimal or no visual elements. Maximum whitespace conveys confidence. |
@@ -916,9 +916,9 @@ Apply the approved animation level (Decision 6):
 - Parallax subtle (background movement on scroll, ≤20px range)
 - Button press scale: `active:scale-[0.98] transition-transform duration-100`
 
-**PERFORMANCE RULE**: ONLY animate `transform` and `opacity` — these are GPU-composited and do not trigger layout recalculation. NEVER animate `width`, `height`, `top`, `left`, `margin`, or `padding` — these cause reflow and degrade performance.
+**PERFORMANCE RULE**: ONLY animate `transform` and `opacity` — these are GPU-composited and do not trigger layout recalculation. never animate `width`, `height`, `top`, `left`, `margin`, or `padding` — these cause reflow and degrade performance.
 
-**ACCESSIBILITY RULE**: ALL animations MUST respect `prefers-reduced-motion`. Wrap animations with a reduced-motion check:
+**ACCESSIBILITY RULE**: ALL animations must respect `prefers-reduced-motion`. Wrap animations with a reduced-motion check:
 - CSS: `@media (prefers-reduced-motion: reduce) { .animated { animation: none; transition: none; } }`
 - Tailwind: Use `motion-safe:` prefix (e.g., `motion-safe:animate-fadeIn`) — animations only apply when the user hasn't requested reduced motion
 - JS motion libraries: Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` before triggering
@@ -956,7 +956,7 @@ These examples use Tailwind's `dark:` prefix and neutral scale. For other CSS fr
 
 ## Phase 4: Playwright Visual Review (MANDATORY)
 
-**This phase is NOT optional.** Every redesign must be visually verified via browser automation.
+**This phase is not optional.** Every redesign must be visually verified via browser automation.
 
 ### Step 4.1 — Start or Verify Dev Server
 
@@ -1021,7 +1021,7 @@ If the project supports dark mode:
 
 ### Step 4.5 — Visual Quality Review
 
-For each captured screenshot, evaluate quality using the reference product screenshots from Phase 0 Step 0.4 as **quality benchmarks** (not pixel-level targets). The goal is NOT to replicate the reference product's design — it's to match their level of visual polish, consistency, and attention to detail.
+For each captured screenshot, evaluate quality using the reference product screenshots from Phase 0 Step 0.4 as **quality benchmarks** (not pixel-level targets). The goal is not to replicate the reference product's design — it's to match their level of visual polish, consistency, and attention to detail.
 
 Review checklist:
    - **Contrast issues** — any text hard to read?
@@ -1074,7 +1074,7 @@ Cross-reference the slop inventory from Step 3.5 (`./plancasting/_audits/visual-
 
 If the `frontend-design` skill is available, invoke it once here — submit all remaining fixes together in a single consolidated invocation (not per-fix).
 
-### NEVER Patterns — Detect and Remove
+### never Patterns — Detect and Remove
 
 Detection examples below use Tailwind class names. For other CSS frameworks, search for the equivalent CSS properties (e.g., `background-clip: text` instead of `bg-clip-text`, `filter: blur(64px)` instead of `blur-3xl`, `padding: 6rem 0` instead of `py-24`).
 
@@ -1091,7 +1091,7 @@ Detection examples below use Tailwind class names. For other CSS frameworks, sea
 | Uniform card grids with identical cards | `grid-cols-3 gap-6` / identical repeated card in uniform grid | Vary card sizes (span-2 + span-1), add featured card treatment, break grid rhythm |
 | Decorative floating shapes/dots | `position: absolute` circles, squares, dots as decoration | Remove unless they serve information hierarchy |
 
-### ALWAYS Patterns — Apply Where Missing
+### always Patterns — Apply Where Missing
 
 These patterns prevent generic AI output. Implementation examples use Tailwind classes — adapt to your CSS framework's equivalents. **Adapt intensity to the approved Design Style** (Decision 3) — e.g., "compact page titles" suit Developer Tool-first but would undermine Editorial's dramatic typography. Use judgment: the spirit is distinctiveness, not a rigid checklist.
 
@@ -1179,7 +1179,7 @@ Update `plancasting/tech-stack.md` with the new design direction (if this sectio
 
 ### Step 7.3 — Documentation Config & Screenshot Preparation
 
-This updates docs.json brand colors and existing screenshots — it is NOT a full 7D re-run. A full 7D re-run from scratch is RECOMMENDED after merging to main (see Phase 9 Shutdown).
+This updates docs.json brand colors and existing screenshots — it is not a full 7D re-run. A full 7D re-run from scratch is RECOMMENDED after merging to main (see Phase 9 Shutdown).
 
 If the project has a documentation site (Mintlify, Docusaurus, etc.):
 
@@ -1192,7 +1192,7 @@ If the project has a documentation site (Mintlify, Docusaurus, etc.):
    Common patterns:
    - Mintlify: images typically go in `images/` at the docs root (e.g., `user-guide/images/`) — see Stage 7D Known Failure Pattern #18
    - Docusaurus: `![](../static/img/...)` → save to `docs/static/img/`
-   - Custom: varies — ALWAYS verify before capturing
+   - Custom: varies — always verify before capturing
 
 3. **Capture screenshots to the CORRECT path**: Save directly to the path the docs framework references, NOT to a separate `images/` directory. Verify the files will be served by the docs build.
 
@@ -1283,7 +1283,7 @@ Generate `./plancasting/_audits/visual-polish/redesign-report.md` (note: uses `r
 ## Downstream Actions
 - [ ] Deploy via Stage 7
 - [ ] Update docs.json / config with new brand colors (do this BEFORE deploying docs — see Known Failure Pattern 14)
-- [ ] Re-run Stage 7D for updated screenshots — MUST grep docs content for actual image path before capturing (see Known Failure Pattern 13)
+- [ ] Re-run Stage 7D for updated screenshots — must grep docs content for actual image path before capturing (see Known Failure Pattern 13)
 - [ ] Verify Hybrid theme has no flicker: navigate public → login → dashboard and confirm no light→dark flash (see Known Failure Patterns 11-12)
 
 ## Gate Decision
@@ -1337,7 +1337,7 @@ Note: Screenshot directories (`./screenshots/`) are for local reference. Add to 
    > git checkout main && git merge <your-redesign-branch>
    > ```
    > (default branch name: `redesign/frontend-elevation`)
-   > THEN re-run Stage 7D (User Guide Generation) in a fresh session to recapture all screenshots and docs content with the new design. Update `docs.json` color tokens to match the new palette. Do NOT run Stage 7D before merging the branch. This is required even if 7D ran before 6P-R.
+   > THEN re-run Stage 7D (User Guide Generation) in a fresh session to recapture all screenshots and docs content with the new design. Update `docs.json` color tokens to match the new palette. Do not run Stage 7D before merging the branch. This is required even if 7D ran before 6P-R.
 
 ---
 
@@ -1346,7 +1346,7 @@ Note: Screenshot directories (`./screenshots/`) are for local reference. Add to 
 If this stage is interrupted mid-execution:
 1. Check if `./plancasting/_audits/visual-polish/` directory exists with any phase output files
 2. Check the `redesign/frontend-elevation` branch: `git log --oneline redesign/frontend-elevation` to see what was committed
-3. **Phase 0–2 interrupted** (interactive discovery): Prior outputs are preserved in audit files. Resume by re-pasting the prompt — the lead will detect existing Phase 0–2 outputs and skip completed phases. Do NOT repeat interactive decisions already made.
+3. **Phase 0–2 interrupted** (interactive discovery): Prior outputs are preserved in audit files. Resume by re-pasting the prompt — the lead will detect existing Phase 0–2 outputs and skip completed phases. Do not repeat interactive decisions already made.
 4. **Phase 3–8 interrupted** (autonomous implementation): Check which components were already redesigned by reviewing git diff on the redesign branch. Resume by re-pasting the prompt — the lead will detect the redesign branch and resume from the first incomplete component group.
 5. **Phase 9 interrupted** (shutdown): Manually commit remaining changes on the redesign branch and proceed to operator merge decision.
 
@@ -1356,41 +1356,41 @@ If this stage is interrupted mid-execution:
 
 ## Critical Rules
 
-1. **NEVER change functional behavior.** This stage changes ONLY visual presentation. If a change would alter routing, data flow, API calls, auth, or form submission logic, it is OUT OF SCOPE. **Exception**: If the user explicitly approves adding dark mode infrastructure in Decision 1 (because the project lacks it but they chose a dark theme), that scope extension is authorized.
+1. **never change functional behavior.** This stage changes ONLY visual presentation. If a change would alter routing, data flow, API calls, auth, or form submission logic, it is OUT OF SCOPE. **Exception**: If the user explicitly approves adding dark mode infrastructure in Decision 1 (because the project lacks it but they chose a dark theme), that scope extension is authorized.
 
-2. **NEVER replace design system components with custom implementations.** Work within the existing UI library's API. Use className, variant props, and CSS overrides — not component replacements.
+2. **never replace design system components with custom implementations.** Work within the existing UI library's API. Use className, variant props, and CSS overrides — not component replacements.
 
-3. **ALWAYS get explicit user approval on the design plan** (Phase 2) before implementing anything. The user's design preferences override any default recommendations.
+3. **always get explicit user approval on the design plan** (Phase 2) before implementing anything. The user's design preferences override any default recommendations.
 
-4. **ALWAYS use the `frontend-design` skill** (if available) for aesthetic decisions. It prevents generic AI-generated aesthetics. **The lead invokes the frontend-design skill once during this stage (in Phase 5 — Anti-AI-Slop Refinement), not per-fix or per-pattern**. Teammates read the shared output — they do NOT invoke the skill themselves. This ensures design consistency across all phases.
+4. **always use the `frontend-design` skill** (if available) for aesthetic decisions. It prevents generic AI-generated aesthetics. **The lead invokes the frontend-design skill once during this stage (in Phase 5 — Anti-AI-Slop Refinement), not per-fix or per-pattern**. Teammates read the shared output — they do not invoke the skill themselves. This ensures design consistency across all phases.
 
-5. **ALWAYS take before/after screenshots.** Every change must be visually documented and verified.
+5. **always take before/after screenshots.** Every change must be visually documented and verified.
 
-6. **ALWAYS run validation** (typecheck + lint + test) after implementation. A beautiful design that breaks the build is worthless.
+6. **always run validation** (typecheck + lint + test) after implementation. A beautiful design that breaks the build is worthless.
 
-7. **ALWAYS verify at all 3 breakpoints** (1440, 768, 375). A desktop-only redesign is half a redesign.
+7. **always verify at all 3 breakpoints** (1440, 768, 375). A desktop-only redesign is half a redesign.
 
-8. **ALWAYS verify dark mode** if the project supports it. Every color change needs a dark variant.
+8. **always verify dark mode** if the project supports it. Every color change needs a dark variant.
 
-9. **NEVER introduce new dependencies without checking `package.json`.** If an animation library or font loader isn't already installed, check with the user before adding it.
+9. **never introduce new dependencies without checking `package.json`.** If an animation library or font loader isn't already installed, check with the user before adding it.
 
-10. **ALWAYS apply the anti-AI-slop patterns** from Phase 5. These are non-negotiable — they prevent the redesign from looking like generic AI output.
+10. **always apply the anti-AI-slop patterns** from Phase 5. These are non-negotiable — they prevent the redesign from looking like generic AI output.
 
 11. **Maximum 3 animation additions per page.** (See Step 3.10 SCOPE RULE.)
 
-12. **ALWAYS preserve accessibility.** Focus rings, ARIA labels, semantic HTML, keyboard navigation — if a design change would compromise any of these, find an alternative approach.
+12. **always preserve accessibility.** Focus rings, ARIA labels, semantic HTML, keyboard navigation — if a design change would compromise any of these, find an alternative approach.
 
 13. **Token-first implementation.** Always start with design tokens (Step 3.1) — they cascade ~80% of changes automatically. Only after tokens are set should you modify individual components.
 
-14. **ALWAYS check console errors during Playwright screenshots.** Use `browser_console_messages` after each capture. (See Steps 4.2, 4.3, 6.2.)
+14. **always check console errors during Playwright screenshots.** Use `browser_console_messages` after each capture. (See Steps 4.2, 4.3, 6.2.)
 
 15. **Collect ALL context in Phase 0 before any design work.** Do not skip interactive collection steps — they prevent wasted implementation effort from wrong assumptions.
 
-16. **ALWAYS use Figma MCP tokens when available.** If the user provided a Figma file, the extracted tokens are the design authority. Implementation must align with Figma, not deviate from it.
+16. **always use Figma MCP tokens when available.** If the user provided a Figma file, the extracted tokens are the design authority. Implementation must align with Figma, not deviate from it.
 
-17. **ALWAYS compare against reference product screenshots.** The user chose references for a reason — use them as quality benchmarks during the visual review cycle.
+17. **always compare against reference product screenshots.** The user chose references for a reason — use them as quality benchmarks during the visual review cycle.
 
-18. **NEVER skip the fix-and-re-review cycle** (Phase 6). First-pass implementation always has issues. The iterative cycle is what produces production-quality results.
+18. **never skip the fix-and-re-review cycle** (Phase 6). First-pass implementation always has issues. The iterative cycle is what produces production-quality results.
 
 19. **Default to one question at a time** in Phase 0 and Phase 1. Offer the batch-mode fast-path (see Phase 0 header) but default to sequential — it prevents overwhelm and incomplete answers. In batch mode, still validate that all required inputs were provided before proceeding.
 
@@ -1398,9 +1398,9 @@ If this stage is interrupted mid-execution:
 
 21. **ONLY animate `transform` and `opacity`.** (See Step 3.10 PERFORMANCE RULE for details.)
 
-22. **NEVER write credentials to committed files.** Reference the credential source (e.g., "from e2e/constants.ts") in reports — never the raw values.
+22. **never write credentials to committed files.** Reference the credential source (e.g., "from e2e/constants.ts") in reports — never the raw values.
 
-23. **ALWAYS verify font availability before configuring.** Google Fonts work with `next/font/google`. Non-Google fonts (Fontshare, paid, custom) require `.woff2` downloads and `next/font/local`. A misconfigured font import breaks the build at compile time.
+23. **always verify font availability before configuring.** Google Fonts work with `next/font/google`. Non-Google fonts (Fontshare, paid, custom) require `.woff2` downloads and `next/font/local`. A misconfigured font import breaks the build at compile time.
 
 24. **Scan for hardcoded values AFTER updating tokens.** (See Step 3.4 for the full audit checklist.)
 
@@ -1408,7 +1408,7 @@ If this stage is interrupted mid-execution:
 
 26. **ALL animations must respect `prefers-reduced-motion`.** Use `motion-safe:` Tailwind prefix or CSS `@media (prefers-reduced-motion: reduce)` to disable animations for users who request it. This is a WCAG 2.1 requirement, not optional.
 
-27. **Adapt anti-slop ALWAYS patterns to the approved Design Style.** The ALWAYS table includes a "Best for Styles" column — skip patterns that conflict with the user's chosen style. The goal is distinctiveness, not a rigid checklist. A "compact page titles" pattern makes no sense for an Editorial design that deliberately uses dramatic typography.
+27. **Adapt anti-slop ALWAYS patterns to the approved Design Style.** The always table includes a "Best for Styles" column — skip patterns that conflict with the user's chosen style. The goal is distinctiveness, not a rigid checklist. A "compact page titles" pattern makes no sense for an Editorial design that deliberately uses dramatic typography.
 
 28. **Maximum 3 fix-and-review cycles.** (See Step 6.4 max iteration guard.)
 ````

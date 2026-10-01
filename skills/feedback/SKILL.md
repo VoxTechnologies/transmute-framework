@@ -7,16 +7,18 @@ description: >-
   "triage support tickets", "run stage 8", "process feedback batch",
   or "update specs from feedback",
   or when the transmute-pipeline agent reaches Stage 8 of the pipeline.
-version: 1.1.0
+metadata:
+  version: 1.1.0
+effort: medium
 ---
 
 # User Feedback Loop — Stage 8
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/feedback-detailed-guide.md` for the complete feedback processing procedures, teammate spawn prompts, triage patterns, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/feedback-detailed-guide.md` for the complete feedback processing procedures, teammate spawn prompts, triage patterns, and report templates.
 
 ## Critical Concept: Living Documents
 
-The BRD and PRD are NOT frozen artifacts. They are living documents that evolve with the product. This skill maintains the chain: Feedback -> Spec Update -> Code Change -> Test Update -> Doc Update, ensuring every layer stays consistent.
+The BRD and PRD are not frozen artifacts. They are living documents that evolve with the product. This skill maintains the chain: Feedback -> Spec Update -> Code Change -> Test Update -> Doc Update, ensuring every layer stays consistent.
 
 ## Prerequisites
 
@@ -83,7 +85,7 @@ If this stage is interrupted mid-execution:
 4. If `./feedback/resolution.md` exists with a complete summary -- Phase 4 completed. The stage is done.
 5. If none of the above files exist, restart from Phase 1.
 
-**Warning**: Partial spec updates without corresponding code changes leave the project in an inconsistent state. MUST complete Phase 3 before ending the recovery session.
+**Warning**: Partial spec updates without corresponding code changes leave the project in an inconsistent state. must complete Phase 3 before ending the recovery session.
 
 ## Execution Flow
 
@@ -131,7 +133,7 @@ Before creating the change plan, scan for conflicting feedback items:
 
 **Spec file limit**: If a single item requires changes to >5 spec files (BRD + PRD combined), flag as 'complex' and recommend a dedicated session.
 
-6. **Assign status markers**: `APPROVED`, `STAKEHOLDER_DECISION_REQUIRED`, or `DEFERRED`. Include in change plan. Each entry MUST include a `Status:` field so teammates can check it before starting work.
+6. **Assign status markers**: `APPROVED`, `STAKEHOLDER_DECISION_REQUIRED`, or `DEFERRED`. Include in change plan. Each entry must include a `Status:` field so teammates can check it before starting work.
 
 7. Create `./feedback/change-plan.md` with ordered changes list. Each entry includes: status marker, spec changes, code changes, test changes, documentation changes, task dependency mapping.
 
@@ -172,16 +174,16 @@ Spawn 3 teammates SEQUENTIALLY (spec -> code -> test/docs). Each teammate skips 
 
 - **PASS**: All APPROVED items resolved, tests pass, specs consistent, docs updated. Proceed to re-deployment (Stage 7) and re-verification (Stage 7V). Consider re-running Stage 6V if UI changes were made.
 - **CONDITIONAL PASS**: Some items deferred due to complexity but all attempted items resolved. Document deferred items with `Status: DEFERRED -- Next batch [DATE]`. Schedule follow-up Stage 8 session.
-- **FAIL**: Test suite fails, spec inconsistency detected, or APPROVED items left unresolved. Do NOT proceed to Stage 7 until PASS or CONDITIONAL PASS.
+- **FAIL**: Test suite fails, spec inconsistency detected, or APPROVED items left unresolved. Do not proceed to Stage 7 until PASS or CONDITIONAL PASS.
 
 ## Known Failure Patterns
 
 1. **Conflicting feedback**: User A wants removal, User B wants expansion. Resolve by frequency, escalate to stakeholder, or document trade-off.
-2. **Feature requests contradicting BRD**: ALWAYS check BRD business rules before accepting.
+2. **Feature requests contradicting BRD**: always check BRD business rules before accepting.
 3. **Spec drift**: Cumulative changes make BRD/PRD inconsistent. Verify consistency after every change.
 4. **Cross-cutting feedback**: "The app is slow" affects multiple features. Triage into specific, actionable items per feature.
 5. **Architectural changes needed**: Defer to a separate Stage 5 re-run rather than patching.
-6. **i18n key breakage**: ALWAYS update message files when changing user-facing text.
+6. **i18n key breakage**: always update message files when changing user-facing text.
 
 ## Running This Prompt Repeatedly
 
@@ -199,15 +201,15 @@ Designed for regular cadence (weekly, biweekly, monthly). Each run processes a n
 
 ## Critical Rules
 
-1. NEVER implement feedback contradicting a BRD business rule without spec-updater resolution first.
-2. NEVER modify a spec without updating all cross-references.
-3. ALWAYS defer architectural changes to a separate Stage 5 re-run.
-4. ALWAYS run the full test suite after code changes.
-5. ALWAYS update i18n message files when changing user-facing text.
+1. never implement feedback contradicting a BRD business rule without spec-updater resolution first.
+2. never modify a spec without updating all cross-references.
+3. always defer architectural changes to a separate Stage 5 re-run.
+4. always run the full test suite after code changes.
+5. always update i18n message files when changing user-facing text.
 6. For batches >15 items, split into multiple runs (max 15 APPROVED items per run, unless overridden in tech-stack.md).
 7. After UI changes, recommend re-running Stage 6V.
 8. After deploying, run Stage 7V.
-9. NEVER skip the traceability chain -- every code change must trace to a spec.
+9. never skip the traceability chain -- every code change must trace to a spec.
 10. Resolve conflicting feedback BEFORE implementing either side.
 11. If deployment causes production failures, revert with `git revert` (not `git reset --hard`), re-run 7V, investigate before re-attempting.
-12. NEVER run Stage 8 and Stage 9 concurrently. Complete one and commit before starting the other.
+12. never run Stage 8 and Stage 9 concurrently. Complete one and commit before starting the other.

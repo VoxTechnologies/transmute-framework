@@ -6,21 +6,23 @@ description: >-
   "check for stubs", "detect stub components", "run implementation audit",
   "run Stage 5B", "verify feature completeness", or "find unfinished implementations",
   or when the transmute-pipeline agent reaches Stage 5B of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Transmute Audit Completeness — Stage 5B: Implementation Completeness Audit
 
-Lead a multi-agent implementation completeness audit using Claude Code Agent Teams. Systematically verify that EVERY feature in the PRD has been FULLY implemented — not just scaffolded — and fix any gaps found.
+Lead a multi-agent implementation completeness audit (teammates are Agent-tool subagents; see the pipeline agent's Execution Model). Systematically verify that EVERY feature in the PRD has been FULLY implemented — not just scaffolded — and fix any gaps found.
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/audit-completeness-detailed-guide.md` for the complete teammate instructions, scan scripts, fix patterns, and coordination protocol.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/audit-completeness-detailed-guide.md` for the complete teammate instructions, scan scripts, fix patterns, and coordination protocol.
 
 ## Why This Stage Exists
 
 Stage 5 (Feature Implementation) builds all features sequentially. In practice, a recurring pattern emerges: backend implementations are thorough and complete, but many frontend components remain as stubs — scaffold-quality code with placeholder text, unconnected hooks, missing interactive behavior, or components that exist in files but are never rendered. This happens because:
-- Even with the pipeline model's full context window (see tech-stack.md § Model Specifications), quality degrades over extended sessions (beyond the session feature limit) as accumulated context competes with per-feature attention
+- Over a long feature queue, per-feature attention competes with everything accumulated so far, even though context itself is managed automatically
 - Per-feature quality gates become less rigorous as the session progresses
-- Frontend teammates produce "looks done" output that passes a fatigued quality gate
+- Frontend teammates produce "looks done" output that passes a late-queue quality gate
 
 This stage runs with a FRESH context window, focused SOLELY on finding and fixing these gaps. It is the hard gate between implementation and QA.
 
@@ -36,7 +38,7 @@ Issues found during this audit are classified into three SIZE-BASED categories:
 
 **Multi-file classification rule**: Category A — all files need <30 lines each. Category B — largest file needs <100 lines AND total across all files <150 lines. Category C — largest file needs ≥100 lines OR total ≥150 lines across all affected files. If ambiguous, default to the higher category. If multiple independent issues happen to be in the same feature, classify each issue separately.
 
-**What Stage 5B Does NOT Do**: Stage 5B fixes cosmetic/moderate gaps (Category A/B) and documents large gaps (Category C). It does NOT: (1) create entirely new backend functions or API endpoints — that's Stage 5 re-implementation, (2) build new features from scratch — only completes partially-built features, (3) refactor architecture — that's Stage 6E, (4) add error handling patterns — that's Stage 6G, (5) fix security issues — that's Stage 6A. If a fix requires >100 lines of net-new code in a single file, it's Category C and gets escalated back to Stage 5.
+**What Stage 5B Does not Do**: Stage 5B fixes cosmetic/moderate gaps (Category A/B) and documents large gaps (Category C). It does not: (1) create entirely new backend functions or API endpoints — that's Stage 5 re-implementation, (2) build new features from scratch — only completes partially-built features, (3) refactor architecture — that's Stage 6E, (4) add error handling patterns — that's Stage 6G, (5) fix security issues — that's Stage 6A. If a fix requires >100 lines of net-new code in a single file, it's Category C and gets escalated back to Stage 5.
 
 ## Prerequisite Checks
 
@@ -142,9 +144,9 @@ Apply the early exit decision table (covers cases where no teammate spawning is 
 
 **Per-feature escalation rule**: If a single feature (same FEAT-ID) reports FAIL-RETRY three consecutive times across 5B re-runs, that feature automatically escalates to FAIL-ESCALATE regardless of overall category counts. Other features' results and intervening PASS/CONDITIONAL PASS outcomes for OTHER features are irrelevant. **Reading previous run state**: At the start of Phase 1, read the previous audit report at `./plancasting/_audits/implementation-completeness/report.md` if it exists — extract the per-feature `5B Runs` column to continue tracking consecutive FAIL-RETRY counts. If no previous report exists, this is Run 1.
 
-When skipping Phase 2-3, the lead MUST still generate the audit report with gate decision and Category C details. Phase 4 (report) and Phase 5 (rule extraction) ALWAYS run regardless of early exit.
+When skipping Phase 2-3, the lead must still generate the audit report with gate decision and Category C details. Phase 4 (report) and Phase 5 (rule extraction) always run regardless of early exit.
 
-Spawn Teammates 1 and 2 in parallel. Teammate 3 MUST wait until both complete.
+Spawn Teammates 1 and 2 in parallel. Teammate 3 must wait until both complete.
 
 **Teammate 1: "frontend-stub-fixer"** (PRIMARY — 70% of effort)
 - Fix all Category A and B frontend issues
@@ -161,7 +163,7 @@ Spawn Teammates 1 and 2 in parallel. Teammate 3 MUST wait until both complete.
 - Fix integration gaps (cross-feature data flows)
 - Verify all function exports match frontend expectations
 
-**Teammate 3: "e2e-verification"** (ALWAYS run last, after Teammates 1+2)
+**Teammate 3: "e2e-verification"** (always run last, after Teammates 1+2)
 - Run full test suite (typecheck, lint, unit, integration, E2E)
 - Run final stub scan — must return zero results
 - Run orphan component scan
@@ -170,7 +172,7 @@ Spawn Teammates 1 and 2 in parallel. Teammate 3 MUST wait until both complete.
 
 ### Phase 3: Coordination
 
-**Mandatory file conflict prevention**: Before spawning, assign mutually exclusive file sets to Teammates 1 and 2. If shared files exist, assign them to Teammate 1 exclusively. Teammate 2 MUST NOT modify frontend-owned files.
+**Mandatory file conflict prevention**: Before spawning, assign mutually exclusive file sets to Teammates 1 and 2. If shared files exist, assign them to Teammate 1 exclusively. Teammate 2 must not modify frontend-owned files.
 
 While teammates work:
 1. After each teammate completes, review their completion message for Category C escalations — document in `plancasting/_progress.md`
@@ -231,15 +233,15 @@ If interrupted:
 
 ## Critical Rules
 
-1. NEVER skip the automated stub scan. It is the objective foundation.
-2. NEVER mark a stub as "acceptable" — stubs are ALWAYS bugs at this stage.
-3. NEVER delete test files to make the suite pass. Fix the code, not the tests.
-4. ALWAYS read the feature brief and PRD screen spec before fixing a component.
-5. ALWAYS follow CLAUDE.md conventions when writing fix code.
-6. ALWAYS run the full verification suite before declaring complete.
+1. never skip the automated stub scan. It is the objective foundation.
+2. never mark a stub as "acceptable" — stubs are always bugs at this stage.
+3. never delete test files to make the suite pass. Fix the code, not the tests.
+4. always read the feature brief and PRD screen spec before fixing a component.
+5. always follow CLAUDE.md conventions when writing fix code.
+6. always run the full verification suite before declaring complete.
 7. Frontend fixes are the PRIMARY focus (70% of effort).
 8. If a component fix requires backend changes that don't exist, classify as Category C.
-9. The goal is completeness, not perfection. Every feature should be FUNCTIONAL. Polish happens in Stage 6. **5B Quality Standard**: 5B fixes should bring components from 'scaffold' to 'working' — happy path complete, loading/error states present, no obvious bugs. This is NOT production polish (Stage 6P handles that).
+9. The goal is completeness, not perfection. Every feature should be FUNCTIONAL. Polish happens in Stage 6. **5B Quality Standard**: 5B fixes should bring components from 'scaffold' to 'working' — happy path complete, loading/error states present, no obvious bugs. This is not production polish (Stage 6P handles that).
 10. Fix, don't redesign. Maintain Stage 5's architectural decisions.
 
 ## Output Specification

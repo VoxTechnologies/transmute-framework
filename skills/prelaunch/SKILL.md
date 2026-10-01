@@ -7,12 +7,14 @@ description: >-
   "validate deployment readiness", "generate launch checklist",
   "are we ready to go live", or "can we ship"
   — or when the transmute-pipeline agent reaches Stage 6H of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Stage 6H: Final Check Before Production Deployment
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/prelaunch-detailed-guide.md` for the complete verification procedures, checklist templates, and report format.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/prelaunch-detailed-guide.md` for the complete verification procedures, checklist templates, and report format.
 
 Lead a multi-agent pre-launch verification project. Perform a comprehensive final check of the COMPLETE product before it goes live. This is the last gate between development and real users.
 
@@ -102,7 +104,7 @@ Tasks:
 
 ### Teammate 3: "user-facing-verifier"
 
-Scope: User-facing completeness, SEO, legal, documentation. Focus on launch-blocking items. Do NOT duplicate Stage 6D (docs audit) or 6P (visual polish).
+Scope: User-facing completeness, SEO, legal, documentation. Focus on launch-blocking items. Do not duplicate Stage 6D (docs audit) or 6P (visual polish).
 
 Tasks:
 
@@ -162,7 +164,7 @@ Generate `./plancasting/_launch/readiness-report.md`:
 
 **NOT READY** = one or more criteria above fail.
 
-**Launch-blocking definition**: An unfixable violation is launch-blocking ONLY if it prevents core business functionality (auth broken, payment cannot complete, data loss possible). Non-critical unfixable issues (minor a11y gap on secondary feature, performance slightly over target) are NOT launch-blocking — document as post-launch items.
+**Launch-blocking definition**: An unfixable violation is launch-blocking ONLY if it prevents core business functionality (auth broken, payment cannot complete, data loss possible). Non-critical unfixable issues (minor a11y gap on secondary feature, performance slightly over target) are not launch-blocking — document as post-launch items.
 
 **Operator Override Procedure**: If NOT READY but operator decides to launch: (1) document override in readiness report under '## Launch Override' with reason, accepted blockers, risk assessment, mitigation plan. (2) Proceed to Stage 6V with documented override.
 
@@ -188,13 +190,13 @@ Request shutdown for all teammates. Verify all modifications are saved and commi
 
 ## Critical Rules
 
-1. NEVER launch with failing tests — no exceptions.
-2. NEVER launch with critical/high dependency vulnerabilities unaddressed. High-severity: document with post-launch remediation timeline.
-3. NEVER assume env vars are set just because they exist in `.env.local` — verify on hosting platform.
-4. NEVER launch without a tested rollback procedure documented.
-5. Readiness report MUST be saved before deployment begins.
-6. ALWAYS verify ALL prior stage audit reports exist. For documentation: verify `./docs/` AND `./plancasting/_audits/documentation/report.md`. For seed data: verify `./seed/README.md` AND `./plancasting/_audits/seed-data/report.md`.
+1. never launch with failing tests — no exceptions.
+2. never launch with critical/high dependency vulnerabilities unaddressed. High-severity: document with post-launch remediation timeline.
+3. never assume env vars are set just because they exist in `.env.local` — verify on hosting platform.
+4. never launch without a tested rollback procedure documented.
+5. Readiness report must be saved before deployment begins.
+6. always verify ALL prior stage audit reports exist. For documentation: verify `./docs/` AND `./plancasting/_audits/documentation/report.md`. For seed data: verify `./seed/README.md` AND `./plancasting/_audits/seed-data/report.md`.
 7. For forward-only schema backends: verify backward-compatible schema changes and feature flag strategy.
-8. ALWAYS verify CORS headers allow the production frontend domain.
+8. always verify CORS headers allow the production frontend domain.
 9. Use commands from CLAUDE.md for testing.
 10. After this stage passes, proceed to Stage 6V as the final live-app gate.

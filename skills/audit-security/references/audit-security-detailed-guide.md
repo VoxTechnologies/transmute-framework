@@ -48,17 +48,21 @@ Always read `CLAUDE.md` Part 2 (Backend Rules, Frontend Rules) for your project'
 
 **Package Manager**: Commands in this prompt use `bun run` as the default. Replace with your project's package manager as specified in `CLAUDE.md` (e.g., `npm run`, `pnpm run`, `yarn`).
 
+## Scope of the audit
+
+This stage finds and fixes vulnerabilities in the product's own source code and configuration. It does not write exploit code, proof-of-concept attacks, or payloads against the running application — a finding is documented with the vulnerable code location, the failure it allows, and the fix. Keeping the audit on the find-and-fix side also keeps it clear of the model's cybersecurity safeguards, which permit vulnerability discovery in source code but decline exploit development.
+
 ## Known Failure Patterns
 
 Based on observed audit outcomes:
 
 1. **Severity deflation**: Agent marks everything as "Medium" to avoid escalation. Use clear definitions: Critical = data breach possible without auth, High = privilege escalation possible, Medium = defense-in-depth gap, Low = best practice deviation.
 2. **Symptom fixing**: Agent adds auth check to a function but doesn't notice the function is also exported publicly via the `api.*` namespace. Fix root cause, not symptoms.
-3. **Regression from security fixes**: Agent adds auth check that breaks a legitimate unauthenticated flow (e.g., public pricing page). ALWAYS verify fixes don't break existing tests.
+3. **Regression from security fixes**: Agent adds auth check that breaks a legitimate unauthenticated flow (e.g., public pricing page). always verify fixes don't break existing tests.
 4. **Skipping generated files' consumers**: Agent correctly skips `_generated/` but also skips files that import from `_generated/` — these may contain security-relevant code.
 5. **Missing CORS/CSP checks**: Focusing only on code-level auth while ignoring HTTP-level security headers.
-6. **Blind framework trust**: Agent assumes a framework handles security correctly without verification (e.g., 'Next.js handles CSRF'). ALWAYS verify framework security defaults are actually enabled in configuration.
-7. **Zero-day normalization**: Agent marks an unpatched CVE as 'acceptable risk' without documenting threat model justification. ALWAYS document: 'We accept this risk because [mitigation] is in place.' CVEs with CVSS score ≥ 9.0 or 'Known Exploited' status (per CISA KEV catalog) MUST NOT be accepted as risk — they require immediate remediation or a documented compensating control verified by the security audit. CVSS thresholds: CRITICAL ≥ 9.0, HIGH 7.0–8.9, MEDIUM 4.0–6.9, LOW 0.1–3.9.
+6. **Blind framework trust**: Agent assumes a framework handles security correctly without verification (e.g., 'Next.js handles CSRF'). always verify framework security defaults are actually enabled in configuration.
+7. **Zero-day normalization**: Agent marks an unpatched CVE as 'acceptable risk' without documenting threat model justification. always document: 'We accept this risk because [mitigation] is in place.' CVEs with CVSS score ≥ 9.0 or 'Known Exploited' status (per CISA KEV catalog) must not be accepted as risk — they require immediate remediation or a documented compensating control verified by the security audit. CVSS thresholds: CRITICAL ≥ 9.0, HIGH 7.0–8.9, MEDIUM 4.0–6.9, LOW 0.1–3.9.
 
 ## Agent Team Architecture
 
@@ -76,7 +80,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Audit Teammates
 
-Spawn the following 4 teammates. Each teammate's spawn prompt MUST include the security checklist and instructions to read CLAUDE.md first. All 4 teammates may run in parallel — they audit different aspects of the codebase. The lead coordinates cross-team findings in Phase 3.
+Spawn the following 4 teammates. Each teammate's spawn prompt must include the security checklist and instructions to read CLAUDE.md first. All 4 teammates may run in parallel — they audit different aspects of the codebase. The lead coordinates cross-team findings in Phase 3.
 
 #### Teammate 1: "auth-auditor"
 **Scope**: Authentication and authorization
@@ -258,9 +262,9 @@ When done, message the lead with: issue count by severity, fix count, remaining 
 
 If a violation cannot be fixed without architectural changes or would break another feature:
 1. Document the full conflict with evidence (what the violation is, what fixing it would break)
-2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do NOT attempt a fix that creates regressions. Escalate to the project operator (the person running the pipeline). Document the violation in `./plancasting/_audits/security/unfixable-violations.md` with the finding, risk level, and recommended mitigations. The operator must respond before Stage 6H can issue a READY verdict.
+2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do not attempt a fix that creates regressions. Escalate to the project operator (the person running the pipeline). Document the violation in `./plancasting/_audits/security/unfixable-violations.md` with the finding, risk level, and recommended mitigations. The operator must respond before Stage 6H can issue a READY verdict.
 3. Include a recommended approach and estimated effort in the report
-4. If the unfixable violation is CRITICAL severity (e.g., architectural security flaw, missing encryption at rest, broken auth model), the audit MUST recommend NOT LAUNCHING until the violation is resolved. Document the required architectural changes and estimated remediation scope. Record in `./plancasting/_audits/security/unfixable-violations.md` (separate file from `report.md`) AND summarize in the main `report.md` under a "Blocking Issues" section — critical violations block Stage 6H (Pre-Launch Gate, see `prompt_prelaunch_verification.md`). Use these headings in the unfixable violations file: `### [Issue ID]`, `**Severity**: [CRITICAL/HIGH]`, `**Description**: [what the issue is]`, `**Evidence**: [code location and proof]`, `**Recommended Approach**: [how to fix with architectural changes]`, `**Estimated Effort**: [hours/days]`.
+4. If the unfixable violation is CRITICAL severity (e.g., architectural security flaw, missing encryption at rest, broken auth model), the audit must recommend NOT LAUNCHING until the violation is resolved. Document the required architectural changes and estimated remediation scope. Record in `./plancasting/_audits/security/unfixable-violations.md` (separate file from `report.md`) AND summarize in the main `report.md` under a "Blocking Issues" section — critical violations block Stage 6H (Pre-Launch Gate, see `prompt_prelaunch_verification.md`). Use these headings in the unfixable violations file: `### [Issue ID]`, `**Severity**: [CRITICAL/HIGH]`, `**Description**: [what the issue is]`, `**Evidence**: [code location and proof]`, `**Recommended Approach**: [how to fix with architectural changes]`, `**Estimated Effort**: [hours/days]`.
 5. Continue with remaining fixable violations — do not block the entire audit on one decision
 
 ### Phase 3: Coordination During Execution
@@ -321,16 +325,16 @@ After all teammates complete:
 
 ## Critical Rules
 
-1. NEVER mark a vulnerability as "acceptable risk" without documenting the specific threat model justification.
-2. NEVER delete a security test to make the test suite pass — fix the vulnerability instead.
-3. NEVER introduce new auth bypass patterns as part of a fix.
-4. ALWAYS run the full test suite after security changes — security fixes that break functionality are not fixes.
-5. ALWAYS verify that custom API routes (e.g., `src/app/api/` for Next.js, or your framework's equivalent) have CSRF protection for state-changing operations.
-6. ALWAYS check for secrets in git history: `git log --all -p -G "(sk-|sk_|Bearer |password=|PRIVATE KEY|AWS_SECRET|STRIPE_SECRET|DATABASE_URL=|-----BEGIN|api[_-]?key|client[_-]?secret)" --max-count=500` (and similar patterns for API keys, tokens, passwords). For large repositories, add `--since='6 months ago'` to avoid excessive execution time. Note: use `-G` with a regex alternation, NOT multiple `-S` flags (git only processes the last `-S` flag, silently ignoring earlier ones). If ANY secret is found in history, document it as a CRITICAL incident in `./plancasting/_audits/security/unfixable-violations.md` requiring immediate key rotation — secrets in git history cannot be fixed by code changes alone. This is a pipeline blocker: do NOT proceed to Stage 6H until key rotation is confirmed by the operator. Verify `.env.local.example` contains only placeholder values (no real API keys, no real passwords).
-7. ALWAYS verify SSRF blocklist: check all outbound `fetch()` or HTTP client calls triggered by user input (webhook URLs, callback URLs, import URLs). Verify they reject: private IP ranges (10.x, 172.16-31.x, 192.168.x), localhost (127.0.0.1, ::1), link-local (169.254.x, fe80::/10), IPv6 unique local (fc00::/7), and cloud metadata endpoints (169.254.169.254).
-8. ALWAYS verify rate limiting on authentication endpoints. Flag missing rate limiting on data-creation mutations for Stage 6G to implement (see scope boundary in Teammate 4 task 4).
+1. never mark a vulnerability as "acceptable risk" without documenting the specific threat model justification.
+2. never delete a security test to make the test suite pass — fix the vulnerability instead.
+3. never introduce new auth bypass patterns as part of a fix.
+4. always run the full test suite after security changes — security fixes that break functionality are not fixes.
+5. always verify that custom API routes (e.g., `src/app/api/` for Next.js, or your framework's equivalent) have CSRF protection for state-changing operations.
+6. always check for secrets in git history: `git log --all -p -G "(sk-|sk_|Bearer |password=|PRIVATE KEY|AWS_SECRET|STRIPE_SECRET|DATABASE_URL=|-----BEGIN|api[_-]?key|client[_-]?secret)" --max-count=500` (and similar patterns for API keys, tokens, passwords). For large repositories, add `--since='6 months ago'` to avoid excessive execution time. Note: use `-G` with a regex alternation, NOT multiple `-S` flags (git only processes the last `-S` flag, silently ignoring earlier ones). If ANY secret is found in history, document it as a CRITICAL incident in `./plancasting/_audits/security/unfixable-violations.md` requiring immediate key rotation — secrets in git history cannot be fixed by code changes alone. This is a pipeline blocker: do not proceed to Stage 6H until key rotation is confirmed by the operator. Verify `.env.local.example` contains only placeholder values (no real API keys, no real passwords).
+7. always verify SSRF blocklist: check all outbound `fetch()` or HTTP client calls triggered by user input (webhook URLs, callback URLs, import URLs). Verify they reject: private IP ranges (10.x, 172.16-31.x, 192.168.x), localhost (127.0.0.1, ::1), link-local (169.254.x, fe80::/10), IPv6 unique local (fc00::/7), and cloud metadata endpoints (169.254.169.254).
+8. always verify rate limiting on authentication endpoints. Flag missing rate limiting on data-creation mutations for Stage 6G to implement (see scope boundary in Teammate 4 task 4).
 9. Use the commands from CLAUDE.md for running tests (e.g., `bun run test` not `npm run test`).
 10. Reference Stage 5B output (`./plancasting/_audits/implementation-completeness/report.md`) to avoid auditing features that are still stub/incomplete.
-11. See Teammate 4 Task 4 for the 6A/6G scope boundary. In summary: 6A = authentication endpoint rate limiting (login, signup, password reset, MFA, session management); 6G = data-mutation endpoint rate limiting (create, update, delete, uploads). Do NOT implement data-mutation rate limiting in Stage 6A.
-12. **Parallel execution**: This stage may run concurrently with 6B and 6C. Document required changes to shared config files (`next.config.ts`, `middleware.ts`, `tailwind.config.ts`, `globals.css`) in the report under a `## Pending Config Changes` section rather than modifying them directly — this prevents silent overwrites when parallel stages commit. If a security fix MUST modify a shared config file immediately (e.g., CSP headers for a critical vulnerability), commit the change immediately and note it prominently in the report.
+11. See Teammate 4 Task 4 for the 6A/6G scope boundary. In summary: 6A = authentication endpoint rate limiting (login, signup, password reset, MFA, session management); 6G = data-mutation endpoint rate limiting (create, update, delete, uploads). Do not implement data-mutation rate limiting in Stage 6A.
+12. **Parallel execution**: This stage may run concurrently with 6B and 6C. Document required changes to shared config files (`next.config.ts`, `middleware.ts`, `tailwind.config.ts`, `globals.css`) in the report under a `## Pending Config Changes` section rather than modifying them directly — this prevents silent overwrites when parallel stages commit. If a security fix must modify a shared config file immediately (e.g., CSP headers for a critical vulnerability), commit the change immediately and note it prominently in the report.
 ````

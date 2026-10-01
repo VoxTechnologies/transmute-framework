@@ -15,6 +15,10 @@ During pipeline execution, Stages 5B (Completeness Audit) and 6R (Remediation) d
    - **MEDIUM** — Edit the Rule Text to generalize, then promote to `.claude/rules/`.
    - **LOW** — Keep for observation. Promote if the pattern recurs in a later stage. Discard if it does not recur after two more stages.
 
+## Beyond this project
+
+Rules that prove out here and are not specific to this product (no feature IDs, no project-only paths, no product nouns) are stack-level knowledge the framework should carry for the next project. Stage 9 exports such rules to `plancasting/_rules-export.md`; the framework maintainer folds them into the canonical `rules-templates/` on the next sync (CONTRIBUTING.md § Promoting rules from projects).
+
 ## Confidence Criteria
 
 - **HIGH**: 2+ distinct features (separate FEAT-IDs) affected with a clear, repeatable pattern. Two occurrences within the same feature count as 1 feature.

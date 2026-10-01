@@ -6,12 +6,14 @@ description: >-
   "cross-validate BRD and PRD", "run Stage 2B", "validate specifications",
   "check spec consistency", "run spec validation", "verify BRD PRD alignment",
   or when the transmute-pipeline agent reaches Stage 2B of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Transmute — Specification Validation (Stage 2B)
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/validate-specs-detailed-guide.md` for the complete validation procedures, teammate spawn prompts, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/validate-specs-detailed-guide.md` for the complete validation procedures, teammate spawn prompts, and report templates.
 
 ## Prerequisites
 
@@ -45,9 +47,9 @@ Read:
 
 Check `./plancasting/tech-stack.md` for `Session Language`. Generate all reports in the specified language. Code, technical identifiers, and file names remain in English.
 
-**Token Budget**: With the pipeline model's context window (see tech-stack.md § Model Specifications), most BRD+PRD sets fit comfortably. For exceptionally large products (>50 files combined), split validation by feature group instead of cross-cutting concern. If splitting by feature group, the lead MUST perform Phase 4 cross-feature consistency checks manually using the unified issue list from all teammates, since teammates split by feature group cannot detect cross-feature inconsistencies.
+**Token Budget**: With the pipeline model's context window (see tech-stack.md § Model Specifications), most BRD+PRD sets fit comfortably. For exceptionally large products (>50 files combined), split validation by feature group instead of cross-cutting concern. If splitting by feature group, the lead must perform Phase 4 cross-feature consistency checks manually using the unified issue list from all teammates, since teammates split by feature group cannot detect cross-feature inconsistencies.
 
-**Teammate Prerequisite**: Each teammate's spawn prompt MUST include the instruction: "Read CLAUDE.md Part 1 (immutable rules) if it exists. Follow its conventions."
+**Teammate Prerequisite**: Each teammate's spawn prompt must include the instruction: "Read CLAUDE.md Part 1 (immutable rules) if it exists. Follow its conventions."
 
 ## Execution Flow
 
@@ -80,9 +82,9 @@ Validate that the PRD completely covers all BRD requirements.
 2. **BRD → PRD Reverse Traceability**: For every US-xxx:
    - Check if it traces to at least one BR-xxx or FR-xxx
    - For orphan stories, apply the **Orphan Story Decision Tree**:
-     - **(a) Indirect mapping**: Implements NFR/BRL/IR indirectly → document, flag as "BRD gap — recommend adding FR-xxx". Do NOT create the FR retroactively — the lead evaluates in Phase 4.
+     - **(a) Indirect mapping**: Implements NFR/BRL/IR indirectly → document, flag as "BRD gap — recommend adding FR-xxx". Do not create the FR retroactively — the lead evaluates in Phase 4.
      - **(b) PRD refinement or valid inference**: UX implementation of documented requirement or best-practice pattern → preserve, label as "PRD refinement" or "Valid inference". If it adds functional capability beyond UX polish, additionally flag as BRD gap.
-     - **(c) Scope creep**: Neither (a) nor (b) → flag for removal or explicit approval. Do NOT silently preserve.
+     - **(c) Scope creep**: Neither (a) nor (b) → flag for removal or explicit approval. Do not silently preserve.
 
 3. **Business Requirement Completeness**: Every BR-xxx has at least one FR. Product KPIs/OKRs align with business KPIs.
 
@@ -139,7 +141,7 @@ Monitor progress. Facilitate cross-team findings:
 
 ### Step 4: Fix Specifications & Generate Report (Phase 4)
 
-1. **Cross-feature consistency checks** (ALWAYS performed — whether validation was monolithic or split by feature group). Leverage Teammate 2's consistency analysis:
+1. **Cross-feature consistency checks** (always performed — whether validation was monolithic or split by feature group). Leverage Teammate 2's consistency analysis:
    - List all shared entity types (User, Organization, Project, etc.)
    - For each entity, extract all field references from every feature group — compare, flag differences
    - Verify terminology consistent across feature groups
@@ -147,7 +149,7 @@ Monitor progress. Facilitate cross-team findings:
    - For workflows spanning features, trace data flow and ensure schemas match at each handoff
 
 2. **Prioritize findings**:
-   - CRITICAL: Must fix (blocks downstream) — missing requirements, contradictions, untestable criteria
+   - Must fix (blocks downstream) — missing requirements, contradictions, untestable criteria
    - HIGH: Should fix (significant quality issue) — terminology inconsistencies, incomplete error states
    - MEDIUM: Can fix during validation — style inconsistencies, redundant descriptions
    - LOW: Polish — formatting, minor wording
@@ -160,7 +162,7 @@ Monitor progress. Facilitate cross-team findings:
    - Allocate new IDs from next available number, update `_context.md` registry
    - Mark fixes with `> ✓ VALIDATED [YYYY-MM-DD]: [fix description]` (obtain date via `date +%Y-%m-%d`)
    - **Re-validate after fixes**: After fixing BRD files, re-validate affected PRD files. After fixing PRD files, verify cross-references still resolve. Check `_context.md` for consistency with modified IDs.
-   - **Iteration limit**: One fix-then-validate cycle per issue. If new CRITICAL issues appear during re-validation, document them and escalate to lead — do NOT automatically fix again. The lead documents new issues as 'Discovered During Fix Pass' in the report.
+   - **Iteration limit**: One fix-then-validate cycle per issue. If new CRITICAL issues appear during re-validation, document them and escalate to lead — do not automatically fix again. The lead documents new issues as 'Discovered During Fix Pass' in the report.
    - Adding a missing US/SC for an existing FR is gap-closing (allowed). Adding entirely new FRs or BRs not in the original Business Plan is prohibited.
 
 4. **Consolidate teammate outputs**: Read all output files from `./plancasting/_audits/spec-validation/`. Merge into unified prioritized issue list, removing duplicates.
@@ -214,7 +216,7 @@ Monitor progress. Facilitate cross-team findings:
 1. **Terminology drift**: BRD uses "organization" while PRD uses "workspace" — different sessions, different context.
 2. **Coverage gaps from token limits**: BRD specifies 20 FRs but PRD only has stories for 15.
 3. **Cross-reference broken links**: PRD screen specs reference nonexistent API endpoints.
-4. **Quantified-to-vague regression**: BRD "99.9% uptime" becomes PRD "high availability". PRD should NEVER weaken BRD specifications.
+4. **Quantified-to-vague regression**: BRD "99.9% uptime" becomes PRD "high availability". PRD should never weaken BRD specifications.
 5. **Untestable acceptance criteria**: Syntactically correct Given/When/Then but semantically untestable ("Then it works correctly").
 6. **Field name mismatches**: Data model has `organizationId` but API returns `orgId`.
 7. **Mermaid diagram syntax errors**: Always validate after editing.
@@ -223,18 +225,18 @@ Monitor progress. Facilitate cross-team findings:
 
 ## Critical Rules
 
-1. NEVER mark an issue as resolved without actually editing the source file.
+1. never mark an issue as resolved without actually editing the source file.
 2. Default: Strengthen the PRD to match the BRD. Exception: If BRD contradicts Business Plan, fix BRD first. If technically infeasible, document assumption and adjust PRD.
-3. NEVER add new features — only close gaps for existing requirements.
-4. ALWAYS preserve existing traceability links when editing.
-5. ALWAYS re-validate mermaid syntax after editing diagrams.
-6. ALWAYS read CLAUDE.md before starting (all teammates).
+3. never add new features — only close gaps for existing requirements.
+4. always preserve existing traceability links when editing.
+5. always re-validate mermaid syntax after editing diagrams.
+6. always read CLAUDE.md before starting (all teammates).
 7. When fixing BRD, check whether PRD references the changed requirement.
 8. The `> ✓ VALIDATED` marker must include the specific change made.
-9. NEVER delete content without checking downstream dependencies.
+9. never delete content without checking downstream dependencies.
 10. If BRD+PRD exceeds context limits, split by feature group rather than validation type.
-11. ALWAYS use lowercase anchors in all cross-reference links (`#br-001` not `#BR-001`).
-12. **Quantification Rule**: PRD should NEVER weaken BRD specifications. If BRD specifies quantified targets, PRD must preserve or enhance them. Any regression from quantified to vague must be flagged and fixed.
+11. always use lowercase anchors in all cross-reference links (`#br-001` not `#BR-001`).
+12. **Quantification Rule**: PRD should never weaken BRD specifications. If BRD specifies quantified targets, PRD must preserve or enhance them. Any regression from quantified to vague must be flagged and fixed.
 
 ## Output Specification
 

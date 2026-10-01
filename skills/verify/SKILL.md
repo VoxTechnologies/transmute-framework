@@ -7,20 +7,22 @@ description: >-
   "verify screens match specs", "run live app verification", "test the running
   application", or "verify acceptance criteria in the browser", or when the
   transmute-pipeline agent reaches Stage 6V of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Stage 6V: Visual & Functional Verification
 
-Verify the RUNNING application against every screen specification and acceptance criterion in the PRD by navigating the app in a browser. Lead a multi-agent verification project using Claude Code Agent Teams.
+Verify the RUNNING application against every screen specification and acceptance criterion in the PRD by navigating the app in a browser. Lead a multi-agent verification project (teammates are Agent-tool subagents; see the pipeline agent's Execution Model).
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/verification-detailed-guide.md` for full teammate prompts, failure patterns, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/verification-detailed-guide.md` for full teammate prompts, failure patterns, and report templates.
 
-Read the scenario generation guide at `${CLAUDE_SKILL_ROOT}/references/feature-scenario-generation.md` for the algorithm to build the Feature Scenario Matrix.
+Read the scenario generation guide at `${CLAUDE_SKILL_DIR}/references/feature-scenario-generation.md` for the algorithm to build the Feature Scenario Matrix.
 
 ## Prerequisites
 
-1. Verify `./plancasting/_launch/readiness-report.md` exists and shows READY. If NOT READY or file missing, STOP -- run Stage 6H first.
+1. Verify `./plancasting/_launch/readiness-report.md` exists and shows READY. If NOT READY or file missing, STOP -- run Stage 6H first. **Exception — Stage 5V (early runtime check)**: when invoked with `MODE: critical` directly after 5B (alias `/transmuter:cast early-verify`), require `./plancasting/_audits/implementation-completeness/report.md` (PASS or CONDITIONAL PASS) instead of the 6H report, run only the `critical` scope, and title the report "Stage 5V — Early Runtime Check (6V critical scope)". The full 6V run after 6H overwrites it.
 2. Create output directories:
    ```bash
    mkdir -p ./plancasting/_audits/visual-verification
@@ -39,7 +41,7 @@ Read the scenario generation guide at `${CLAUDE_SKILL_ROOT}/references/feature-s
 
 - **`full`** (default) -- All screens in `plancasting/prd/08-screen-specifications.md`. ~30-60 min.
 - **`critical`** -- P0/P1 features only. ~15-30 min.
-- **`diff`** -- Only screens related to files changed since last verification. ~10-20 min. **Note**: `last-verified-commit.txt` is created at the END of a 6V run, so `diff` mode only works on the second or subsequent run. If the file does not exist, automatically falls back to `full`. **Warning**: diff mode requires a previous 6V report to diff against — do NOT use for the first 6V run.
+- **`diff`** -- Only screens related to files changed since last verification. ~10-20 min. **Note**: `last-verified-commit.txt` is created at the END of a 6V run, so `diff` mode only works on the second or subsequent run. If the file does not exist, automatically falls back to `full`. **Warning**: diff mode requires a previous 6V report to diff against — do not use for the first 6V run.
 
 **How to specify scope**: Append `MODE: full`, `MODE: critical`, or `MODE: diff` on a new line after pasting the prompt, or as a separate follow-up message. Default is `full`.
 
@@ -48,7 +50,7 @@ Read the scenario generation guide at `${CLAUDE_SKILL_ROOT}/references/feature-s
 ## Input
 
 - **Running Application**: Dev server (use the dev command from `plancasting/tech-stack.md`)
-- **Scenario Generation Guide**: `${CLAUDE_SKILL_ROOT}/references/feature-scenario-generation.md`
+- **Scenario Generation Guide**: `${CLAUDE_SKILL_DIR}/references/feature-scenario-generation.md`
 - **PRD**: `./plancasting/prd/` -- ALL files, especially `02-feature-map-and-prioritization.md`, `04-epics-and-user-stories.md`, `06-user-flows.md`, `07-information-architecture.md`, `08-screen-specifications.md`
 - **Tech Stack**: `./plancasting/tech-stack.md`
 - **Project Rules**: `./CLAUDE.md`
@@ -64,7 +66,7 @@ The examples use Playwright + Next.js + Convex. Adapt to your `plancasting/tech-
 
 Complete BEFORE spawning teammates:
 
-1. **Read project context**: `./CLAUDE.md`, `./plancasting/tech-stack.md`, `${CLAUDE_SKILL_ROOT}/references/feature-scenario-generation.md`, `./playwright.config.ts`, `./e2e/constants.ts`, `./e2e/helpers/`
+1. **Read project context**: `./CLAUDE.md`, `./plancasting/tech-stack.md`, `${CLAUDE_SKILL_DIR}/references/feature-scenario-generation.md`, `./playwright.config.ts`, `./e2e/constants.ts`, `./e2e/helpers/`
 
 2. **Generate the Feature Scenario Matrix** following the algorithm in the scenario generation guide:
    - Read ALL PRD sources and extract structured data
@@ -168,22 +170,22 @@ A **flaky scenario** is a test that fails on the first run but passes on a subse
 
 ## Critical Rules
 
-1. ALWAYS start the dev server and verify accessibility before spawning teammates. ABORT if it fails within 60 seconds.
-2. NEVER skip the AI vision review (Teammate 3).
-3. NEVER mark a page as PASS if it has console ERRORS. Console WARNINGS from third-party libraries do not constitute FAIL.
-4. ALWAYS test with seeded data.
-5. ALWAYS take screenshots on failure.
-6. ALWAYS map findings to PRD identifiers (SC-NNN, US-NNN, FEAT-NNN).
-7. ALWAYS generate Playwright test files even when using direct browser interaction.
-8. This stage FINDS issues -- it does NOT fix them. Fixes happen in Stage 6R.
-9. NEVER let one teammate's actions corrupt state for another.
+1. always start the dev server and verify accessibility before spawning teammates. ABORT if it fails within 60 seconds.
+2. never skip the AI vision review (Teammate 3).
+3. never mark a page as PASS if it has console ERRORS. Console WARNINGS from third-party libraries do not constitute FAIL.
+4. always test with seeded data.
+5. always take screenshots on failure.
+6. always map findings to PRD identifiers (SC-NNN, US-NNN, FEAT-NNN).
+7. always generate Playwright test files even when using direct browser interaction.
+8. This stage FINDS issues -- it does not fix them. Fixes happen in Stage 6R.
+9. never let one teammate's actions corrupt state for another.
 10. For eventually-consistent backends, use `expect.poll()` or retry assertions (up to 10s timeout).
-11. ALWAYS verify test user seeding BEFORE spawning teammates.
-12. ALWAYS crawl links from shared layouts (sidebar, header, footer, mobile nav).
-13. ALWAYS test navigation at BOTH desktop and mobile viewports.
-14. ALWAYS click buttons and verify their action -- not just DOM presence.
-15. ALWAYS test auth middleware redirects for ALL public routes.
-16. ALWAYS test public routes from a FRESH unauthenticated browser context BEFORE logging in.
+11. always verify test user seeding BEFORE spawning teammates.
+12. always crawl links from shared layouts (sidebar, header, footer, mobile nav).
+13. always test navigation at BOTH desktop and mobile viewports.
+14. always click buttons and verify their action -- not just DOM presence.
+15. always test auth middleware redirects for ALL public routes.
+16. always test public routes from a FRESH unauthenticated browser context BEFORE logging in.
 
 ## Output Specification
 

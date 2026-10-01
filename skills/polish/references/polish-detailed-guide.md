@@ -41,16 +41,16 @@ This stage uses the **`frontend-design` skill** (Claude Code plugin) for all aes
 - **Spatial Composition**: Unexpected layouts, asymmetry, generous negative space or controlled density
 - **Visual Depth**: Gradient meshes, noise textures, layered transparencies, dramatic shadows
 
-**KEY CONSTRAINT**: This stage operates WITHIN the project's existing design system. You are NOT redesigning from scratch.
+**KEY CONSTRAINT**: This stage operates WITHIN the project's existing design system. You are not redesigning from scratch.
 
 **Scope Prioritization**: Focus on HIGH-IMPACT pages first: (1) landing/marketing pages (first impression), (2) auth pages (signup/login — conversion-critical), (3) primary dashboard (most-used screen), (4) core feature pages (P0/P1 features from PRD). Polish secondary pages (settings, profile, admin) only after key pages pass visual review. Target: 10–15 key screens, not every component in the codebase.
 
 **Component modification decision matrix**:
 | Scenario | Action |
 |---|---|
-| Component needs hover transition but library doesn't support via className | Add transition via wrapper `<div className="transition-colors">`, do NOT replace component |
-| Component styling is completely incompatible with design direction | Escalate to Category D (document for design review), do NOT replace component |
-| Text contrast fails WCAG AA in dark mode | Adjust color variant via className (e.g., `dark:text-slate-200`), do NOT replace component |
+| Component needs hover transition but library doesn't support via className | Add transition via wrapper `<div className="transition-colors">`, do not replace component |
+| Component styling is completely incompatible with design direction | Escalate to Category D (document for design review), do not replace component |
+| Text contrast fails WCAG AA in dark mode | Adjust color variant via className (e.g., `dark:text-slate-200`), do not replace component |
 
 You are:
 - **Elevating** the existing aesthetic using the design system's tokens (colors, spacing, typography scale)
@@ -58,28 +58,28 @@ You are:
 - **Fixing** objective visual defects (contrast failures, layout breaks, spacing inconsistencies)
 - **Enhancing** key screens with the frontend-design skill's aesthetics guidelines (within the design system's vocabulary)
 
-If the project uses a UI library (e.g., Untitled UI, shadcn/ui, Chakra), work WITHIN its component API. Do NOT replace library components with custom implementations unless fixing a specific defect that the library cannot handle. Replace a library component ONLY if: (1) the defect cannot be fixed via the component's API/props, (2) accessibility is broken, AND (3) the change is scoped to a single component. In all other cases, use wrapper components, CSS overrides, or configuration changes.
+If the project uses a UI library (e.g., Untitled UI, shadcn/ui, Chakra), work WITHIN its component API. Do not replace library components with custom implementations unless fixing a specific defect that the library cannot handle. Replace a library component ONLY if: (1) the defect cannot be fixed via the component's API/props, (2) accessibility is broken, AND (3) the change is scoped to a single component. In all other cases, use wrapper components, CSS overrides, or configuration changes.
 
-> **Component modification boundary**: Use the library's component API (className, props, variants) for styling changes. Escalate to Category D if the component API doesn't support the needed styling. NEVER replace a UI library component just for styling — only escalate for accessibility fixes where the library offers no API path forward.
+> **Component modification boundary**: Use the library's component API (className, props, variants) for styling changes. Escalate to Category D if the component API doesn't support the needed styling. never replace a UI library component just for styling — only escalate for accessibility fixes where the library offers no API path forward.
 
 ## Known Failure Patterns
 
 Based on observed visual polish outcomes:
 
-1. **Replacing UI library components wholesale**: Agent replaces Untitled UI / shadcn/ui buttons with custom-styled `<button>` elements to add hover transitions. This breaks accessibility (ARIA), variant consistency, and future library updates. ALWAYS use the library's component API (className, variant props) to add styling — never replace the component itself.
+1. **Replacing UI library components wholesale**: Agent replaces Untitled UI / shadcn/ui buttons with custom-styled `<button>` elements to add hover transitions. This breaks accessibility (ARIA), variant consistency, and future library updates. always use the library's component API (className, variant props) to add styling — never replace the component itself.
 2. **CSS specificity wars**: Agent adds Tailwind utility classes that are overridden by the UI library's base styles. Fix: use `!important` sparingly and only as a last resort, or add styles via the library's theming/customization API.
-3. **Breaking existing dark mode**: Agent fixes a light-mode contrast issue by hardcoding a color value (e.g., `text-gray-900`) without adding the `dark:` variant, breaking dark mode. ALWAYS add both light and dark variants when modifying colors.
+3. **Breaking existing dark mode**: Agent fixes a light-mode contrast issue by hardcoding a color value (e.g., `text-gray-900`) without adding the `dark:` variant, breaking dark mode. always add both light and dark variants when modifying colors.
 4. **Animation performance regression**: Agent adds CSS transitions/animations that trigger layout recalculation (animating `width`, `height`, `top`, `left`). ONLY animate `transform` and `opacity` for performant animations.
 5. **Font loading FOUT/FOIT**: Agent adds a distinctive display font via CDN `<link>` without `font-display: swap` or preloading, causing Flash of Unstyled Text or Invisible Text on slow connections. Use `next/font` (or equivalent) with `display: swap`.
 6. **Overzealous enhancement scope**: Agent "improves" 50+ components when only 10 key screens need attention. This stage targets high-impact pages — do not polish every minor component.
-7. **Hybrid theme localStorage flicker**: In projects with light/dark mode, using `setTheme()` or similar JS-based theme toggles causes a flash of the wrong theme on page load because `localStorage` is read after initial render. NEVER use `setTheme()` for initial theme — use CSS `prefers-color-scheme` media query as the default, with `setTheme()` only for user-initiated overrides. This pattern is documented in detail in Stage 6P-R's Known Failure Patterns.
+7. **Hybrid theme localStorage flicker**: In projects with light/dark mode, using `setTheme()` or similar JS-based theme toggles causes a flash of the wrong theme on page load because `localStorage` is read after initial render. never use `setTheme()` for initial theme — use CSS `prefers-color-scheme` media query as the default, with `setTheme()` only for user-initiated overrides. This pattern is documented in detail in Stage 6P-R's Known Failure Patterns.
 
 ## Refinement Categories
 
 Every visual issue falls into one of three categories:
 
 ### Category O: Objective Defects (Auto-Fix, No Judgment)
-Issues with a clear right/wrong answer. The agent MUST fix these.
+Issues with a clear right/wrong answer. The agent must fix these.
 
 | Issue Type | Detection Method | Fix Pattern |
 |---|---|---|
@@ -110,7 +110,7 @@ Issues where the fix follows established patterns in the codebase. Apply the fix
 | Missing hover state on buttons/links | Interact with element, compare to design system | Add hover transition using project's existing hover patterns | Verify hover doesn't break layout or overlap adjacent elements |
 | Missing page transition animation | Navigate between pages, observe jarring cut | Add entry animation using project's motion library/CSS | Verify animation doesn't delay perceived load time |
 | Inconsistent spacing between similar sections | Compare spacing across pages | Standardize to project's spacing scale tokens | Verify content still fits at all breakpoints |
-| Empty state visually weak (just text) | AI vision — sparse empty state | Enhance with icon or call-to-action using project's existing design system assets (do NOT source new illustrations — if none exist, document as Category D suggestion instead) | Verify CTA navigation works |
+| Empty state visually weak (just text) | AI vision — sparse empty state | Enhance with icon or call-to-action using project's existing design system assets (do not source new illustrations — if none exist, document as Category D suggestion instead) | Verify CTA navigation works |
 | Typography hierarchy flat (all same size) | AI vision — no visual hierarchy on page | Apply heading/subheading/body scale from design system | Verify text doesn't overflow containers |
 | Card/container missing depth (looks flat) | AI vision — no shadow, border, or gradient | Add subtle shadow or border using design system tokens | Verify depth doesn't look inconsistent with surrounding cards |
 | Loading state too plain (no skeleton, just spinner) | Observe loading state | Replace with skeleton matching content layout | Verify skeleton-to-content transition is smooth |
@@ -128,7 +128,7 @@ Subjective improvements that would elevate the aesthetic but may conflict with b
 | Micro-interaction opportunity (scroll-triggered, parallax, etc.) | Interaction description, which elements, expected delight factor |
 | Overall aesthetic direction suggestion | Named direction (from frontend-design skill), rationale, which pages would change |
 
-Category D suggestions are for POST-LAUNCH review. They do NOT block Stage 7 deployment. The operator may implement them in a future 6P-R run or defer indefinitely.
+Category D suggestions are for POST-LAUNCH review. They do not block Stage 7 deployment. The operator may implement them in a future 6P-R run or defer indefinitely.
 
 ## Prerequisites
 
@@ -136,7 +136,7 @@ Category D suggestions are for POST-LAUNCH review. They do NOT block Stage 7 dep
 
 0. **Check if 6P-R was run instead**: If Stage 6P-R (Frontend Design Elevation) was run instead of 6P, skip this stage entirely — 6P-R subsumes all 6P work. Proceed directly to Stage 7. Check for `./plancasting/_audits/visual-polish/design-plan.md` — this file is only generated by Stage 6P-R. If `./plancasting/_audits/visual-polish/design-plan.md` exists, check 6P-R completion status:
    - If `progress.md` in the same directory shows all phases completed → 6P-R is done. Skip this stage (6P).
-   - If `progress.md` is missing or shows incomplete phases → 6P-R failed mid-execution. Do NOT proceed — request operator approval before continuing.
+   - If `progress.md` is missing or shows incomplete phases → 6P-R failed mid-execution. Do not proceed — request operator approval before continuing.
    - If `design-plan.md` exists but 6P-R's `progress.md` shows incomplete status, verify with the operator whether 6P-R was intentionally abandoned before proceeding.
    - If `design-plan.md` does not exist → 6P-R was not run. Proceed with 6P.
 
@@ -153,9 +153,9 @@ Category D suggestions are for POST-LAUNCH review. They do NOT block Stage 7 dep
 
 2. **Stage 6R must PASS or CONDITIONAL PASS (if 6R was required)**:
    - **If 6R report exists** (`./plancasting/_audits/runtime-remediation/report.md`): check its Gate Decision. If FAIL → STOP, return to 6R first. If PASS or CONDITIONAL PASS (regardless of remaining 6V-C issues) → proceed. 6V-C issues from 6V/6R are documented for human review and do not block 6P.
-   - **If 6R report does NOT exist**: check `./plancasting/_audits/visual-verification/report.md`:
+   - **If 6R report does not exist**: check `./plancasting/_audits/visual-verification/report.md`:
      - If 6V reports **PASS** → 6R was correctly skipped (no failures to remediate), proceed to 6P.
-     - If 6V reports **FAIL** → STOP: "Stage 6V reported FAIL. Fix critical issues manually and re-run Stage 6V before starting Stage 6P." (Do NOT run 6R against a FAIL report — 6R rejects FAIL inputs in its own prerequisites.)
+     - If 6V reports **FAIL** → STOP: "Stage 6V reported FAIL. Fix critical issues manually and re-run Stage 6V before starting Stage 6P." (Do not run 6R against a FAIL report — 6R rejects FAIL inputs in its own prerequisites.)
      - If 6V reports **CONDITIONAL PASS** with only 6V-C issues (human judgment required — not auto-fixable): 6R was correctly skipped (6R cannot fix 6V-C). Proceed to 6P. Document unresolved 6V-C issues in the 6P report.
      - If 6V reports **CONDITIONAL PASS** with 6V-A or 6V-B issues → STOP: "Stage 6V found auto-fixable issues but Stage 6R has not been run yet. Run Stage 6R before starting Stage 6P."
    - **If NEITHER report exists** (both 6V and 6R were skipped): this is unusual — verify with the operator that prior stages were intentionally skipped before proceeding.
@@ -197,7 +197,7 @@ Always read `CLAUDE.md` and `plancasting/tech-stack.md` for your project's actua
 
 **Package Manager**: Commands in this prompt use `bun run` as the default. Replace with your project's package manager as specified in `CLAUDE.md` (e.g., `npm run`, `pnpm run`, `yarn`).
 
-**Category System Note**: This stage uses DIFFERENT categories than 6V/6R. 6P categories: O (objective defects), E (enhancements), D (design elevation). 6V/6R categories: 6V-A/6V-B (agent-fixable), 6V-C (human judgment). Do NOT confuse the two systems when reading 6V/6R reports.
+**Category System Note**: This stage uses DIFFERENT categories than 6V/6R. 6P categories: O (objective defects), E (enhancements), D (design elevation). 6V/6R categories: 6V-A/6V-B (agent-fixable), 6V-C (human judgment). Do not confuse the two systems when reading 6V/6R reports.
 
 **Browser Tools**: This prompt uses Playwright MCP tools (`browser_navigate`, `browser_resize`, `browser_take_screenshot`, `browser_console_messages`, `browser_fill_form`, `browser_click`, `browser_type`, `browser_evaluate`). If your project uses a different browser automation tool (Cypress, Puppeteer, etc.), adapt the tool names accordingly.
 
@@ -339,7 +339,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
    ~~~
 
 8. **Invoke the `frontend-design` skill for enhancement guidance**:
-   Before spawning teammates, the lead MUST invoke the `frontend-design` skill (if available — see Prerequisites step 1 for fallback behavior) to generate design guidance that Teammate 2 will follow. This is necessary because the skill is a slash command (`/frontend-design`) that works in the lead's session but may not be invocable by spawned teammates.
+   Before spawning teammates, the lead must invoke the `frontend-design` skill (if available — see Prerequisites step 1 for fallback behavior) to generate design guidance that Teammate 2 will follow. This is necessary because the skill is a slash command (`/frontend-design`) that works in the lead's session but may not be invocable by spawned teammates.
 
    Invoke `/frontend-design` with this prompt:
    > "Given a [product type] application using [UI library] with [design direction from tech-stack.md], provide specific enhancement guidelines for: (1) hover/press state transitions, (2) page entry animations, (3) spacing rhythm, (4) empty state design, (5) card/container depth, (6) typography hierarchy. Work within the existing design system tokens: [paste Design System Summary]. Output concrete CSS patterns for each category using the project's CSS framework (from tech-stack.md — e.g., Tailwind utilities, CSS Modules, styled-components)."
@@ -359,7 +359,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
    | src/components/ui/Button.tsx | Teammate 2 | E-001, E-002 |
    | src/app/(dashboard)/page.tsx | Teammate 1 | O-003, O-005 |
    ~~~
-   Teammates MUST read this section before modifying any file to verify ownership.
+   Teammates must read this section before modifying any file to verify ownership.
 
 ### Phase 2: Teammates
 
@@ -378,11 +378,11 @@ Read CLAUDE.md first. Then read ./plancasting/_audits/visual-polish/plan.md for 
 Your approach: Fix each Category O issue using the project's design tokens and patterns.
 
 Rules:
-- Use ONLY existing design system tokens (do NOT invent new colors, spacing values, or shadows). **Exception**: 6P may modify `design-tokens.ts` ONLY for: (a) adding a missing size to an existing scale (e.g., `shadow-md` between `shadow-sm` and `shadow-lg`), (b) correcting a token value to meet WCAG AA contrast (≥4.5:1 for text), or (c) fixing a broken variable reference. Do NOT change design direction or aesthetic intent — only fill technical gaps in the scale. Document any token changes in the report.
+- Use ONLY existing design system tokens (do not invent new colors, spacing values, or shadows). **Exception**: 6P may modify `design-tokens.ts` ONLY for: (a) adding a missing size to an existing scale (e.g., `shadow-md` between `shadow-sm` and `shadow-lg`), (b) correcting a token value to meet WCAG AA contrast (≥4.5:1 for text), or (c) fixing a broken variable reference. Do not change design direction or aesthetic intent — only fill technical gaps in the scale. Document any token changes in the report.
 - For contrast fixes, prefer adjusting the text color over the background (less visual disruption)
 - For responsive fixes, use the project's breakpoint utilities (e.g., `md:`, `lg:` in Tailwind)
 - For dark mode fixes, use the project's dark mode pattern (e.g., `dark:` prefix in Tailwind)
-- NEVER change functional behavior — this teammate only changes visual presentation
+- never change functional behavior — this teammate only changes visual presentation
 - For authenticated pages, log in before taking screenshots: use `browser_navigate` to go to the login page, then `browser_fill_form` or `browser_type`/`browser_click` to enter the test user's email and password from `./e2e/constants.ts`. Verify login succeeded (check for redirect to dashboard or authenticated UI) before proceeding.
 - After fixing each issue, verify visually: use `browser_navigate` to go to the affected page, `browser_resize` to the relevant breakpoint, `browser_take_screenshot` to capture a PNG (save to `./screenshots/visual-polish/after/[issue-id].png`). Use `browser_console_messages` to check for JavaScript errors. For DOM inspection (checking if a CSS class applied), use `browser_snapshot` to inspect the accessibility tree.
 - Run `bun run typecheck` and `bun run lint` after each batch of fixes
@@ -398,7 +398,7 @@ You are applying visual enhancements (Category E) guided by the frontend-design 
 
 Check `./plancasting/tech-stack.md` for the `Session Language` setting. Code remains in English; any report messages or documentation updates should follow the session language.
 
-Read CLAUDE.md first. Then read ./plancasting/_audits/visual-polish/design-guidelines.md — this contains the `frontend-design` skill's output with concrete CSS/Tailwind patterns for each enhancement category. Follow these patterns exactly. If design-guidelines.md does NOT exist (frontend-design plugin was unavailable), read `plancasting/tech-stack.md` design direction and `src/styles/design-tokens.ts` (or equivalent) instead — use the project's existing design patterns for all enhancement decisions. Then read ./plancasting/_audits/visual-polish/plan.md for your assigned issues.
+Read CLAUDE.md first. Then read ./plancasting/_audits/visual-polish/design-guidelines.md — this contains the `frontend-design` skill's output with concrete CSS/Tailwind patterns for each enhancement category. Follow these patterns exactly. If design-guidelines.md does not exist (frontend-design plugin was unavailable), read `plancasting/tech-stack.md` design direction and `src/styles/design-tokens.ts` (or equivalent) instead — use the project's existing design patterns for all enhancement decisions. Then read ./plancasting/_audits/visual-polish/plan.md for your assigned issues.
 
 Rules:
 - If the design guidelines suggest approaches that conflict with the existing design system tokens, adapt the intent to the system's tokens (e.g., if guidelines suggest "dramatic shadows" but design system has `shadow-sm`/`shadow-md`/`shadow-lg`, use `shadow-lg` not a custom box-shadow)
@@ -407,7 +407,7 @@ Rules:
   - If the project uses a motion library (Framer Motion, Motion, etc.), use it
   - Otherwise, prefer CSS-only transitions and animations
   - Focus on HIGH-IMPACT moments: page entry reveals, hero animations, card hover lifts
-  - Do NOT add animation to every element — restraint is elegance
+  - Do not add animation to every element — restraint is elegance
 - For typography hierarchy: work within the existing type scale, adjusting weights and sizes but not font families (font changes are Category D)
 - After applying each enhancement category, use the Playwright browser tools (`browser_navigate`, `browser_resize`, `browser_take_screenshot`) to capture before/after screenshots. Use `browser_console_messages` to check for JavaScript errors. Log in with the test user from `./e2e/constants.ts` if screenshots require authentication.
 - Run `bun run typecheck` and `bun run lint` after each batch
@@ -432,7 +432,7 @@ Use Playwright browser tools to take fresh screenshots at all breakpoints and ve
 - No regressions introduced (compare with pre-polish screenshots in ./screenshots/visual-polish/before/)
 
 Rules:
-- If a fix or enhancement causes a regression at a different breakpoint, flag it immediately (do NOT attempt to fix — return to lead)
+- If a fix or enhancement causes a regression at a different breakpoint, flag it immediately (do not attempt to fix — return to lead)
 - Use Playwright browser tools to capture comparison screenshots: `browser_navigate` to each modified page, `browser_resize` to each breakpoint (1440, 768, 375), `browser_take_screenshot`. Save to `./screenshots/visual-polish/after/`. Log in with the test user from `./e2e/constants.ts` for authenticated pages.
 - Test mobile touch interactions (tap states, swipe gestures if applicable)
 - Verify page load performance hasn't degraded (animations shouldn't delay FCP)
@@ -450,7 +450,7 @@ After all teammates complete:
    - Any Category E enhancements that Teammate 3 found problematic
 
 2. **Fix regressions**:
-   A **regression** is a NEGATIVE SIDE EFFECT introduced by a polish fix: visual breakage of unrelated elements, functional breakage (button no longer works), accessibility breakage (new contrast failure), or performance degradation. Intentional enhancements (e.g., increased padding for touch targets) are NOT regressions.
+   A **regression** is a NEGATIVE SIDE EFFECT introduced by a polish fix: visual breakage of unrelated elements, functional breakage (button no longer works), accessibility breakage (new contrast failure), or performance degradation. Intentional enhancements (e.g., increased padding for touch targets) are not regressions.
 
    If Teammate 3 flagged regressions:
    - Revert the specific change that caused the regression
@@ -468,13 +468,13 @@ After all teammates complete:
    ALL must pass. Visual changes can break E2E test selectors — if any fail, fix the issue or revert the change that caused it.
 
 4. **Generate Category D design brief**:
-   ⚠️ **Category D is for HUMAN REVIEW ONLY**: Do NOT implement Category D suggestions in this stage. Generate the brief for the operator to review post-launch. If the frontend-design skill was unavailable (per Prerequisites), the design elevation brief was not generated. Note in the Phase 3 report: 'Category D design elevation brief not generated (frontend-design skill unavailable).' and skip the Category D appendix reference.
+   ⚠️ **Category D is for HUMAN REVIEW ONLY**: Do not implement Category D suggestions in this stage. Generate the brief for the operator to review post-launch. If the frontend-design skill was unavailable (per Prerequisites), the design elevation brief was not generated. Note in the Phase 3 report: 'Category D design elevation brief not generated (frontend-design skill unavailable).' and skip the Category D appendix reference.
    For Category D suggestions, the LEAD (not a teammate) creates a design brief using the `frontend-design` skill:
    - Invoke `/frontend-design` with this prompt:
      > "You are reviewing a [product type] application. Based on these Category D observations: [paste Category D items from the plan]. The current design direction is [from tech-stack.md]. The current design system uses: [Design System Summary]. Suggest 3 distinctive aesthetic directions that would elevate this product. For each: name it, describe the tone, list specific visual changes (typography, color, motion, layout), identify which screens/files would change, and estimate effort (hours)."
    - Save the skill's output as `./plancasting/_audits/visual-polish/design-elevation-brief.md`
 
-   This brief is for HUMAN REVIEW — the agent does NOT apply Category D changes.
+   This brief is for HUMAN REVIEW — the agent does not apply Category D changes.
 
 5. **Generate the Visual Polish Report** at `./plancasting/_audits/visual-polish/report.md`:
 
@@ -532,7 +532,7 @@ After all teammates complete:
 
    ## Next Steps
    - If PASS or CONDITIONAL PASS: proceed to Stage 7 (Deploy) → Stage 7V (Production Smoke) → Stage 7D (User Guide)
-   - If FAIL: regressions detected — investigate root cause, fix, and revalidate. Do NOT deploy until 6P PASS or CONDITIONAL PASS
+   - If FAIL: regressions detected — investigate root cause, fix, and revalidate. Do not deploy until 6P PASS or CONDITIONAL PASS
    ~~~
 
 6. **Save comparison screenshots**:
@@ -561,29 +561,29 @@ If the session disconnects mid-execution: start a new session, re-paste this pro
 
 ## Critical Rules
 
-1. **NEVER change functional behavior.** This stage changes ONLY visual presentation. If a fix would alter routing, data flow, API calls, auth, or form submission logic, it is OUT OF SCOPE — flag it and move on.
+1. **never change functional behavior.** This stage changes ONLY visual presentation. If a fix would alter routing, data flow, API calls, auth, or form submission logic, it is OUT OF SCOPE — flag it and move on.
 
-2. **NEVER replace design system components with custom implementations.** Work within the existing UI library's API. If a component doesn't support the enhancement you want, use CSS overrides or wrapper components, not replacements.
+2. **never replace design system components with custom implementations.** Work within the existing UI library's API. If a component doesn't support the enhancement you want, use CSS overrides or wrapper components, not replacements.
 
-3. **NEVER introduce new fonts without human approval.** Font changes are Category D (design elevation). Document the suggestion but do NOT apply it.
+3. **never introduce new fonts without human approval.** Font changes are Category D (design elevation). Document the suggestion but do not apply it.
 
-4. **NEVER introduce new dependencies without checking `package.json`.** If an animation library isn't already installed, use CSS-only animations. Do NOT add Motion, GSAP, or other libraries without checking if they're already in the project.
+4. **never introduce new dependencies without checking `package.json`.** If an animation library isn't already installed, use CSS-only animations. Do not add Motion, GSAP, or other libraries without checking if they're already in the project.
 
-5. **ALWAYS take before/after screenshots.** Every change must be visually documented. If you can't screenshot it, you can't verify it.
+5. **always take before/after screenshots.** Every change must be visually documented. If you can't screenshot it, you can't verify it.
 
-6. **ALWAYS run validation (typecheck + lint + test) after fixes.** A visual improvement that breaks the build is worse than no improvement.
+6. **always run validation (typecheck + lint + test) after fixes.** A visual improvement that breaks the build is worse than no improvement.
 
-7. **ALWAYS work at all 3 breakpoints.** A fix that looks great at desktop but breaks mobile is a regression, not an improvement.
+7. **always work at all 3 breakpoints.** A fix that looks great at desktop but breaks mobile is a regression, not an improvement.
 
 8. **Teammate 3 scope management**: Teammate 3 focuses on HIGHEST-IMPACT screens first, in this priority order: (1) landing/home page, (2) dashboard, (3) primary feature page (the core product screen), (4) auth pages (login/signup), (5) settings/billing pages. Verify each at all 3 breakpoints + dark mode before moving to the next. If time permits after the top 5, continue to lower-impact screens. Mark any unverified screens in the report with "SPOT-CHECK ONLY" status. Target: verify at minimum the top 5 screens within 30 minutes.
 
-9. **ALWAYS respect the project's dark mode pattern.** If the project uses `dark:` Tailwind classes, every color change must include the dark mode variant. If the project doesn't support dark mode, don't add it.
+9. **always respect the project's dark mode pattern.** If the project uses `dark:` Tailwind classes, every color change must include the dark mode variant. If the project doesn't support dark mode, don't add it.
 
 10. **Category O before Category E.** Fix objective defects first, then apply enhancements. Never polish what's broken.
 
 11. **The `frontend-design` skill guides INTENT, not implementation.** When the skill says "dramatic shadows," translate that to your design system's shadow tokens. When it says "unexpected layout," interpret within your grid system. The skill's aesthetic vision + your design system's vocabulary = the implementation.
 
-12. **Maximum 3 animation additions per page.** Restraint creates elegance. Do NOT animate every element — choose the 1-3 highest-impact moments per page (hero reveal, card entry, hover lift).
+12. **Maximum 3 animation additions per page.** Restraint creates elegance. Do not animate every element — choose the 1-3 highest-impact moments per page (hero reveal, card entry, hover lift).
 
 13. **AVOID modifying shared UI primitive components directly** (e.g., `src/components/ui/` or your framework's equivalent) unless fixing a Category O defect or applying a global Category E enhancement. Prefer page-level or layout-level overrides for page-specific changes.
 
@@ -591,9 +591,9 @@ If the session disconnects mid-execution: start a new session, re-paste this pro
 
 15. **Treat contrast ratios as non-negotiable.** WCAG AA (4.5:1 for normal text, 3:1 for large text) is the MINIMUM. If in doubt, use a higher contrast option.
 
-16. **ALWAYS preserve accessibility.** Focus rings, aria labels, semantic HTML, keyboard navigation — if an enhancement would compromise any of these, skip it.
+16. **always preserve accessibility.** Focus rings, aria labels, semantic HTML, keyboard navigation — if an enhancement would compromise any of these, skip it.
 
-17. **The lead invokes `/frontend-design`, teammates read the output.** The lead invokes `/frontend-design` twice: once in Phase 1 Step 8 (enhancement guidelines) and once in Phase 3 Step 4 (design elevation brief). Teammates read the saved output — they do NOT invoke the skill themselves.
+17. **The lead invokes `/frontend-design`, teammates read the output.** The lead invokes `/frontend-design` twice: once in Phase 1 Step 8 (enhancement guidelines) and once in Phase 3 Step 4 (design elevation brief). Teammates read the saved output — they do not invoke the skill themselves.
 
 18. **Teammates 1 and 2 run in parallel, Teammate 3 runs AFTER both complete.** Teammate 3 verifies changes from 1 and 2 — it cannot run concurrently. The lead must wait for Teammates 1 and 2 to finish before spawning Teammate 3.
 
@@ -601,7 +601,7 @@ If the session disconnects mid-execution: start a new session, re-paste this pro
 
 20. **Test user login is required for authenticated page screenshots.** Read `./e2e/constants.ts` for credentials. Use `browser_navigate` to the login page, `browser_fill_form` or `browser_type`/`browser_click` to authenticate. Verify login succeeded (check for redirect to dashboard or authenticated indicator) before proceeding with screenshots.
 
-21. **ALWAYS check for console errors during screenshots.** After each `browser_take_screenshot`, use `browser_console_messages` to check for JavaScript errors. A page that looks correct visually but has console errors may have runtime issues that affect subsequent interactions. Log any errors in the report.
+21. **always check for console errors during screenshots.** After each `browser_take_screenshot`, use `browser_console_messages` to check for JavaScript errors. A page that looks correct visually but has console errors may have runtime issues that affect subsequent interactions. Log any errors in the report.
 
-22. **Ensure NO two teammates modify the same file.** The lead MUST assign files to teammates in Phase 1 Step 9. If a file needs both Category O and Category E changes, assign all changes for that file to ONE teammate.
+22. **Ensure NO two teammates modify the same file.** The lead must assign files to teammates in Phase 1 Step 9. If a file needs both Category O and Category E changes, assign all changes for that file to ONE teammate.
 ````

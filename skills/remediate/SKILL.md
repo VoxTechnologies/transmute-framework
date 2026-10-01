@@ -7,14 +7,16 @@ description: >-
   "remediate runtime issues", "fix the verification report failures",
   or "run the remediation cycle", or when the transmute-pipeline agent
   reaches Stage 6R of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Stage 6R: Runtime Remediation
 
-Read the Stage 6V verification report, categorize every failure by fixability, auto-fix all mechanical issues, and produce a human-review TODO list for issues requiring judgment — then re-verify to confirm fixes work. Lead a multi-agent runtime remediation project using Claude Code Agent Teams.
+Read the Stage 6V verification report, categorize every failure by fixability, auto-fix all mechanical issues, and produce a human-review TODO list for issues requiring judgment — then re-verify to confirm fixes work. Lead a multi-agent runtime remediation project (teammates are Agent-tool subagents; see the pipeline agent's Execution Model).
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/remediate-detailed-guide.md` for full fixability taxonomy, teammate prompts, safety rules, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/remediate-detailed-guide.md` for full fixability taxonomy, teammate prompts, safety rules, and report templates.
 
 ## Prerequisites
 
@@ -56,8 +58,8 @@ Complete BEFORE spawning teammates:
 1. **Check cycle counter** (prevents infinite remediation cycles):
    - Read `./plancasting/_audits/runtime-remediation/loop-count.txt`. If absent, this is run 1 — proceed.
    - If it contains `1` or `2`, previous runs have completed — proceed.
-   - If it contains `3`, 3 runs have already completed — STOP immediately. Create `./plancasting/_audits/runtime-remediation/remaining-blockers.md` and halt. Do NOT proceed to 6P or 6P-R.
-   - **Counter increment**: Do NOT write to `loop-count.txt` here. The counter is incremented at the END of Phase 4 (after verification completes) to ensure it tracks completed runs, not started runs. **Important**: The 3-cycle counter resets only after a full 6V re-run between 6R sessions — simply re-running 6R without a 6V re-run does NOT reset it.
+   - If it contains `3`, 3 runs have already completed — STOP immediately. Create `./plancasting/_audits/runtime-remediation/remaining-blockers.md` and halt. Do not proceed to 6P or 6P-R.
+   - **Counter increment**: Do not write to `loop-count.txt` here. The counter is incremented at the END of Phase 4 (after verification completes) to ensure it tracks completed runs, not started runs. **Important**: The 3-cycle counter resets only after a full 6V re-run between 6R sessions — simply re-running 6R without a 6V re-run does not reset it.
 
 2. **Read project context**: `./CLAUDE.md`, `./plancasting/tech-stack.md`, `./plancasting/_audits/visual-verification/report.md`
 
@@ -87,13 +89,13 @@ Complete BEFORE spawning teammates:
 Spawn up to 3 teammates based on triage. Teammates work in parallel on SEPARATE file sets.
 
 ### Teammate 1: "navigation-routing-fixer"
-Fixes: public routes blocked by middleware, dead links, broken hrefs, mobile nav gaps, sub-nav tab 404s, auth redirect issues. NEVER use wildcard middleware whitelists. For public route fixes, verify in a fresh unauthenticated browser session.
+Fixes: public routes blocked by middleware, dead links, broken hrefs, mobile nav gaps, sub-nav tab 404s, auth redirect issues. never use wildcard middleware whitelists. For public route fixes, verify in a fresh unauthenticated browser session.
 
 ### Teammate 2: "component-ui-fixer"
-Fixes: broken button handlers, missing loading/empty states, missing i18n keys, missing imports, TypeScript runtime errors, missing confirmation dialogs. NEVER change visual design. Verify mutations exist before wiring buttons.
+Fixes: broken button handlers, missing loading/empty states, missing i18n keys, missing imports, TypeScript runtime errors, missing confirmation dialogs. never change visual design. Verify mutations exist before wiring buttons.
 
 ### Teammate 3: "backend-data-fixer"
-Fixes: wrong response shapes, auth context propagation, empty query results, missing error handling, subscription issues. NEVER create business logic. NEVER modify schema.
+Fixes: wrong response shapes, auth context propagation, empty query results, missing error handling, subscription issues. never create business logic. never modify schema.
 
 Each teammate runs `bun run typecheck` after EVERY fix. Each reports: fixes applied, files modified, issues escalated to 6V-C.
 
@@ -160,7 +162,7 @@ After 3 internal fix-verify cycles within a single 6R run, if 6V-A/6V-B issues p
 - Proceed to 6P/6P-R without further cycle attempts
 - Create `remaining-blockers.md` listing all unresolved issues
 - Operator must: (a) manually resolve, re-run 6V, then 6R if needed, OR (b) document as known limitations and proceed to 6P
-- If 6R gate is FAIL after max cycles, do NOT re-run 6R — manually fix 6V-C issues first, re-run 6V, then 6R if needed
+- If 6R gate is FAIL after max cycles, do not re-run 6R — manually fix 6V-C issues first, re-run 6V, then 6R if needed
 - **Outer cycle tracking**: Track outer cycle count by counting 6R report files or noting cycle number in report headers
 
 ## Gate Decision
@@ -177,20 +179,20 @@ After 3 internal fix-verify cycles within a single 6R run, if 6V-A/6V-B issues p
 
 ## Critical Rules
 
-1. NEVER make business logic decisions. Ambiguous fixes go to 6V-C.
-2. NEVER weaken security. Adding public routes is fine if PRD says public. Removing auth guards is NEVER acceptable.
-3. ALWAYS preserve test baseline. Zero test regressions is non-negotiable.
-4. ALWAYS typecheck after EVERY fix, not just at the end.
-5. ALWAYS verify fixes in the running app, not just in code.
-6. NEVER modify auto-generated files (`_generated/`, `.next/`, `node_modules/`).
-7. NEVER create database schema changes.
+1. never make business logic decisions. Ambiguous fixes go to 6V-C.
+2. never weaken security. Adding public routes is fine if PRD says public. Removing auth guards is never acceptable.
+3. always preserve test baseline. Zero test regressions is non-negotiable.
+4. always typecheck after EVERY fix, not just at the end.
+5. always verify fixes in the running app, not just in code.
+6. never modify auto-generated files (`_generated/`, `.next/`, `node_modules/`).
+7. never create database schema changes.
 8. If a 6V-B fix introduces a NEW failure of EQUAL or HIGHER severity, revert and move to 6V-C.
-9. ALWAYS read component/function context before fixing. Check git blame when a fix seems too simple.
+9. always read component/function context before fixing. Check git blame when a fix seems too simple.
 10. For i18n fixes: check ALL language files.
-11. For stub pages: ALWAYS include auth guards, loading states, and error handling.
+11. For stub pages: always include auth guards, loading states, and error handling.
 12. If 6V report has zero failures, output a clean report and exit.
 13. Maximum 3 internal fix-verify cycles per run (tracked in `loop-count.txt` — filename preserved for backward compatibility).
-14. ALWAYS respect the project's file organization conventions.
+14. always respect the project's file organization conventions.
 
 ## Output Specification
 

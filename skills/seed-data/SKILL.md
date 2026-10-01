@@ -6,12 +6,14 @@ description: >-
   "create test data", "populate the database", "create demo data",
   "generate edge case data", or "set up seed scripts"
   — or when the transmute-pipeline agent reaches Stage 6F of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Stage 6F: Realistic Test Data for All Environments
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/seed-data-detailed-guide.md` for the complete generation procedures, teammate spawn prompts, data profile patterns, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/seed-data-detailed-guide.md` for the complete generation procedures, teammate spawn prompts, data profile patterns, and report templates.
 
 Lead a multi-agent seed data generation project. Generate comprehensive, realistic seed data covering all entities in the data model, supporting all user flows, and enabling meaningful testing and demonstrations of the COMPLETE product.
 
@@ -130,7 +132,7 @@ IDs are shared via `./seed/.seed-ids.json`. Only Teammate 1 writes this file. Te
 - Each key maps to a non-empty object of `{ label: id }` pairs
 - IDs are database IDs (for foreign keys), not auth-provider IDs
 
-If ANY check fails, do NOT spawn Teammates 2/3 — re-spawn Teammate 1 with fix instructions. Fallback: extract IDs from completion message and write the file manually.
+If ANY check fails, do not spawn Teammates 2/3 — re-spawn Teammate 1 with fix instructions. Fallback: extract IDs from completion message and write the file manually.
 
 ## Phase 3: Integration and Seed Script
 
@@ -178,13 +180,13 @@ If a seed data issue cannot be resolved without schema changes or architectural 
 
 ## Critical Rules
 
-1. NEVER use real personal data in seed data.
-2. NEVER bypass schema validators — all data goes through backend mutation functions. Create internal/admin seed functions if auth is required.
-3. NEVER hardcode document IDs — use IDs returned from insert operations.
-4. Seed scripts MUST be idempotent (upsert logic preferred). Use natural unique keys for deduplication. If upsert not feasible, provide `seed:reset` and document the requirement.
-5. ALWAYS include soft-deleted records to verify query filtering.
-6. ALWAYS verify seed data renders correctly in the UI, not just that it inserts.
-7. ALWAYS include realistic timestamps with proper chronological ordering. Demo data dates should be relative to "now" (calculated at runtime) so demos always look current.
+1. never use real personal data in seed data.
+2. never bypass schema validators — all data goes through backend mutation functions. Create internal/admin seed functions if auth is required.
+3. never hardcode document IDs — use IDs returned from insert operations.
+4. Seed scripts must be idempotent (upsert logic preferred). Use natural unique keys for deduplication. If upsert not feasible, provide `seed:reset` and document the requirement.
+5. always include soft-deleted records to verify query filtering.
+6. always verify seed data renders correctly in the UI, not just that it inserts.
+7. always include realistic timestamps with proper chronological ordering. Demo data dates should be relative to "now" (calculated at runtime) so demos always look current.
 8. If auth provider requires API calls to create users, document as manual step or implement in seed script.
-9. NEVER hard-code API keys, secrets, or real credentials in seed scripts. Use environment variables or placeholder values.
-10. If Stage 6A or 6G has added rate limiting, seed scripts MUST either use internal/admin functions that bypass rate limiting or add delays between batch operations.
+9. never hard-code API keys, secrets, or real credentials in seed scripts. Use environment variables or placeholder values.
+10. If Stage 6A or 6G has added rate limiting, seed scripts must either use internal/admin functions that bypass rate limiting or add delays between batch operations.

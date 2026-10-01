@@ -10,9 +10,9 @@ only some of them.
 
 | Layer | Role |
 |---|---|
-| `commands/cast.md` | The `/transmuter:cast` entry point. Parses `$1`, routes to the pipeline agent (`full` / `resume` / empty) or maps a stage alias to a skill. Holds the alias table (`security` to `audit-security`, `a11y` to `audit-a11y`, and so on). |
+| `commands/cast.md` | The `/transmuter:cast` entry point. Parses `$0` (the first argument; indices are 0-based), routes to the pipeline agent (`full` / `resume` / empty) or maps a stage alias to a skill. Holds the alias table (`security` to `audit-security`, `a11y` to `audit-a11y`, and so on). |
 | `agents/transmute-pipeline.md` | Full-pipeline orchestrator. Owns the Stage Skills Map, gate logic, parallel-safety rules, and `plancasting/_progress.md` state transitions. |
-| `agents/{brd,prd}-writer.md`, `agents/feature-{backend,frontend,tests,reviewer}.md` | Teammates spawned by skills, never invoked by users directly. |
+| `agents/{brd,prd}-writer.md`, `agents/feature-{backend,frontend,tests,reviewer}.md` | Teammates spawned by skills, never invoked by users directly. A teammate is an Agent-tool subagent; Claude Code's experimental Agent Teams is an opt-in alternative (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), described in the pipeline agent's Execution Model. |
 | `skills/<stage>/` | One directory per stage, using the two-file pattern below. |
 | `templates/` | Files copied into generated projects. |
 
@@ -34,15 +34,18 @@ test coverage:
 - `execution-guide.md` — canonical per-stage reference shipped into the project.
 - `feature_scenario_generation.md` — scenario extraction algorithm read by
   Stages 6V and 7V.
-- `progress.md`, `_rules-candidates.md`, and six path-scoped
-  `rules-templates/` starter files.
+- `progress.md`, `_rules-candidates.md`, and seven path-scoped
+  `rules-templates/` starter files (scoped with `paths:` frontmatter;
+  `_ai-provider-template.md` is rendered only for products with an AI/LLM
+  provider).
 
 ## The two-file skill pattern
 
 `skills/<stage>/SKILL.md` is the always-loaded layer: frontmatter (`name`,
-`description`, `version`), prerequisite STOP/WARN checks, critical framing, and
-the execution flow. It opens by pointing at
-`${CLAUDE_SKILL_ROOT}/references/<stage>-detailed-guide.md`, the on-demand layer
+`description`, `effort`, `metadata.version` — `version` is not a supported
+top-level key, so it lives under `metadata`), prerequisite STOP/WARN checks,
+critical framing, and the execution flow. It opens by pointing at
+`${CLAUDE_SKILL_DIR}/references/<stage>-detailed-guide.md`, the on-demand layer
 holding full teammate spawn prompts, report templates, gate tables, and known
 failure patterns.
 
@@ -50,23 +53,56 @@ All 23 skills follow this. Keep the split: moving spawn prompts up into
 `SKILL.md` inflates the cost of every invocation of that stage, including the
 invocations that never spawn anything.
 
-Path variables are `${CLAUDE_SKILL_ROOT}` for skill-internal paths and
-`${CLAUDE_PLUGIN_ROOT}` for plugin-root paths. Never hardcode either.
+Path variables are `${CLAUDE_SKILL_DIR}` for skill-internal paths and
+`${CLAUDE_PLUGIN_ROOT}` for plugin-root paths. Never hardcode either, and never
+write `${CLAUDE_SKILL_ROOT}` — it is not a Claude Code variable and is left
+unsubstituted (this plugin shipped with it through v3.0.1). In `commands/`,
+argument indices are 0-based: `$0` is the first argument.
 
 ## Gate enforcement
 
-`hooks/hooks.json` registers a `PreToolUse` hook on the `Skill` matcher that
-runs `hooks/scripts/check-prerequisites.sh`. The script reads the tool-input
-JSON from stdin, extracts the skill name, and checks per stage that prior-stage
-artifacts exist, exiting non-zero with a `BLOCK:` message to stop the stage. It
-is macOS-compatible by design (`sed`, no `grep -P`).
+`hooks/hooks.json` registers `hooks/scripts/check-prerequisites.sh` on two
+events: `PreToolUse` with the `Skill` matcher (fires when Claude invokes a stage
+skill, including from `/transmuter:cast <stage>`), and `UserPromptExpansion`
+with a matcher listing the 23 stage names (fires when the user types
+`/transmuter:<stage>` directly — that path never reaches `PreToolUse`). The
+script reads the hook JSON from stdin, extracts the stage name from
+`tool_input.skill` / `tool_input.skill_name` / `command_name`, strips a
+`transmuter:` prefix, and checks per stage that prior-stage artifacts exist.
+To block it writes the `BLOCK:` reason to stderr and exits **2**; exit code 1
+is a non-blocking error in Claude Code (the message is shown and the stage runs
+anyway), which is how the gates silently stopped gating before v3.1.0. It is
+macOS-compatible by design (`sed`, no `grep -P`).
 
-`.claude-plugin/hooks/` holds a stale second copy using an older `before:skill`
-schema, whose script only warns and never blocks. It has been unreferenced since
-v2.4.0. `hooks/hooks.json` at the plugin root is the live one, because
-`plugin.json` declares no `hooks` field and auto-discovery applies. Edit
-`hooks/`. Do not reconcile the two copies without first deciding which schema is
-real — silently merging them can turn blocking gates into warnings.
+The former `.claude-plugin/hooks/` copy (an unsupported `before:skill` schema)
+was deleted in v3.1.0; `plugin.json` declares no `hooks` field, so
+`hooks/hooks.json` is found by auto-discovery.
+
+## Conformance script
+
+`scripts/conformance.sh` is the repository's test suite. Static checks (seconds, offline) verify the manifest, that every stage lands in `commands/cast.md`, the hook, the Stage Skills Map and the README, the Claude Code 2.1 facts above, and the gate hook's behaviour against fixtures (credential tiers, the Stage 4 placeholder check, the 5V bypass). `--live` loads the plugin with `claude -p` in a temporary directory and checks that `/transmuter:<stage>` is gated, that `/transmuter:cast help` prints the stage list and that `/transmuter:cast <stage>` routes `$0`. `examples/sample-plan/` is the fixture business plan for manual end-to-end runs.
+
+## Opt-in execution modes (documented, not defaulted)
+
+Claude Code 2.1 offers three frontmatter fields that would change how stages
+run. They are recorded here with the reason each stays off until a measured
+trial run shows it helps:
+
+- `context: fork` (+ `agent`) on a skill runs it in a fresh subagent context.
+  It would implement "Stage 5B runs with a fresh context window" without the
+  operator opening a new session, but a forked skill cannot ask the operator
+  anything (5B's "operator confirms 5B was intentionally skipped" override,
+  6V's mode choice), and it runs in the background by default.
+- `isolation: worktree` on `feature-*` agents or the 6A/6B/6C stages would
+  give each parallel teammate its own git worktree, turning the "shared config
+  files silently overwritten" hazard into an explicit merge. Stage 5's
+  opt-in parallel waves (`tech-stack.md` § "Stage 5 parallel waves") use
+  lead-managed `git worktree` per feature for the same reason; the agent-level
+  field is not used because one feature's three teammates must share a tree.
+- `allowed-tools` / `disallowed-tools` on the find-only stages (6A, 6B, 6V,
+  6H, 7V) could enforce "never modify application code" by permission instead
+  of prose; it needs a per-stage tool list because those stages still write
+  reports and test files.
 
 ## The consistency invariant
 

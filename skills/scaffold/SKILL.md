@@ -6,14 +6,16 @@ description: >-
   "scaffold the codebase", "create the code skeleton", "generate the project structure",
   "run Stage 3", or "scaffold from PRD",
   or when the transmute-pipeline agent reaches Stage 3 of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: high
 ---
 
 # Transmute Scaffold — Stage 3: Project Code Skeleton Generation
 
 Lead a multi-agent code generation project to produce a complete, development-ready project scaffolding from the existing PRD, with full traceability back to PRD specifications, BRD requirements, and the original Business Plan.
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/scaffold-detailed-guide.md` for the complete teammate instructions, code generation guidelines, rules-templates processing, and coordination protocol.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/scaffold-detailed-guide.md` for the complete teammate instructions, code generation guidelines, rules-templates processing, and coordination protocol.
 
 ## Critical Framing: Full-Build Approach
 
@@ -37,11 +39,11 @@ Before proceeding, verify ALL of these conditions. Stop with a clear error messa
 Avoid these common scaffolding failures:
 
 1. **Over-generating files**: Creating 200+ files when the product needs 80. Every file must trace to a PRD screen spec, API endpoint, or data model entity — no speculative files.
-2. **Auth provider mismatch**: ALWAYS read `plancasting/tech-stack.md` for the actual auth provider.
-3. **Dependency version conflicts**: ALWAYS verify compatibility before adding dependencies.
+2. **Auth provider mismatch**: always read `plancasting/tech-stack.md` for the actual auth provider.
+3. **Dependency version conflicts**: always verify compatibility before adding dependencies.
 4. **Wrong directory structure**: Creating `pages/` router when `plancasting/tech-stack.md` specifies App Router, or vice versa.
 5. **Missing cross-feature references**: Hooks or functions that reference data from multiple features must be wired correctly from the start.
-6. **OAuth callback missing session persistence**: Callback page completes token exchange but never stores the session client-side — user bounces back to login. The callback MUST: (a) exchange code, (b) handle intermediate auth states, (c) persist session in ALL storage locations, (d) THEN navigate away.
+6. **OAuth callback missing session persistence**: Callback page completes token exchange but never stores the session client-side — user bounces back to login. The callback must: (a) exchange code, (b) handle intermediate auth states, (c) persist session in ALL storage locations, (d) THEN navigate away.
 
 ## Execution Phases
 
@@ -129,7 +131,7 @@ After all teammates complete:
 
 3. **Generate `ARCHITECTURE.md`** with system architecture diagram (mermaid), directory structure, data flow diagrams, cross-feature flows, auth flow, feature flag flow, and PRD-to-code traceability matrix.
 
-4. Update `CLAUDE.md` Part 2 ONLY — fill in placeholder sections with actual project details. NEVER modify Part 1. Replace ALL bracketed placeholders (`[PROJECT_NAME]`, `[e.g., ...]`, `[N]`) with actual values. After verification passes (all Part 1 sections intact, no Part 2 placeholders remain), commit: `git add CLAUDE.md && git commit -m 'chore: complete Stage 4 (CLAUDE.md verification)'`
+4. Update `CLAUDE.md` Part 2 ONLY — fill in placeholder sections with actual project details. never modify Part 1. Replace ALL bracketed placeholders (`[PROJECT_NAME]`, `[e.g., ...]`, `[N]`) with actual values. After verification passes (all Part 1 sections intact, no Part 2 placeholders remain), commit: `git add CLAUDE.md && git commit -m 'chore: complete Stage 4 (CLAUDE.md verification)'`
 
 5. **Generate `.claude/rules/` starter rules**:
    - Create the `.claude/rules/` directory
@@ -137,7 +139,7 @@ After all teammates complete:
    - For each template, render into a real rule file by:
      a. Replacing directory placeholders (`[BACKEND_DIR]`, `[FRONTEND_DIR]`, etc.) with actual project paths from `tech-stack.md`
      b. Replacing tech-stack-specific placeholders (`[VALIDATOR_SYSTEM]`, `[ERROR_TYPE]`, `[AUTH_HELPER]`, etc.) with actual values derived from `tech-stack.md`
-     c. Adding correct `globs` frontmatter based on actual project paths
+     c. Adding correct `paths` frontmatter based on actual project paths (Claude Code scopes rules by `paths`; a rule file without it loads in every session)
      d. Setting `Source: Stage 3` and `Evidence: tech-stack.md` on each rule
      e. Removing all `<!-- TODO: Stage 3 — ... -->` comments and template banners
    - Write rendered files to `.claude/rules/backend.md`, `.claude/rules/frontend.md`, `.claude/rules/api-contracts.md`, `.claude/rules/auth.md`, `.claude/rules/testing.md`, `.claude/rules/data-model.md`
@@ -145,7 +147,7 @@ After all teammates complete:
 
 6. **Create `plancasting/_rules-candidates.md`** with a header explaining the staging workflow, candidate format, and confidence criteria (per CLAUDE.md § 'Path-Scoped Rules'). Starts with zero candidates — Stages 5B and 6R will populate it.
 
-7. **Update the Path-Scoped Rules table** in CLAUDE.md Part 2 with actual rule files (paths, globs, rule counts).
+7. **Update the Path-Scoped Rules table** in CLAUDE.md Part 2 with actual rule files (file paths, `paths` patterns, rule counts).
 
 8. **Copy framework files into project**: Copy `execution-guide.md` and `feature_scenario_generation.md` from the Transmute Framework Template into `./plancasting/transmute-framework/` so they are available for later stages (6V, 7V) without depending on the template location. Note: The CLAUDE.md template lives at the ROOT of the Transmute Framework Template, not inside `plancasting/transmute-framework/`.
 
@@ -172,7 +174,7 @@ If resuming a previously interrupted scaffold generation:
 1. Check which files already exist in backend dir, `src/`, and `e2e/`.
 2. Check if `plancasting/_codegen-context.md` and `plancasting/_progress.md` exist (Phase 1+ completed).
 3. Check if `ARCHITECTURE.md` exists (Phase 4 reached).
-4. Resume from the earliest incomplete phase. Do NOT regenerate existing complete files.
+4. Resume from the earliest incomplete phase. Do not regenerate existing complete files.
 5. Only respawn teammates whose assigned files are missing or incomplete.
 6. Clean up incomplete files before re-spawning. Re-spawned teammates regenerate from scratch and append to `plancasting/_scaffold-manifest.md`.
 
@@ -183,7 +185,7 @@ If resuming a previously interrupted scaffold generation:
 3. **TypeScript Strict Mode**: All code compiles under `strict: true`. No `any`, no `@ts-ignore`.
 4. **Structurally Complete Functions**: Correct signatures, validators, auth checks, error handling. Business logic bodies contain a reasonable first-pass with `// ⚠️ STUB: <description>` markers for Stage 5 to replace.
 5. **Design Quality**: Read `plancasting/tech-stack.md` "Design Direction" section. Use design tokens. Build with the selected UI component library. Avoid generic AI aesthetics.
-6. **Tailwind v4 Critical**: `globals.css` MUST include `@config` directive. Semantic color tokens MUST be in `colors` palette.
+6. **Tailwind v4 Critical**: `globals.css` must include `@config` directive. Semantic color tokens must be in `colors` palette.
 7. **Component Patterns**: Default to Server Components. Implement ALL states. Include ARIA and keyboard nav.
 8. **No Phase References**: All features ship enabled. Conditional rendering only via ops/experiment/permission flags.
 9. **CLAUDE.md Protection**: Never rewrite from scratch. Only extend Part 2.

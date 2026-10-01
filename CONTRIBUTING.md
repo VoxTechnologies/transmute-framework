@@ -44,9 +44,9 @@ transmute-framework/
 ├── skills/                      # 23 stage skills (one per pipeline stage)
 │   └── <stage-name>/
 │       ├── SKILL.md             # Skill definition with frontmatter + instructions
-│       └── references/          # Optional detailed guides loaded via ${CLAUDE_SKILL_ROOT}
+│       └── references/          # Optional detailed guides loaded via ${CLAUDE_SKILL_DIR}
 ├── hooks/
-│   ├── hooks.json               # Hook registration (PreToolUse gate enforcement)
+│   ├── hooks.json               # Hook registration (PreToolUse + UserPromptExpansion gate enforcement, exit 2 blocks)
 │   └── scripts/
 │       └── check-prerequisites.sh   # Gate enforcement script
 └── templates/
@@ -67,13 +67,17 @@ transmute-framework/
 ## How to Add a New Stage
 
 1. Create a skill directory: `skills/<stage-name>/SKILL.md`
-2. Add frontmatter with `name`, `description`, and `version`
+2. Add frontmatter with `name`, `description`, `effort`, and `metadata.version` (`version` is not a supported top-level skill key)
 3. Add the stage to the mapping table in `commands/cast.md`
 4. Add prerequisite checks in `hooks/scripts/check-prerequisites.sh`
 5. Add the stage row to `agents/transmute-pipeline.md` Stage Skills Map
 6. If the stage has complex instructions, add a `references/` subdirectory
 
-A stage also appears in the templates, README tables, and version metadata. See the full eight-place checklist in [docs/plugin-architecture.md](docs/plugin-architecture.md#the-consistency-invariant) before opening the PR.
+A stage also appears in the templates, README tables, and version metadata. See the full eight-place checklist in [docs/plugin-architecture.md](docs/plugin-architecture.md#the-consistency-invariant) before opening the PR, then run `scripts/conformance.sh` — it checks every stage against those places and exercises the gate hook with fixtures; `--live` also loads the plugin and checks command routing.
+
+## Promoting rules from projects
+
+Generated projects accumulate `.claude/rules/*.md` lessons during Stages 5B and 6R. Stage 9 exports the ones that are stack-level rather than project-specific to `plancasting/_rules-export.md` in that project. When you have such a file from a real run: open a PR that adds each rule to the matching `templates/rules-templates/_*-template.md` (with `[BRACKETED]` placeholders for anything stack-specific), cite the project and stage in the PR body, and keep the rule count per template at or under 15. This is how the framework learns from the products it builds; without it every project rediscovers the same pitfalls.
 
 ## How to Modify an Existing Stage
 
@@ -85,7 +89,7 @@ A stage also appears in the templates, README tables, and version metadata. See 
 ## File Conventions
 
 - **Paths**: Project artifacts use `./plancasting/` prefix. Code output dirs (`src/`, `docs/`, `seed/`) stay at project root
-- **Plugin variables**: Use `${CLAUDE_SKILL_ROOT}` for skill-internal paths, `${CLAUDE_PLUGIN_ROOT}` for plugin-root paths
+- **Plugin variables**: Use `${CLAUDE_SKILL_DIR}` for skill-internal paths, `${CLAUDE_PLUGIN_ROOT}` for plugin-root paths
 - **Skill names**: Short names without prefix (e.g., `brd`, not `transmute-brd`)
 
 ## Testing
@@ -118,6 +122,6 @@ When filing a bug report, include:
 
 ## Code Style
 
-- Markdown files use `---` frontmatter delimiters
+- Markdown files use `---` frontmatter delimiters; `.claude/rules/` templates scope with `paths:` (not `globs:`); skill-internal paths use `${CLAUDE_SKILL_DIR}` (`${CLAUDE_SKILL_ROOT}` is not a Claude Code variable); command arguments are 0-based (`$0` first)
 - YAML values with colons must be quoted
 - Prefer explicit instructions over implicit assumptions in skill prompts

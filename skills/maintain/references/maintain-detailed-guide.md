@@ -7,7 +7,7 @@ You are a senior DevOps engineer acting as the TEAM LEAD for a multi-agent depen
 
 **Stage Sequence**: ... → 7D (User Guide) → 8 (Feedback Loop) / **9 (this stage)** — run both sequentially, never concurrently (per CLAUDE.md notation). Run on a recurring cadence (monthly or quarterly) post-launch, or on trigger when vulnerability scanners report critical issues.
 
-**CRITICAL prerequisite — Stage 8/9 mutual exclusion**: Before proceeding, verify that Stage 8 (Feedback Loop) is NOT currently in progress. Pre-flight check: Verify no Stage 8 branch is active: `git branch | grep 'feedback/' && echo 'WARNING: Stage 8 branch exists — complete and merge Stage 8 before starting Stage 9'`. Check: (a) `git branch | grep 'feedback/batch'` — if a branch exists and is not yet merged, Stage 8 may still be in progress. (b) If Stage 8 is in progress, STOP — do not run Stage 9 until Stage 8 is committed and merged. Both stages modify `package.json`, lock files, and source code; concurrent execution causes merge conflicts and silent overwrites.
+**CRITICAL prerequisite — Stage 8/9 mutual exclusion**: Before proceeding, verify that Stage 8 (Feedback Loop) is not currently in progress. Pre-flight check: Verify no Stage 8 branch is active: `git branch | grep 'feedback/' && echo 'WARNING: Stage 8 branch exists — complete and merge Stage 8 before starting Stage 9'`. Check: (a) `git branch | grep 'feedback/batch'` — if a branch exists and is not yet merged, Stage 8 may still be in progress. (b) If Stage 8 is in progress, STOP — do not run Stage 9 until Stage 8 is committed and merged. Both stages modify `package.json`, lock files, and source code; concurrent execution causes merge conflicts and silent overwrites.
 
 ## Context
 
@@ -39,18 +39,18 @@ Always read `CLAUDE.md` and `plancasting/tech-stack.md` for your project's actua
 Based on observed maintenance outcomes:
 
 1. **Peer dependency conflicts**: Package A requires React 18, Package B requires React 19. AVOID force-resolving with `--legacy-peer-deps` — find compatible versions first. If absolutely necessary as a temporary measure, document the rationale (see Critical Rule #2). **Resolution flowchart**: (1) Do the conflicting versions overlap? → update dependent packages to the higher version. (2) Can one be downgraded? → downgrade the less-critical package. (3) Is a substitute package available? → switch packages. (4) Last resort: document the conflict, add `--legacy-peer-deps` with rationale, and flag for next maintenance cycle.
-2. **Lock file regeneration**: Deleting the lock file to resolve conflicts creates unpredictable transitive dependency changes. NEVER delete the lock file. See Lock File Strategy section below for details.
-3. **Type definition mismatches**: `@types/react` version incompatible with actual `react` version. ALWAYS update type definitions alongside their runtime packages.
+2. **Lock file regeneration**: Deleting the lock file to resolve conflicts creates unpredictable transitive dependency changes. never delete the lock file. See Lock File Strategy section below for details.
+3. **Type definition mismatches**: `@types/react` version incompatible with actual `react` version. always update type definitions alongside their runtime packages.
 4. **PostCSS/Tailwind breakage**: CSS toolchain is fragile across versions (especially Tailwind v4). Test styling thoroughly after CSS-related updates.
 5. **Backend framework SDK updates**: Your backend SDK may evolve rapidly (e.g., Convex SDK updates may require schema migration, function signature changes, or re-running code generation like `bunx convex codegen`).
-6. **Build-only breakage**: Tests pass but production build fails due to tree-shaking or bundler incompatibilities. ALWAYS run `build` after major updates, not just `test`.
+6. **Build-only breakage**: Tests pass but production build fails due to tree-shaking or bundler incompatibilities. always run `build` after major updates, not just `test`.
 7. **Node.js/Bun version requirements**: New dependency versions may require newer runtime. Check engine requirements.
 8. **Environment variable changes**: Auth library or payment SDK updates may require new or renamed environment variables.
 9. **Playwright browser binary mismatch**: After updating Playwright, run `bunx playwright install --with-deps` before running E2E tests.
 
 ### Lock File Strategy
-- NEVER delete the lock file to resolve conflicts. Lock file deletion creates unpredictable transitive dependency changes. Instead: (1) identify which package causes the conflict, (2) downgrade or upgrade that specific package to find a compatible version, (3) run your package manager's install command to update the lock file. For `bun.lockb` (binary format): the file cannot be manually edited — regenerate it by running `bun install` after resolving the conflict in `package.json`. For `package-lock.json` or `pnpm-lock.yaml` (text formats): resolve the conflicting entries directly in the file, then reinstall. Only as an absolute last resort (after all resolution strategies exhausted), delete the lock file, run a fresh install, and document this action in the report — flag for architecture review in the next Stage 9.
-- **Package manager differences**: For Bun (`bun.lockb`): binary file, regenerated by `bun install` — do NOT attempt manual edits. For npm (`package-lock.json`): text-based, can resolve conflicts manually. For pnpm (`pnpm-lock.yaml`): text-based, less fragile than npm — if conflicts arise: (1) identify the conflicting package from the YAML structure, (2) run `pnpm install --force` to regenerate the entire lock file from `package.json`, or (3) delete only the conflicting package's resolution block and re-run `pnpm install`. If the lock file changes on a second `pnpm install` (non-deterministic resolution), the issue is likely a git-based dependency or floating range — escalate. Always use the project's configured package manager (see `plancasting/tech-stack.md`) to regenerate lock files after dependency changes.
+- never delete the lock file to resolve conflicts. Lock file deletion creates unpredictable transitive dependency changes. Instead: (1) identify which package causes the conflict, (2) downgrade or upgrade that specific package to find a compatible version, (3) run your package manager's install command to update the lock file. For `bun.lockb` (binary format): the file cannot be manually edited — regenerate it by running `bun install` after resolving the conflict in `package.json`. For `package-lock.json` or `pnpm-lock.yaml` (text formats): resolve the conflicting entries directly in the file, then reinstall. Only as an absolute last resort (after all resolution strategies exhausted), delete the lock file, run a fresh install, and document this action in the report — flag for architecture review in the next Stage 9.
+- **Package manager differences**: For Bun (`bun.lockb`): binary file, regenerated by `bun install` — do not attempt manual edits. For npm (`package-lock.json`): text-based, can resolve conflicts manually. For pnpm (`pnpm-lock.yaml`): text-based, less fragile than npm — if conflicts arise: (1) identify the conflicting package from the YAML structure, (2) run `pnpm install --force` to regenerate the entire lock file from `package.json`, or (3) delete only the conflicting package's resolution block and re-run `pnpm install`. If the lock file changes on a second `pnpm install` (non-deterministic resolution), the issue is likely a git-based dependency or floating range — escalate. Always use the project's configured package manager (see `plancasting/tech-stack.md`) to regenerate lock files after dependency changes.
 - After each successful update batch, commit the updated lock file
 - For `bun.lockb` (binary format): the file cannot be diffed directly; verify by running `bun install` and checking that no unexpected changes occur
 - If lock file conflicts arise, resolve by removing only the conflicting package and re-installing
@@ -82,9 +82,9 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 **Prerequisites**: Read `CLAUDE.md` Part 2 "Commands" section to identify the project's package manager and command aliases. If CLAUDE.md Part 2 'Commands' section is empty or incomplete, infer the package manager from lock files: `bun.lockb` → bun, `package-lock.json` → npm, `pnpm-lock.yaml` → pnpm. Log the inferred package manager in the report. All existing tests must pass (verified in step 4 below) — or pre-existing known failures must be documented (see step 4 for nuance on distinguishing new regressions from pre-existing failures).
 
-**Note**: Stage 9 does not require 7V PASS — it can update dependencies at any point after Stage 5. However, if the product is deployed, re-run 7V after deploying updated dependencies. Stage 9 must NOT run concurrently with Stage 8. If `./plancasting/_audits/implementation-completeness/report.md` exists, read it for context on known implementation gaps that may affect dependency compatibility.
+**Note**: Stage 9 does not require 7V PASS — it can update dependencies at any point after Stage 5. However, if the product is deployed, re-run 7V after deploying updated dependencies. Stage 9 must not run concurrently with Stage 8. If `./plancasting/_audits/implementation-completeness/report.md` exists, read it for context on known implementation gaps that may affect dependency compatibility.
 
-**Branch safety**: Create a dedicated branch with a unique name (e.g., `chore/dependency-update-YYYY-MM-DD-HHMMSS`, or use `git checkout -b chore/dependency-update-$(date +%Y-%m-%d-%H%M%S)` to generate it automatically — the HMS suffix prevents collisions if Stage 9 is re-run the same day) before starting updates. Do NOT commit directly to the main branch. After all verifications pass, merge the maintenance branch into main: `git checkout main && git merge chore/dependency-update-YYYY-MM-DD-HHMMSS`. If the merge fails due to lock file conflicts, rebase the maintenance branch on main (`git checkout chore/dependency-update-YYYY-MM-DD-HHMMSS && git rebase main`), run `bun install` (or your package manager's install command) to regenerate the lock file, re-run the full test suite (`bun run typecheck && bun run lint && bun run test && bun run test:e2e && bun run build`), and retry the merge.
+**Branch safety**: Create a dedicated branch with a unique name (e.g., `chore/dependency-update-YYYY-MM-DD-HHMMSS`, or use `git checkout -b chore/dependency-update-$(date +%Y-%m-%d-%H%M%S)` to generate it automatically — the HMS suffix prevents collisions if Stage 9 is re-run the same day) before starting updates. Do not commit directly to the main branch. After all verifications pass, merge the maintenance branch into main: `git checkout main && git merge chore/dependency-update-YYYY-MM-DD-HHMMSS`. If the merge fails due to lock file conflicts, rebase the maintenance branch on main (`git checkout chore/dependency-update-YYYY-MM-DD-HHMMSS && git rebase main`), run `bun install` (or your package manager's install command) to regenerate the lock file, re-run the full test suite (`bun run typecheck && bun run lint && bun run test && bun run test:e2e && bun run build`), and retry the merge.
 
 1. Read `./CLAUDE.md` and `./plancasting/tech-stack.md`.
    If a prior Stage 9 report exists (check `./plancasting/_maintenance/` for prior `report-*.md` files), read the 'Deferred Updates' section. Re-attempt deferred major version updates if the surrounding ecosystem has stabilized since the last run.
@@ -119,7 +119,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
    If no outdated dependencies are found and no security vulnerabilities exist, skip Phases 2–4 and generate a brief all-clear report to `./plancasting/_maintenance/report-$(date +%Y-%m-%d-%H%M%S).md`. Stage 9 completes with PASS gate.
 
 6. Categorize updates:
-   - **Security patches**: MUST update. Sub-classify by CVSS severity if available: CRITICAL (9–10) = patch immediately, can trigger emergency Stage 9 outside normal cadence; HIGH (7–8) = patch within 24–48 hours; MEDIUM (4–6) = patch in current Stage 9 run; LOW (0–3) = patch in next planned run. Process CRITICAL patches in a dedicated fast-tracked batch before other updates.
+   - **Security patches**: must update. Sub-classify by CVSS severity if available: CRITICAL (9–10) = patch immediately, can trigger emergency Stage 9 outside normal cadence; HIGH (7–8) = patch within 24–48 hours; MEDIUM (4–6) = patch in current Stage 9 run; LOW (0–3) = patch in next planned run. Process CRITICAL patches in a dedicated fast-tracked batch before other updates.
    - **Patch versions** (x.y.Z): Low risk, usually safe — BUT verify the changelog first (rare case: a patch may revert a prior patch's change)
    - **Minor versions** (x.Y.z): Medium risk, may add features or deprecations
    - **Major versions** (X.y.z): High risk, likely breaking changes
@@ -135,7 +135,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Maintenance Teammates
 
-Spawn the following 3 teammates SEQUENTIALLY (not in parallel). Each depends on the prior teammate's completion. **Rationale**: Security patches (Teammate 1) may change public APIs that affect minor version compatibility; minor version updates (Teammate 2) must land before major version upgrades (Teammate 3) to avoid cascading conflicts. Do NOT parallelize without explicit operator override.
+Spawn the following 3 teammates SEQUENTIALLY (not in parallel). Each depends on the prior teammate's completion. **Rationale**: Security patches (Teammate 1) may change public APIs that affect minor version compatibility; minor version updates (Teammate 2) must land before major version upgrades (Teammate 3) to avoid cascading conflicts. Do not parallelize without explicit operator override.
 
 #### Teammate 1: "security-and-patch-updater"
 **Scope**: Security patches and patch version updates (lowest risk)
@@ -181,7 +181,7 @@ When done, message the lead with: patches applied, vulnerabilities resolved, any
 #### Teammate 2: "minor-version-updater"
 **Scope**: Minor version updates
 
-**Blocked by**: Teammate 1 completion (apply low-risk updates first). **Enforcement**: The lead MUST NOT spawn Teammate 2 until Teammate 1 sends a completion message.
+**Blocked by**: Teammate 1 completion (apply low-risk updates first). **Enforcement**: The lead must not spawn Teammate 2 until Teammate 1 sends a completion message.
 
 ~~~
 You are applying minor version updates.
@@ -196,7 +196,7 @@ Your tasks:
    - Run `bun install` (or equivalent per CLAUDE.md).
 
 2. ENVIRONMENT VARIABLE CHANGES: Check changelogs for new or renamed env vars required by updated packages. Update `.env.local.example` with new variable names and notify the lead. If a variable was simply renamed (not a new credential), update `.env.local` with the mapped value. For genuinely NEW credentials, add a placeholder to `.env.local.example` (and a temporary value to `.env.local` for local development) and flag in your report for the operator to supply the actual value. Note that deployment environments (e.g., Vercel) may also need updating.
-   NEVER commit `.env.local` to git — it contains secrets. Only commit `.env.local.example` with placeholder values.
+   never commit `.env.local` to git — it contains secrets. Only commit `.env.local.example` with placeholder values.
 
 3. HANDLE DEPRECATIONS:
    - If the update introduces deprecation warnings, update the codebase to use the new API.
@@ -223,7 +223,7 @@ When done, message the lead with: minor updates applied, deprecations resolved, 
 #### Teammate 3: "major-version-updater"
 **Scope**: Major version updates
 
-**Blocked by**: Teammate 2 completion (apply medium-risk updates before high-risk). **Enforcement**: The lead MUST NOT spawn Teammate 3 until Teammate 2 sends a completion message.
+**Blocked by**: Teammate 2 completion (apply medium-risk updates before high-risk). **Enforcement**: The lead must not spawn Teammate 3 until Teammate 2 sends a completion message.
 
 ~~~
 You are applying major version updates.
@@ -267,9 +267,9 @@ Your tasks:
      - **Drizzle**: No codegen required, but review `schema.ts` for type compatibility with new SDK
      - **Supabase**: Check `supabase/migrations/` for schema migration needs. Run `supabase gen types typescript` if using type generation
      - **Firebase Admin SDK**: No codegen required, but verify function signatures match new SDK version
-   - **Codegen is a GATE**: After `bun install` (or your package manager's install command), IMMEDIATELY run backend codegen (e.g., `bunx convex codegen`) BEFORE tests. Generated files and runtime SDK versions must stay in sync — the test suite WILL fail with type mismatches if codegen is not run first. If codegen fails, revert the update and mark as deferred. Do NOT skip this step or defer it.
+   - **Codegen is a GATE**: After `bun install` (or your package manager's install command), IMMEDIATELY run backend codegen (e.g., `bunx convex codegen`) BEFORE tests. Generated files and runtime SDK versions must stay in sync — the test suite WILL fail with type mismatches if codegen is not run first. If codegen fails, revert the update and mark as deferred. Do not skip this step or defer it.
    - If codegen fails after the SDK update: (1) revert the SDK update (`git checkout -- package.json [lock-file]` and reinstall), (2) document the failure and root cause in the report, (3) defer that SDK update to the next maintenance cycle or dedicate a task to fixing codegen compatibility. Include "Backend SDK code generation: PASS/FAIL" in the final report.
-   - Revert with: `git checkout -- package.json <lock-file> && <package-manager> install` where `<lock-file>` is `bun.lockb` (Bun), `package-lock.json` (npm), or `pnpm-lock.yaml` (pnpm), and `<package-manager>` is `bun`, `npm`, or `pnpm` — match your project's package manager from `plancasting/tech-stack.md`. After reverting package.json and reinstalling, also restore generated files that may have changed during the failed update: re-run backend codegen (e.g., `bunx convex codegen`, `npx prisma generate`, `supabase gen types typescript`) to regenerate files matching the reverted SDK version. If generated files still differ from pre-update state, run `git checkout -- <generated-files-dir>/` (e.g., `git checkout -- convex/_generated/`). Verify with `git diff` — no generated files should show changes. Do NOT attempt to fix codegen manually — defer this update to the next maintenance cycle with a detailed error report.
+   - Revert with: `git checkout -- package.json <lock-file> && <package-manager> install` where `<lock-file>` is `bun.lockb` (Bun), `package-lock.json` (npm), or `pnpm-lock.yaml` (pnpm), and `<package-manager>` is `bun`, `npm`, or `pnpm` — match your project's package manager from `plancasting/tech-stack.md`. After reverting package.json and reinstalling, also restore generated files that may have changed during the failed update: re-run backend codegen (e.g., `bunx convex codegen`, `npx prisma generate`, `supabase gen types typescript`) to regenerate files matching the reverted SDK version. If generated files still differ from pre-update state, run `git checkout -- <generated-files-dir>/` (e.g., `git checkout -- convex/_generated/`). Verify with `git diff` — no generated files should show changes. Do not attempt to fix codegen manually — defer this update to the next maintenance cycle with a detailed error report.
    - Verify all function signatures still match (validators, return types).
    - Check if backend config files need updates.
    - Run backend tests (e.g., `bun run test -- convex/__tests__/` for Convex).
@@ -302,7 +302,7 @@ After all teammates complete:
    ~~~
    Compare results to the baseline. All tests must pass.
 
-2. **Runtime version check**: If any major version updates changed `engines` requirements in `package.json`, verify the current Node.js/Bun version satisfies them (`node --version`, `bun --version`). If Stage 7D requires Node.js v20.17.0+ for Mintlify CLI, ensure that constraint is still met. If the runtime does NOT satisfy the new requirement: (a) update your local runtime (via `nvm`, Homebrew, or official installer), (b) update your CI/CD pipeline runtime requirements, (c) if the new requirement is a blocker, revert the dependency update and document as a deferred major update, (d) re-run the full test suite after runtime update.
+2. **Runtime version check**: If any major version updates changed `engines` requirements in `package.json`, verify the current Node.js/Bun version satisfies them (`node --version`, `bun --version`). If Stage 7D requires Node.js v20.17.0+ for Mintlify CLI, ensure that constraint is still met. If the runtime does not satisfy the new requirement: (a) update your local runtime (via `nvm`, Homebrew, or official installer), (b) update your CI/CD pipeline runtime requirements, (c) if the new requirement is a blocker, revert the dependency update and document as a deferred major update, (d) re-run the full test suite after runtime update.
 
 3. Re-run the security audit using the same tool selected in Phase 1 step 5. Compare against the baseline.
 
@@ -319,7 +319,7 @@ After all teammates complete:
    - **Rules Hygiene**: Rules reviewed, removed, updated, unchanged (populated in step 9)
    - **Next Maintenance Date**: Suggested date for next run. Default: 30 days from today. Accelerate if: (1) critical security vulnerabilities exist, (2) breaking changes were deferred, (3) major framework updates are pending (e.g., Next.js major, Node.js major)
 
-5. **Stage 6V/7D re-run decision**: After all tests pass, check if any major updates touched React, Next.js, Tailwind, CSS framework, or UI component library. If yes, add to the report: 'Recommend re-running Stage 6V (MODE: critical) to validate UI rendering with updated dependencies.' Do NOT auto-run these stages.
+5. **Stage 6V/7D re-run decision**: After all tests pass, check if any major updates touched React, Next.js, Tailwind, CSS framework, or UI component library. If yes, add to the report: 'Recommend re-running Stage 6V (MODE: critical) to validate UI rendering with updated dependencies.' Do not auto-run these stages.
 
 6. Update `plancasting/tech-stack.md` with new version numbers for core dependencies (runtime, framework, backend SDK, auth library, UI component library, CSS framework). Match the version format already used in `plancasting/tech-stack.md`. Use exact version numbers (e.g., `18.3.1`, not `^18.3.1`) in `tech-stack.md` — this file documents the actual installed versions, not package.json range constraints.
 
@@ -331,10 +331,11 @@ After all teammates complete:
    - Read all rule files in `.claude/rules/`.
    - Remove rules referencing deprecated APIs, removed packages, renamed functions, or non-existent file paths.
    - Remove stale candidates from `plancasting/_rules-candidates.md` (pending 2+ maintenance cycles without promotion). Also remove candidates older than 60 calendar days that have not been promoted, edited, or re-triggered (whichever staleness condition is met first — see `_rules-candidates.md` Staleness Policy).
+   - **Promotion to the framework**: rules in `.claude/rules/` that were added by Stage 5B or 6R (Source: 5B / 6R), survived at least one maintenance cycle, and contain no project-specific names (no feature IDs, no file paths unique to this project, no product nouns) are stack-level lessons the framework itself should carry. Append each one to `plancasting/_rules-export.md` with its source stage, the stack it applies to (from `tech-stack.md`), and the date; the framework maintainer reviews that file when syncing the canonical `rules-templates/` (see the plugin's CONTRIBUTING.md § Promoting rules from projects). Do not remove the rule from the project.
    - After removing or adding rules, update the "Path-Scoped Rules" table in CLAUDE.md Part 2 with current rule counts per file. Count the actual bullet-point rules in each `.claude/rules/*.md` file and update the Rule Count column. If the table still contains `[N]` placeholders from the template, replace them with actual counts.
    - Log all changes in the maintenance report under a "Rules Hygiene" section.
 
-10. **Complete the Gate Decision** (see below) BEFORE merging. Do NOT merge until the Gate Decision confirms PASS or CONDITIONAL PASS. If FAIL, do NOT merge — fix issues on the maintenance branch first. If PASS or CONDITIONAL PASS, merge the maintenance branch into main: `git checkout main && git merge chore/dependency-update-YYYY-MM-DD-HHMMSS`. Use the actual branch name created in Phase 1. Or create a pull request if your workflow requires review.
+10. **Complete the Gate Decision** (see below) BEFORE merging. Do not merge until the Gate Decision confirms PASS or CONDITIONAL PASS. If FAIL, do not merge — fix issues on the maintenance branch first. If PASS or CONDITIONAL PASS, merge the maintenance branch into main: `git checkout main && git merge chore/dependency-update-YYYY-MM-DD-HHMMSS`. Use the actual branch name created in Phase 1. Or create a pull request if your workflow requires review.
 
 11. Output summary: total updates applied, vulnerabilities resolved, tests pass/fail, deferred updates, rules hygiene (removed/updated count).
 
@@ -347,7 +348,7 @@ After all teammates complete:
 **Post-gate routing**:
 - **PASS**: Merge maintenance branch to main. If the report recommends a 6V re-run (UI dependency changes), run 6V (MODE: critical) before deploying via Stage 7. Deploy via Stage 7, then verify with Stage 7V. Schedule next maintenance cycle.
 - **CONDITIONAL PASS**: Merge and deploy resolved updates via Stage 7 → 7V. Schedule follow-up Stage 9 for deferred major updates. Document deferred items in the report.
-- **FAIL**: Do NOT merge to main. Fix failing tests or revert problematic updates (`git checkout -- package.json [lock-file] && [package-manager] install`, then re-run backend codegen if applicable — see Teammate 3 revert procedure). Re-run Phase 4 verification. If unfixable, revert all updates and document in report.
+- **FAIL**: Do not merge to main. Fix failing tests or revert problematic updates (`git checkout -- package.json [lock-file] && [package-manager] install`, then re-run backend codegen if applicable — see Teammate 3 revert procedure). Re-run Phase 4 verification. If unfixable, revert all updates and document in report.
 
 ### Phase 5: Shutdown
 
@@ -393,15 +394,15 @@ During each Stage 9 run, review `.claude/rules/` for stale rules. See CLAUDE.md 
 
 ## Critical Rules
 
-1. NEVER update all dependencies at once — always batch by risk tier (security → patch → minor → major).
+1. never update all dependencies at once — always batch by risk tier (security → patch → minor → major).
 2. AVOID using `--legacy-peer-deps` to force-resolve peer dependency conflicts. If absolutely necessary, document the rationale and the affected packages. Acceptable rationale: (1) peer dependency conflict is between packages you don't control, (2) the conflicting versions have been tested together without issues, and (3) no CVE exists for the mismatched versions. Unacceptable: "it fixes the install error" without further analysis. Note: `--legacy-peer-deps` is npm-specific. For Bun: peer dependency conflicts are handled differently (Bun installs peers automatically). For pnpm: use `--strict-peer-dependencies=false` if needed.
-3. NEVER delete the lock file to resolve conflicts — it creates unpredictable transitive changes.
-4. ALWAYS commit to the maintenance branch after each successful tier so rollback is granular.
-5. ALWAYS run `build` (not just `test`) after major updates — some breakage only manifests at build time.
-6. ALWAYS run `lint` after updates — new ESLint plugin versions may introduce new rules.
+3. never delete the lock file to resolve conflicts — it creates unpredictable transitive changes.
+4. always commit to the maintenance branch after each successful tier so rollback is granular.
+5. always run `build` (not just `test`) after major updates — some breakage only manifests at build time.
+6. always run `lint` after updates — new ESLint plugin versions may introduce new rules.
 7. If a backend SDK update is included, re-run your backend's code generation step unconditionally (e.g., `bunx convex codegen` for Convex) and verify generated files are updated.
 8. For major framework updates (e.g., Next.js, Convex), re-run Stage 6V to verify visual/functional correctness (at minimum, document this recommendation in the report).
 9. After deploying dependency updates, run Stage 7V (Production Smoke Verification).
 10. Co-dependent packages must be updated together (e.g., `react` + `@types/react`, all `@radix-ui/*` packages).
-11. NEVER run Stage 9 and Stage 8 concurrently. Complete one and commit before starting the other. Both stages modify `package.json`, lock files, and potentially source code — concurrent runs create merge conflicts and inconsistent state.
+11. never run Stage 9 and Stage 8 concurrently. Complete one and commit before starting the other. Both stages modify `package.json`, lock files, and potentially source code — concurrent runs create merge conflicts and inconsistent state.
 ````

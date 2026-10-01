@@ -7,7 +7,7 @@ You are a senior software engineer acting as the TEAM LEAD for a multi-agent run
 
 ## Why This Stage Exists
 
-Stage 6V finds runtime issues but explicitly does NOT fix them. Without a dedicated remediation stage, the workflow is:
+Stage 6V finds runtime issues but explicitly does not fix them. Without a dedicated remediation stage, the workflow is:
 1. 6V finds 30 issues → writes report
 2. Human reads report → manually prioritizes and fixes each one
 3. Human re-runs 6V → finds 5 regressions from the manual fixes
@@ -33,7 +33,7 @@ After each cycle completes, update the `## Cycle Tracking` section: increment `C
 > ⚠️ **Category System Note**: This stage uses the same **fixability-based** category system as Stage 6V — DIFFERENT from Stage 5B's size-based categories:
 > - **5B Categories** (size-based): A = small, B = moderate, C = large/architectural
 > - **6V/6R Categories** (fixability-based): 6V-A = auto-fixable, 6V-B = semi-auto fixable, 6V-C = needs human judgment
-> **IMPORTANT**: ALWAYS use the `6V-` prefix in reports (e.g., `6V-A`, `6V-B`, `6V-C`). Never output bare "Category A" — it will be confused with Stage 5B's size-based categories. Classify based on FIXABILITY, not severity.
+> always use the `6V-` prefix in reports (e.g., `6V-A`, `6V-B`, `6V-C`). Never output bare "Category A" — it will be confused with Stage 5B's size-based categories. Classify based on FIXABILITY, not severity.
 >
 > Example: A 5B Category C issue ('entire payment flow unbuilt') might contain a 6V-A sub-issue ('wrong import path'). A 5B Category A issue ('form label missing') might be 6V-C if fixing requires a design decision.
 
@@ -70,7 +70,7 @@ These issues have a likely correct fix based on established codebase patterns, b
 | Cross-feature navigation passes wrong params | Fix the params based on the receiving page's expected query/path params | Verify the receiving page handles the params correctly |
 
 ### 6V-C: Needs Human Judgment (Cannot Auto-Fix)
-These issues require business logic decisions, design choices, or architectural changes that the agent should NOT make.
+These issues require business logic decisions, design choices, or architectural changes that the agent should not make.
 
 | Issue Type | Why It Needs Human | What To Document |
 |---|---|---|
@@ -86,17 +86,17 @@ These issues require business logic decisions, design choices, or architectural 
 
 Based on observed remediation outcomes:
 
-1. **Fix cascade**: Fixing issue A introduces issue B. ALWAYS run typecheck + affected tests after each fix batch. If a fix introduces new failures, revert it and move to 6V-C.
-2. **Middleware whitelist over-broadening**: Adding `/api/*` to PUBLIC_ROUTES instead of specific endpoints. ALWAYS add the EXACT route, not a wildcard that opens unintended endpoints. To determine which routes should be public, read `./plancasting/prd/10-system-architecture.md` and check which endpoints the PRD designates as unauthenticated.
-3. **Stub page without proper auth**: Creating a stub `page.tsx` for an authenticated route but forgetting to add auth guards. ALWAYS follow the project's auth pattern (`requireAuth`, `requireOrgMembership`, etc.).
-4. **Fix the symptom, not the cause**: Button doesn't work → wire it to a function. But the function was deliberately removed because the feature isn't ready. ALWAYS check git blame/context before wiring.
-   Before wiring a button to a function: (1) Verify the function exists in the codebase (`grep -r 'function handleX'` or check imports). (2) If the function doesn't exist, check git blame — if it was deleted recently with a message like 'defer feature', this may be intentional. (3) If truly missing, escalate to 6V-C. Do NOT create stub functions.
-5. **Mobile nav divergence**: Adding missing links to mobile nav without matching the desktop nav's conditional logic (e.g., admin-only links). ALWAYS copy the EXACT same visibility conditions.
+1. **Fix cascade**: Fixing issue A introduces issue B. always run typecheck + affected tests after each fix batch. If a fix introduces new failures, revert it and move to 6V-C.
+2. **Middleware whitelist over-broadening**: Adding `/api/*` to PUBLIC_ROUTES instead of specific endpoints. always add the EXACT route, not a wildcard that opens unintended endpoints. To determine which routes should be public, read `./plancasting/prd/10-system-architecture.md` and check which endpoints the PRD designates as unauthenticated.
+3. **Stub page without proper auth**: Creating a stub `page.tsx` for an authenticated route but forgetting to add auth guards. always follow the project's auth pattern (`requireAuth`, `requireOrgMembership`, etc.).
+4. **Fix the symptom, not the cause**: Button doesn't work → wire it to a function. But the function was deliberately removed because the feature isn't ready. always check git blame/context before wiring.
+   Before wiring a button to a function: (1) Verify the function exists in the codebase (`grep -r 'function handleX'` or check imports). (2) If the function doesn't exist, check git blame — if it was deleted recently with a message like 'defer feature', this may be intentional. (3) If truly missing, escalate to 6V-C. Do not create stub functions.
+5. **Mobile nav divergence**: Adding missing links to mobile nav without matching the desktop nav's conditional logic (e.g., admin-only links). always copy the EXACT same visibility conditions.
 6. **i18n key added in English only**: Project supports multiple languages but agent adds key only to `en.json`. Check `plancasting/tech-stack.md` for supported languages.
-7. **Category mis-classification**: Agent classifies a 6V-C issue (needs human judgment) as 6V-A (auto-fixable) and applies an incorrect fix — e.g., wiring a button to a similar-sounding but wrong mutation, or creating a stub page for a feature that needs real business logic. ALWAYS verify the fix target actually exists and matches the intended behavior before applying.
-8. **Fix introduces routing regression**: Auto-fixing one page's routing breaks another page's deep links or navigation. ALWAYS run the full re-verification after fixes, not just the fixed pages.
+7. **Category mis-classification**: Agent classifies a 6V-C issue (needs human judgment) as 6V-A (auto-fixable) and applies an incorrect fix — e.g., wiring a button to a similar-sounding but wrong mutation, or creating a stub page for a feature that needs real business logic. always verify the fix target actually exists and matches the intended behavior before applying.
+8. **Fix introduces routing regression**: Auto-fixing one page's routing breaks another page's deep links or navigation. always run the full re-verification after fixes, not just the fixed pages.
 9. **Re-verification scope too narrow**: Agent re-runs only the specific failed scenarios instead of running the full regression — misses side effects of fixes on other features. After applying fixes, verify ALL previously-passing scenarios still pass, not just the ones that were broken.
-10. **Placeholder pages without states**: Agent creates stub pages for missing routes but skips loading/error/empty states, violating CLAUDE.md component rules. Every new page MUST include all required states (default, loading, empty, error, disabled) per CLAUDE.md Part 1 § 'Component Rules (All Frameworks)'.
+10. **Placeholder pages without states**: Agent creates stub pages for missing routes but skips loading/error/empty states, violating CLAUDE.md component rules. Every new page must include all required states (default, loading, empty, error, disabled) per CLAUDE.md Part 1 § 'Component Rules (All Frameworks)'.
 
 ## Input
 
@@ -119,7 +119,7 @@ The examples in this prompt use Next.js + Convex as the reference architecture. 
 - `src/messages/en.json` → your i18n translation files
 - `useQuery`/`useMutation` → your data fetching patterns
 - `convex/` → your backend directory
-- Auto-generated directories: `convex/_generated/` → adapt to your backend's equivalent (e.g., `prisma/generated/`, `.next/`). NEVER modify files in auto-generated directories.
+- Auto-generated directories: `convex/_generated/` → adapt to your backend's equivalent (e.g., `prisma/generated/`, `.next/`). never modify files in auto-generated directories.
 Always read `CLAUDE.md` and `plancasting/tech-stack.md` for your project's actual commands and conventions.
 
 **Package Manager**: Commands in this prompt use `bun run` as the default. Replace with your project's package manager as specified in `CLAUDE.md` (e.g., `npm run`, `pnpm run`, `yarn`).
@@ -134,7 +134,7 @@ Always read `CLAUDE.md` and `plancasting/tech-stack.md` for your project's actua
    - **6V PASS**: Skip 6R entirely — proceed to 6P (Visual Polish). No failures to remediate.
    - **6V CONDITIONAL PASS with 6V-A/B issues**: Proceed with 6R — this is the intended use case.
    - **6V CONDITIONAL PASS with ONLY 6V-C issues** (no 6V-A/B): SKIP 6R ENTIRELY — these issues require human judgment that 6R cannot provide. Proceed directly to Stage 6P or 6P-R and document unresolved 6V-C items for post-launch or architectural review.
-   - **6V FAIL** (critical functional issues — e.g., auth completely broken, core pages won't load, data layer non-functional): STOP — fix critical issues manually first, then re-run 6V. Do NOT run 6R on a FAIL report — these issues need architectural fixes, not mechanical remediation.
+   - **6V FAIL** (critical functional issues — e.g., auth completely broken, core pages won't load, data layer non-functional): STOP — fix critical issues manually first, then re-run 6V. Do not run 6R on a FAIL report — these issues need architectural fixes, not mechanical remediation.
 
 4. **Dev server port available**: Before running this stage, verify the dev server port is available (`lsof -i :3000` — if busy, `kill -9 <PID>`). This prompt starts the dev server internally.
 
@@ -172,7 +172,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
    **Quick triage rule**: If the fix requires editing only one file, adding a route, or wiring an existing function → 6V-A (auto-fix). If the fix requires understanding multiple files or pattern-matching across the codebase → 6V-B (semi-auto). If the fix requires implementing new business logic, making architecture decisions, or weighing trade-offs → 6V-C (needs human). A fix is "mechanical" (auto-fixable by 6R) if: (a) the root cause is clear from the 6V report, (b) the fix is ≤ 10 lines of code, (c) the fix does not require API contract changes or new dependencies, and (d) the fix has a known pattern (e.g., missing null check, incorrect selector, wrong import path). All other fixes are non-mechanical and go to the human-review TODO list.
 
-   **Early exit**: If triage results in zero 6V-A and zero 6V-B issues (all are 6V-C): Generate the Phase 4 report noting 'No mechanical fixes applied — all issues are 6V-C requiring human judgment.' Do NOT spawn Teammates 1-3. Proceed directly to Stage 6P/6P-R decision.
+   **Early exit**: If triage results in zero 6V-A and zero 6V-B issues (all are 6V-C): Generate the Phase 4 report noting 'No mechanical fixes applied — all issues are 6V-C requiring human judgment.' Do not spawn Teammates 1-3. Proceed directly to Stage 6P/6P-R decision.
 
    In this early-exit case, the Phase 4 report should state: 'All issues are 6V-C (human judgment required). No mechanical fixes were applied. 6V-C issues are documented below for operator review.' Include the full 6V-C issue list from the 6V report in the Phase 4 report, then skip the remediation results sections.
 
@@ -238,7 +238,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Remediation Teammates
 
-Spawn up to 3 teammates based on the triage. If all issues fall in one domain, use fewer teammates. Teammates work in parallel on SEPARATE file sets (no overlapping files). **File assignment enforcement**: Before spawning, create an explicit file→teammate mapping in `./plancasting/_audits/runtime-remediation/plan.md`. Include each teammate's assigned files in their spawn prompt. If two issues touch the same file, assign BOTH to the same teammate. Teammates MUST NOT modify files outside their assignment.
+Spawn up to 3 teammates based on the triage. If all issues fall in one domain, use fewer teammates. Teammates work in parallel on SEPARATE file sets (no overlapping files). **File assignment enforcement**: Before spawning, create an explicit file→teammate mapping in `./plancasting/_audits/runtime-remediation/plan.md`. Include each teammate's assigned files in their spawn prompt. If two issues touch the same file, assign BOTH to the same teammate. Teammates must not modify files outside their assignment.
 
 #### Teammate 1: "navigation-routing-fixer"
 **Scope**: All navigation, routing, middleware, and link-related fixes (6V-A and 6V-B only — 6V-C issues are left for human)
@@ -249,15 +249,15 @@ You are fixing navigation and routing issues identified by Stage 6V verification
 Read CLAUDE.md first. Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write all findings in that language. Then read ./plancasting/_audits/runtime-remediation/plan.md for your assigned issues.
 
 ## Safety Rules
-1. NEVER modify business logic — only fix routing, navigation, and middleware configuration.
-2. ALWAYS use the project's existing patterns — read existing middleware, layout, and nav components to understand conventions before making changes.
+1. never modify business logic — only fix routing, navigation, and middleware configuration.
+2. always use the project's existing patterns — read existing middleware, layout, and nav components to understand conventions before making changes.
 3. After EACH fix, run `bun run typecheck` to verify no type errors were introduced.
 4. If a fix requires creating a new page file, follow the project's page conventions:
    - Include proper auth guards if the route is protected
    - Include loading.tsx if the page fetches data
    - Include error handling
    - Use the project's layout structure
-5. For middleware changes, add ONLY the specific route — NEVER use wildcards like `/api/*` unless the existing code already uses that pattern.
+5. For middleware changes, add ONLY the specific route — never use wildcards like `/api/*` unless the existing code already uses that pattern.
 
 ## Your Tasks
 
@@ -266,8 +266,8 @@ For each issue assigned to you in the plan:
 ### Fix: Public Route Blocked by Middleware
 - Read `src/middleware.ts` (or equivalent)
 - Add the blocked route to the `PUBLIC_ROUTES` or `PUBLIC_ROUTE_PREFIXES` array
-- Verify the route is NOT a protected route that should require auth (check PRD)
-- **Verification**: After the fix, clear all auth state to test as unauthenticated: use `browser_close` to fully end the browser session (this clears cookies, localStorage, and sessionStorage), then `browser_navigate` to start a fresh session. Note: using `browser_evaluate` with `localStorage.clear(); sessionStorage.clear()` only clears storage — it does NOT clear cookies, so cookie-based auth will persist. Prefer `browser_close` for a complete clean slate. Navigate to the route unauthenticated and verify it returns 200 with correct content — do NOT verify while logged in, as that hides middleware issues
+- Verify the route is not a protected route that should require auth (check PRD)
+- **Verification**: After the fix, clear all auth state to test as unauthenticated: use `browser_close` to fully end the browser session (this clears cookies, localStorage, and sessionStorage), then `browser_navigate` to start a fresh session. Note: using `browser_evaluate` with `localStorage.clear(); sessionStorage.clear()` only clears storage — it does not clear cookies, so cookie-based auth will persist. Prefer `browser_close` for a complete clean slate. Navigate to the route unauthenticated and verify it returns 200 with correct content — do not verify while logged in, as that hides middleware issues
 
 ### Fix: Dead Link in Shared Layout
 - Determine if the link target SHOULD exist (check PRD/route constants):
@@ -294,7 +294,7 @@ For each issue assigned to you in the plan:
 ### Fix: Auth Redirect Issues
 - For "redirect after login doesn't return": check the login page/callback handler for `redirect` query param handling
 - For "redirect loops": check for circular redirect conditions in middleware and auth callbacks
-- NEVER disable auth checks to fix a redirect — find the root cause
+- never disable auth checks to fix a redirect — find the root cause
 
 ### Output
 For each fix:
@@ -319,8 +319,8 @@ You are fixing UI component issues identified by Stage 6V verification.
 Read CLAUDE.md first. Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write all findings in that language. Then read ./plancasting/_audits/runtime-remediation/plan.md for your assigned issues.
 
 ## Safety Rules
-1. NEVER change component visual design or layout — only fix functional issues (broken handlers, missing states, missing translations).
-2. ALWAYS read the existing component source BEFORE modifying it — understand its current structure, hooks, and patterns.
+1. never change component visual design or layout — only fix functional issues (broken handlers, missing states, missing translations).
+2. always read the existing component source BEFORE modifying it — understand its current structure, hooks, and patterns.
 3. After EACH fix, run `bun run typecheck` to verify no type errors were introduced.
 4. For button handler fixes: verify the mutation/action being wired actually EXISTS in the backend before connecting it.
 5. For i18n fixes: add keys to ALL language files the project supports, not just the primary language.
@@ -393,11 +393,11 @@ You are fixing backend and data-layer issues identified by Stage 6V verification
 Read CLAUDE.md first. Check `./plancasting/tech-stack.md` for the `Session Language` setting. Write all findings in that language. Then read ./plancasting/_audits/runtime-remediation/plan.md for your assigned issues.
 
 ## Safety Rules
-1. NEVER create new backend functions that implement business logic — only fix wiring, type mismatches, and configuration issues.
-2. NEVER modify database schema — schema changes require migration planning.
+1. never create new backend functions that implement business logic — only fix wiring, type mismatches, and configuration issues.
+2. never modify database schema — schema changes require migration planning.
 3. After EACH fix, run `bun run typecheck` and `bun run test` to verify nothing broke.
-4. For auth fixes: NEVER weaken auth checks. You may ADD routes to public whitelists or FIX broken auth token handling, but never remove auth guards.
-5. For Convex (or equivalent BaaS): NEVER edit auto-generated files (e.g., `convex/_generated/`).
+4. For auth fixes: never weaken auth checks. You may ADD routes to public whitelists or FIX broken auth token handling, but never remove auth guards.
+5. For Convex (or equivalent BaaS): never edit auto-generated files (e.g., `convex/_generated/`).
 
 ## Your Tasks
 
@@ -478,12 +478,12 @@ After all teammates complete:
    Verify the fixed issues using Playwright browser tools for spot-checks (dev server is already running from step 2):
    - For each 6V-A fix: use `browser_navigate` to go to the affected page/route, `browser_take_screenshot` to capture evidence, and `browser_console_messages` to check for console errors — verify the issue is resolved
    - For each 6V-B fix: use Playwright browser tools (`browser_navigate`, `browser_click`, `browser_fill_form`, `browser_take_screenshot`, `browser_console_messages`) to execute the specific acceptance criterion that was failing
-   - **For public route / middleware fixes**: Use `browser_close` to end the current session, then `browser_navigate` to start a fresh session with no stored state. Do NOT verify while logged in — that hides the exact class of bug being fixed.
+   - **For public route / middleware fixes**: Use `browser_close` to end the current session, then `browser_navigate` to start a fresh session with no stored state. Do not verify while logged in — that hides the exact class of bug being fixed.
    - **For auth redirect fixes**: Test both unauthenticated→protected (should redirect to login) and authenticated→login (should redirect to dashboard)
    - Use Playwright browser tools (`browser_navigate`, `browser_click`, `browser_take_screenshot`) for quick spot-checks — you don't need to regenerate full test files
    - If a fix didn't resolve the issue: revert the fix and move to 6V-C
 
-   **Quick regression sweep** (see Known Failure Pattern #9): After all targeted spot-checks, verify no previously-working pages broke due to the fixes. Scope: navigate ALL Feature Scenario entry pages (first screen of each FS-NNN from the 6V scenario matrix at `./plancasting/_audits/visual-verification/feature-scenario-matrix.md`) — not just 5-10 pages. For each page: `browser_navigate` → wait for data (up to 10s) → `browser_take_screenshot` → `browser_console_messages`. Flag as regression if: page returns non-200, shows blank/error state, or has new console errors not present in the original 6V baseline. This does NOT require re-running full 6V scenarios — just page-load + console checks on all entry points.
+   **Quick regression sweep** (see Known Failure Pattern #9): After all targeted spot-checks, verify no previously-working pages broke due to the fixes. Scope: navigate ALL Feature Scenario entry pages (first screen of each FS-NNN from the 6V scenario matrix at `./plancasting/_audits/visual-verification/feature-scenario-matrix.md`) — not just 5-10 pages. For each page: `browser_navigate` → wait for data (up to 10s) → `browser_take_screenshot` → `browser_console_messages`. Flag as regression if: page returns non-200, shows blank/error state, or has new console errors not present in the original 6V baseline. This does not require re-running full 6V scenarios — just page-load + console checks on all entry points.
 
    **Regression detection**: After the regression sweep, compare any NEW failures against the original 6V report:
    - If NEW failures are regressions from 6R's fixes: revert the specific fix that caused the regression, move that issue to 6V-C, and document ("Fix reverted — caused regression on [page]")
@@ -491,9 +491,9 @@ After all teammates complete:
    - This run still counts toward the 3-run limit even if fixes were reverted
 
 4. **Update 6V report** (CRITICAL — prevents stale gate decision):
-   Append a remediation section to `./plancasting/_audits/visual-verification/report.md` (the appended section below). Additionally, record the **remediation outcome** in 6R's own report (`./plancasting/_audits/runtime-remediation/report.md` § "Remediation Outcome") — this is the authoritative post-remediation gate. Do NOT edit the original `## Gate Decision` section of the 6V report (it preserves the pre-remediation state for audit trail). Instead, add a `## Post-Remediation Gate Update` section AFTER the appended remediation results in the 6V report, stating the updated gate: if all 6V-A/B issues are resolved AND zero 6V-C remain → `PASS`; if 6V-C issues remain → `CONDITIONAL PASS (6V-C remaining — requires human judgment)`. Downstream stages (6P, 6H) read the `## Post-Remediation Gate Update` section if it exists, otherwise the original `## Gate Decision`.
+   Append a remediation section to `./plancasting/_audits/visual-verification/report.md` (the appended section below). Additionally, record the **remediation outcome** in 6R's own report (`./plancasting/_audits/runtime-remediation/report.md` § "Remediation Outcome") — this is the authoritative post-remediation gate. Do not edit the original `## Gate Decision` section of the 6V report (it preserves the pre-remediation state for audit trail). Instead, add a `## Post-Remediation Gate Update` section AFTER the appended remediation results in the 6V report, stating the updated gate: if all 6V-A/B issues are resolved AND zero 6V-C remain → `PASS`; if 6V-C issues remain → `CONDITIONAL PASS (6V-C remaining — requires human judgment)`. Downstream stages (6P, 6H) read the `## Post-Remediation Gate Update` section if it exists, otherwise the original `## Gate Decision`.
    ~~~markdown
-   ---
+   ----
    ## Stage 6R Remediation Results (appended [date])
 
    ### Auto-Fixed (6V-A)
@@ -530,7 +530,7 @@ After all teammates complete:
    ~~~markdown
    # Runtime Remediation Report — Stage 6R
 
-   > **Category System**: This report uses the 6V/6R fixability-based categories (6V-A = auto-fix, 6V-B = semi-auto, 6V-C = needs human), which are DIFFERENT from Stage 5B's size-based categories. Do NOT compare 6V-C with 5B Category C — they measure different things.
+   > **Category System**: This report uses the 6V/6R fixability-based categories (6V-A = auto-fix, 6V-B = semi-auto, 6V-C = needs human), which are DIFFERENT from Stage 5B's size-based categories. Do not compare 6V-C with 5B Category C — they measure different things.
 
    ## Summary
    - **Remediation Date**: [date]
@@ -633,7 +633,7 @@ After all teammates complete:
 
 If a runtime issue requires architectural changes beyond this stage's scope (e.g., redesigning a data flow, adding server-side rendering, restructuring auth):
 1. Document it in `./plancasting/_audits/runtime-remediation/category-c-escalations.md` with: issue description, root cause, estimated fix effort, and recommended approach.
-2. Mark as **'REQUIRES HUMAN DECISION'** — do NOT attempt architectural redesigns during remediation.
+2. Mark as **'REQUIRES HUMAN DECISION'** — do not attempt architectural redesigns during remediation.
 3. Include in the final report under a '6V-C Escalations' section.
 4. Continue fixing remaining 6V-A/B issues — do not block the cycle on one decision.
 
@@ -641,23 +641,23 @@ If a runtime issue requires architectural changes beyond this stage's scope (e.g
 
 1. Request shutdown for all teammates.
 2. Verify all file modifications are saved and committed.
-3. **Update cycle counter**: After all verification is complete and changes are committed, update the `## Cycle Tracking` section in `./plancasting/_audits/runtime-remediation/report.md`. Set `Completed cycles:` to the current cycle number (1, 2, or 3). This ensures the counter tracks COMPLETED runs (not started runs), so a crash mid-run does not consume a run attempt. Update ONLY after Phase 3 verification fully completes (even if issues remain unresolved). If Phase 3 is interrupted before completion, do NOT update — the incomplete run does not count toward the 3-cycle maximum. The 6R report MUST include a `Last completed phase:` field alongside `Completed cycles:` so crash recovery can determine where to resume without cross-referencing the 6V report. **Crash recovery**: On session start, check two files: (1) the 6R report (`./plancasting/_audits/runtime-remediation/report.md`) for the `Completed cycles: N` counter and `Last completed phase:` field in `## Cycle Tracking`, and (2) the 6V report (`./plancasting/_audits/visual-verification/report.md`) for the `## Stage 6R Remediation Results` subsections (each delimited by `---`) that 6R appends after each cycle. If `Completed cycles: N` in the 6R report but fewer than N remediation sections exist in the 6V report, the most recent cycle was interrupted — resume from Phase 2 without incrementing the counter. If exactly N sections exist, the cycle completed successfully. The cycle counter only reflects fully completed cycles.
+3. **Update cycle counter**: After all verification is complete and changes are committed, update the `## Cycle Tracking` section in `./plancasting/_audits/runtime-remediation/report.md`. Set `Completed cycles:` to the current cycle number (1, 2, or 3). This ensures the counter tracks COMPLETED runs (not started runs), so a crash mid-run does not consume a run attempt. Update ONLY after Phase 3 verification fully completes (even if issues remain unresolved). If Phase 3 is interrupted before completion, do not update — the incomplete run does not count toward the 3-cycle maximum. The 6R report must include a `Last completed phase:` field alongside `Completed cycles:` so crash recovery can determine where to resume without cross-referencing the 6V report. **Crash recovery**: On session start, check two files: (1) the 6R report (`./plancasting/_audits/runtime-remediation/report.md`) for the `Completed cycles: N` counter and `Last completed phase:` field in `## Cycle Tracking`, and (2) the 6V report (`./plancasting/_audits/visual-verification/report.md`) for the `## Stage 6R Remediation Results` subsections (each delimited by `---`) that 6R appends after each cycle. If `Completed cycles: N` in the 6R report but fewer than N remediation sections exist in the 6V report, the most recent cycle was interrupted — resume from Phase 2 without incrementing the counter. If exactly N sections exist, the cycle completed successfully. The cycle counter only reflects fully completed cycles.
 4. Leave the dev server running if Stage 6P will be run immediately in the same session. If following the recommended practice of using a fresh Claude Code session for each stage, the dev server will terminate when this session ends — Stage 6P handles startup independently.
 
 ## Critical Rules
 
-1. NEVER make business logic decisions. If a fix requires choosing between multiple valid approaches, move to 6V-C. The agent's job is to fix MECHANICAL issues, not to make product decisions.
-2. NEVER weaken security. Adding a route to PUBLIC_ROUTES is fine if the PRD says it's public. Removing auth guards is NEVER acceptable.
-3. ALWAYS preserve the test baseline. If any test that passed before remediation now fails, the fix that caused it MUST be reverted. Zero test regressions is non-negotiable.
-4. ALWAYS typecheck after EVERY fix, not just at the end. Catching type errors early prevents cascade failures.
-5. ALWAYS verify fixes in the running app, not just in code. A fix that passes typecheck can still fail at runtime (e.g., added the import but the function still throws).
-6. NEVER modify auto-generated files (`convex/_generated/`, `.next/`, `node_modules/`, etc.).
-7. NEVER create database schema changes. Schema changes require migration planning and cannot be done safely in an automated remediation cycle.
+1. never make business logic decisions. If a fix requires choosing between multiple valid approaches, move to 6V-C. The agent's job is to fix MECHANICAL issues, not to make product decisions.
+2. never weaken security. Adding a route to PUBLIC_ROUTES is fine if the PRD says it's public. Removing auth guards is never acceptable.
+3. always preserve the test baseline. If any test that passed before remediation now fails, the fix that caused it must be reverted. Zero test regressions is non-negotiable.
+4. always typecheck after EVERY fix, not just at the end. Catching type errors early prevents cascade failures.
+5. always verify fixes in the running app, not just in code. A fix that passes typecheck can still fail at runtime (e.g., added the import but the function still throws).
+6. never modify auto-generated files (`convex/_generated/`, `.next/`, `node_modules/`, etc.).
+7. never create database schema changes. Schema changes require migration planning and cannot be done safely in an automated remediation cycle.
 8. If a 6V-B fix introduces a NEW failure of EQUAL or HIGHER severity than the issue it fixed, revert it and move to 6V-C. If the new failure is trivially fixable (e.g., lint warning, unused import), fix it inline rather than reverting.
-9. ALWAYS read the component/function context before fixing. Don't just pattern-match on the error — understand WHY the error exists. A "missing handler" might be deliberately removed because the feature is deferred.
-10. ALWAYS check git blame or commit history when a fix seems too simple. If code was recently deleted or changed, there may be a reason.
+9. always read the component/function context before fixing. Don't just pattern-match on the error — understand WHY the error exists. A "missing handler" might be deliberately removed because the feature is deferred.
+10. always check git blame or commit history when a fix seems too simple. If code was recently deleted or changed, there may be a reason.
 11. For i18n fixes: check ALL language files, not just the primary language.
-12. For stub pages created to fix dead links: ALWAYS include proper auth guards, loading states, and error handling — never create a bare `page.tsx` that exports just a `<div>`.
+12. For stub pages created to fix dead links: always include proper auth guards, loading states, and error handling — never create a bare `page.tsx` that exports just a `<div>`.
 13. If the 6V report has zero failures, output a clean report and exit. Don't invent issues to fix.
 14. Maximum 3 remediation runs. The counter in the report's `## Cycle Tracking` section tracks completed runs:
     - After 1st 6R session completes → `Completed cycles: 1`
@@ -665,5 +665,5 @@ If a runtime issue requires architectural changes beyond this stage's scope (e.g
     - After 3rd 6R session completes → `Completed cycles: 3`
     - When you read `Completed cycles: 3` at the start of a new session → STOP immediately. All remaining issues become 6V-C requiring manual intervention. Output `./plancasting/_audits/runtime-remediation/remaining-blockers.md` listing all unresolved issues. The operator must resolve 6V-C issues, re-run 6V, then re-run 6R (which will see a fresh report with no cycle tracking).
     Note: This 3-cycle maximum applies to a single 6R run. Across the entire pipeline, there is also a maximum of 2 outer 6V→6R cycles (see execution-guide.md § "Gate Decision Outcomes (Universal)"). If the second outer 6V→6R cycle still has issues, document as known limitations and proceed to 6P/6P-R.
-15. ALWAYS respect the project's file organization conventions. New files go in the correct directory following the established patterns (read `CLAUDE.md` and existing code structure).
+15. always respect the project's file organization conventions. New files go in the correct directory following the established patterns (read `CLAUDE.md` and existing code structure).
 ````

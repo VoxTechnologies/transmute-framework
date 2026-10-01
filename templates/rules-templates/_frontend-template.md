@@ -1,11 +1,11 @@
 ---
 description: Template for frontend rules — component states, hook data mapping, responsive behavior, design tokens, and image optimization for the frontend framework.
-globs: ["[FRONTEND_DIR]/**"]
+paths: ["[FRONTEND_DIR]/**"]
 ---
 
 # Frontend Rules
 
-> **This is a template.** Stage 3 (Scaffold Generation) reads this template and generates `.claude/rules/frontend.md` with actual project values. Stage 3 MUST: (1) replace ALL `[BRACKETED]` placeholder markers (e.g., `[FRONTEND_DIR]`, `[FRONTEND_FRAMEWORK]`, `[LOADING_COMPONENT]`, `[ERROR_COMPONENT]`, `[EMPTY_COMPONENT]`, `[IMAGE_COMPONENT]`, `[DESIGN_TOKENS_PATH]`, `[ICON_LIBRARY]`, `[ICON_REGISTRY_PATH]`, `[BREAKPOINT_CONFIG]`, `[MOBILE_BREAKPOINT]`, `[CLIENT_ENV_PREFIX]`), (2) replace each `<!-- TODO -->` HTML comment with a proper `<!-- Source: Stage 3 | Evidence: [ref] | Confidence: HIGH -->` annotation (`// TODO:` inside code blocks are code example placeholders — replace those with actual code patterns), (3) update the globs in frontmatter with actual paths, and (4) remove ALL other HTML comments (e.g., `<!-- Stage 3: ... -->`, `<!-- Note: ... -->`) — these are template-only guidance that must not appear in generated rule files. Stage 4 confirms replacements are complete. After Stage 3 renders this template, verify no placeholders remain: `grep -nE '\[[A-Z_]+\]' .claude/rules/frontend.md` — the output should be empty (all `[BRACKETED]` markers replaced with actual values). **Rule count limit**: The rendered output must contain ≤ 15 rules (individual bullet-point directives). This template contains conditional sections — omit sections that don't apply to the selected tech stack. If the rendered output exceeds 15 rules after omitting inapplicable sections, split into two rule files (e.g., `frontend.md` → `frontend.md` + `frontend-ssr.md`) and update CLAUDE.md Part 2 § Path-Scoped Rules accordingly. Do not edit this template directly — edit the generated `.claude/rules/frontend.md` instead.
+> **This is a template.** Stage 3 (Scaffold Generation) reads this template and generates `.claude/rules/frontend.md` with actual project values. Stage 3 must: (1) replace ALL `[BRACKETED]` placeholder markers (e.g., `[FRONTEND_DIR]`, `[FRONTEND_FRAMEWORK]`, `[LOADING_COMPONENT]`, `[ERROR_COMPONENT]`, `[EMPTY_COMPONENT]`, `[IMAGE_COMPONENT]`, `[DESIGN_TOKENS_PATH]`, `[ICON_LIBRARY]`, `[ICON_REGISTRY_PATH]`, `[BREAKPOINT_CONFIG]`, `[MOBILE_BREAKPOINT]`, `[CLIENT_ENV_PREFIX]`), (2) replace each `<!-- TODO -->` HTML comment with a proper `<!-- Source: Stage 3 | Evidence: [ref] | Confidence: HIGH -->` annotation (`// TODO:` inside code blocks are code example placeholders — replace those with actual code patterns), (3) update the `paths` patterns in frontmatter with actual project paths, and (4) remove ALL other HTML comments (e.g., `<!-- Stage 3: ... -->`, `<!-- Note: ... -->`) — these are template-only guidance that must not appear in generated rule files. Stage 4 confirms replacements are complete. After Stage 3 renders this template, verify no placeholders remain: `grep -nE '\[[A-Z_]+\]' .claude/rules/frontend.md` — the output should be empty (all `[BRACKETED]` markers replaced with actual values). **Rule count limit**: The rendered output must contain ≤ 15 rules (individual bullet-point directives). This template contains conditional sections — omit sections that don't apply to the selected tech stack. If the rendered output exceeds 15 rules after omitting inapplicable sections, split into two rule files (e.g., `frontend.md` → `frontend.md` + `frontend-ssr.md`) and update CLAUDE.md Part 2 § Path-Scoped Rules accordingly. Do not edit this template directly — edit the generated `.claude/rules/frontend.md` instead.
 
 ## Component States
 
@@ -76,7 +76,7 @@ globs: ["[FRONTEND_DIR]/**"]
 
 ## SSR/Hydration
 
-<!-- Stage 3: If framework uses SSR, replace this section with actual SSR patterns. If framework does NOT use SSR, DELETE this entire section. -->
+<!-- Stage 3: If framework uses SSR, replace this section with actual SSR patterns. If framework does not use SSR, DELETE this entire section. -->
 <!-- TODO: Stage 3 — replace with actual SSR hydration pattern for [FRONTEND_FRAMEWORK]. Source: tech-stack.md | Confidence: HIGH -->
 
 - Avoid referencing `window`, `document`, or `localStorage` during server-side rendering — use dynamic imports with `ssr: false` or `useEffect`/`onMounted` for browser-only code.
@@ -84,7 +84,7 @@ globs: ["[FRONTEND_DIR]/**"]
 
 ## Error Boundaries
 
-<!-- Stage 3: If the frontend framework is NOT React-based, adapt this section to the framework's error handling mechanism (e.g., Vue errorHandler, Svelte error boundary, Angular ErrorHandler). -->
+<!-- Stage 3: If the frontend framework is not React-based, adapt this section to the framework's error handling mechanism (e.g., Vue errorHandler, Svelte error boundary, Angular ErrorHandler). -->
 <!-- TODO: Stage 3 — replace with actual error boundary pattern for [FRONTEND_FRAMEWORK]. Source: tech-stack.md | Confidence: HIGH -->
 
 - Place error boundaries at route segment level (one per page/layout) and around independently-failing widgets — do not wrap the entire app in a single boundary.

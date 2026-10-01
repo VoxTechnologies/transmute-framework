@@ -19,6 +19,7 @@ description: |
   <commentary>Common fix — the scaffold inventory rule prevents duplication patterns.</commentary>
   </example>
 model: inherit
+effort: high
 color: magenta
 tools:
   - Read
@@ -46,7 +47,7 @@ Check `plancasting/tech-stack.md` for the `Session Language` setting. Write user
 3. **Read the feature brief** — Your spawn prompt includes or references a `plancasting/_briefs/FEAT-XXX.md` file.
 4. **Read PRD sections** — Check `plancasting/prd/08-screen-specifications.md` for UI specs, `plancasting/prd/09-interaction-patterns.md` for UX patterns, `plancasting/prd/06-user-flows.md` for flows.
 5. **Check design tokens** — Read the design token file path defined in CLAUDE.md Part 2 Technology Stack table or `plancasting/tech-stack.md` for the project's design direction.
-6. **Check scaffold files** — Read `plancasting/_scaffold-manifest.md`. EXTEND existing scaffold files. NEVER create duplicates.
+6. **Check scaffold files** — Read `plancasting/_scaffold-manifest.md`. EXTEND existing scaffold files. never create duplicates.
 7. **Check `plancasting/tech-stack.md`** — Use the specified UI component library and CSS framework.
 
 ## Implementation Rules
@@ -55,11 +56,12 @@ Check `plancasting/tech-stack.md` for the `Session Language` setting. Write user
 2. **ARIA attributes**: All interactive elements must have proper ARIA labels.
 3. **Keyboard navigation**: All interactive elements must be keyboard-accessible.
 4. **No inline styles**: Use the project's CSS framework (Tailwind, etc.).
-5. **Design direction**: Follow the project's design token file consistently. No generic AI aesthetics.
+5. **Design direction**: Follow the project's design token file consistently, and avoid the named default patterns in sub-rule (g) below.
 6. **Props interfaces**: Explicitly typed and exported.
 7. **Traceability header**: Every file includes `@prd` and `@brd` references.
 8. **Scaffold inventory**: List ALL existing scaffold files BEFORE writing code. Extend them.
-9. **API Contract Alignment**: Frontend types must match ACTUAL backend response shape, not database schema. Create SEPARATE types for projections. NEVER use `as unknown as Type`.
+10. **Targeted edits**: When implementing inside an existing scaffold file, edit the region that changes rather than rewriting the whole file — a whole-file rewrite costs output tokens and silently drops structure (imports, exported props, placeholders for sibling features) that other teammates depend on.
+9. **API Contract Alignment**: Frontend types must match ACTUAL backend response shape, not database schema. Create SEPARATE types for projections. never use `as unknown as Type`.
 
 ## Design Guidelines
 
@@ -83,21 +85,21 @@ a. Use ONLY the design tokens from the project's design-tokens file — never ha
 b. Apply micro-interactions: CSS transitions on hover/focus states, smooth state changes, subtle entrance animations.
 c. Skeleton screens for loading states must match the actual component layout and use the design system's colors.
 d. Empty states must be visually composed with illustrations or icons — not just text saying "No items found."
-e. Icons: ALWAYS use the project's icon library (specified in `plancasting/tech-stack.md` "Icon library" field). NEVER use inline SVG `<path>` elements for standard UI icons. The only acceptable inline SVGs are: product logos, brand marks, or custom illustrations.
+e. Icons: always use the project's icon library (specified in `plancasting/tech-stack.md` "Icon library" field). never use inline SVG `<path>` elements for standard UI icons. The only acceptable inline SVGs are: product logos, brand marks, or custom illustrations.
 f. Error states must be styled and helpful — not raw error strings.
-g. NEVER produce generic AI-looking UI: no default Tailwind colors, no Inter/Roboto fonts, no uniform card grids, no purple-on-white gradients.
+g. Avoid the named default patterns from CLAUDE.md § Design & Visual Identity (cream backgrounds as the default surface, italic accent words in headlines, "01 / 02 / 03" section labels, monospace labels on non-technical products, pill-shaped buttons and badges everywhere, purple-on-white gradients, three-column icon-title-copy card grids, identical radii and shadows on every surface, default Tailwind colors, Inter/Roboto chosen by default). Naming the pattern is what makes the rule effective; "no generic AI look" on its own only swaps one default for another.
 h. Every component must be visually consistent with already-completed features. Check existing components for patterns.
 
 ## I18n
 
-Check `plancasting/tech-stack.md` for i18n configuration. If i18n is enabled: use translation keys (`t('key')`) for all user-facing strings — never hardcode display text directly. Add all new keys to the messages file(s). If i18n is NOT enabled: use hardcoded strings but follow naming and formatting conventions from the design tokens.
+Check `plancasting/tech-stack.md` for i18n configuration. If i18n is enabled: use translation keys (`t('key')`) for all user-facing strings — never hardcode display text directly. Add all new keys to the messages file(s). If i18n is not enabled: use hardcoded strings but follow naming and formatting conventions from the design tokens.
 
 ## Feature Flags
 
 If this feature has ops/experiment/permission flags:
 - Wrap appropriate components with `<FeatureGate>`.
 - Implement fallback UIs.
-- Remember: these are NOT release gates. The feature ships enabled. Flags are for kill switches, A/B tests, or role gating.
+- Remember: these are not release gates. The feature ships enabled. Flags are for kill switches, A/B tests, or role gating.
 
 ## Output
 
@@ -106,6 +108,7 @@ If this feature has ops/experiment/permission flags:
 - Custom hooks
 - Type definitions
 - Update `plancasting/_progress.md` with frontend status for the feature
+- A completion message for the lead. Before reporting, audit each claim against a tool result from this session: only report work you can point to evidence for (a file you wrote, a command you ran and its output). If something is not yet verified, say so explicitly rather than reporting it as done.
 
 ## Anti-Stub Quality Gates
 
@@ -146,8 +149,8 @@ g. **CSS/Tailwind purge gaps**: Dynamic classes like `bg-${color}-500` get purge
 
 ## Known Failure Patterns
 
-- **Frontend stubs surviving quality gates** — ALWAYS apply anti-stub quality gates even when fatigued
-- **Missing empty/error states** — Quality gate MUST catch before marking feature done
+- **Frontend stubs surviving quality gates** — apply the anti-stub quality gates to the last feature in the queue with the same rigor as the first
+- **Missing empty/error states** — Quality gate must catch before marking feature done
 - **Inline page code instead of component composition** — Check scaffold files first
 - **Orphan scaffold components** — Implement existing scaffold, don't create duplicates
 - **Context window degradation** — End session if quality gate fails 2x in sequence; resume fresh

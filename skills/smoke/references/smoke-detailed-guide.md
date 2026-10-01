@@ -57,10 +57,10 @@ Always read `CLAUDE.md` and `plancasting/tech-stack.md` for your project's actua
 ## Input
 
 - **Production URL**: The live application URL (e.g., `https://yourapp.com`). **Prerequisite**: Verify deployment (Stage 7) is complete — the production URL must be accessible before starting 7V. Check with `curl -sI <production-url> | head -1` (expect HTTP 200 or 301/302). If the URL is unreachable, STOP and verify deployment status.
-- **Scenario Generation Guide**: `./plancasting/transmute-framework/feature_scenario_generation.md` — MUST READ if it exists. If not found, read `prd/02-feature-map-and-prioritization.md` and `prd/06-user-flows.md` to generate smoke scenarios directly. **Generation mode: SMOKE** (P0/P1 features only, happy path Feature Scenarios + one authenticated/unauthenticated Auth Context check per route — no Entity State, Role Permission, or Negative Scenarios. Target: 15 scenarios max. See feature_scenario_generation.md § Step 9 "For 7V (Smoke)" for full filtering rules).
+- **Scenario Generation Guide**: `./plancasting/transmute-framework/feature_scenario_generation.md` — must read if it exists. If not found, read `prd/02-feature-map-and-prioritization.md` and `prd/06-user-flows.md` to generate smoke scenarios directly. **Generation mode: SMOKE** (P0/P1 features only, happy path Feature Scenarios + one authenticated/unauthenticated Auth Context check per route — no Entity State, Role Permission, or Negative Scenarios. Target: 15 scenarios max. See feature_scenario_generation.md § Step 9 "For 7V (Smoke)" for full filtering rules).
   If `./plancasting/transmute-framework/feature_scenario_generation.md` does not exist locally, copy from the Transmute Framework Template directory (the directory where this prompt file originated): `cp /path/to/Transmute\ Framework\ Template/plancasting/transmute-framework/feature_scenario_generation.md ./plancasting/transmute-framework/` (adjust the source path to your Transmute Framework Template location). See execution-guide.md § "Pre-6V Setup" for detailed instructions.
 
-  > **Fallback if feature_scenario_generation.md is unavailable after copy attempt**: Use PRD files directly — read `plancasting/prd/02-feature-map-and-prioritization.md`, `plancasting/prd/04-epics-and-user-stories.md`, and `plancasting/prd/06-user-flows.md` to derive minimal smoke scenarios. Do NOT stop execution; proceed with PRD-derived scenarios.
+  > **Fallback if feature_scenario_generation.md is unavailable after copy attempt**: Use PRD files directly — read `plancasting/prd/02-feature-map-and-prioritization.md`, `plancasting/prd/04-epics-and-user-stories.md`, and `plancasting/prd/06-user-flows.md` to derive minimal smoke scenarios. Do not stop execution; proceed with PRD-derived scenarios.
 - **6V Scenario Matrix** (if exists): `./plancasting/_audits/visual-verification/feature-scenario-matrix.md` — reuse and filter to P0/P1 instead of regenerating. If this file doesn't exist, generate smoke scenarios from scratch using the guide.
 - **Stage 6V Report**: `./plancasting/_audits/visual-verification/report.md` (baseline — what passed in dev)
 - **Stage 6R Report** (if exists): `./plancasting/_audits/runtime-remediation/report.md` (fixes applied — must verify they survived deployment)
@@ -107,11 +107,11 @@ If the session disconnects mid-verification, start a new session and re-paste th
 
 ## Verification Checklist
 
-This stage does NOT use agent teams — it is a single-agent sequential check. This stage should complete in 25–45 minutes (3–5 min scenario generation + 15–25 min core checks + 5–8 min for 6R/6P/navigation verification + 2–5 min performance/integrations). If the application has grown beyond what can be verified in 45 minutes (50+ pages, 10+ integrations — 'pages' = distinct routes in the application's routing config; 'integrations' = external services configured in `.env.local`), consider running a scoped Stage 6V (`critical` mode) against the production URL instead.
+This stage does not use agent teams — it is a single-agent sequential check. This stage should complete in 25–45 minutes (3–5 min scenario generation + 15–25 min core checks + 5–8 min for 6R/6P/navigation verification + 2–5 min performance/integrations). If the application has grown beyond what can be verified in 45 minutes (50+ pages, 10+ integrations — 'pages' = distinct routes in the application's routing config; 'integrations' = external services configured in `.env.local`), consider running a scoped Stage 6V (`critical` mode) against the production URL instead.
 
 **Language**: Check `./plancasting/tech-stack.md` for the `Session Language` setting. Generate the report in the specified language. Code, URLs, and technical identifiers remain in English.
 
-### Check 0. Generate Smoke Scenario Matrix (MUST run FIRST)
+### Check 0. Generate Smoke Scenario Matrix (must run FIRST)
 
 Before any verification, generate a targeted test plan for production smoke testing. This replaces the hardcoded page lists with dynamically generated scenarios based on YOUR project's actual features.
 
@@ -134,7 +134,7 @@ Before any verification, generate a targeted test plan for production smoke test
 
 **If scenario generation fails** (PRD files missing or unreadable): Fall back to the hardcoded minimum flows in the "Critical User Flow Verification" section below (Check 8 of this document — not to be confused with pipeline Stage 8). Note the failure in the report.
 
-This stage generates `./plancasting/_audits/production-smoke/smoke-scenario-matrix.md` — a lighter matrix than 6V's `feature-scenario-matrix.md`. Use only P0/P1 features + Auth Context scenarios. Do NOT use the 6V matrix as-is — filter it to P0/P1 smoke scenarios as described above.
+This stage generates `./plancasting/_audits/production-smoke/smoke-scenario-matrix.md` — a lighter matrix than 6V's `feature-scenario-matrix.md`. Use only P0/P1 features + Auth Context scenarios. Do not use the 6V matrix as-is — filter it to P0/P1 smoke scenarios as described above.
 
 **Save to** `./plancasting/_audits/production-smoke/smoke-scenario-matrix.md`:
 ~~~markdown
@@ -197,7 +197,7 @@ Checklist:
 
 ### Check 2. Environment Variable Spot-Check
 
-**Early AI model validation**: Check all AI model IDs used in code (e.g., `claude-opus-5`, `gpt-4-turbo`) against the provider's documentation. Send a 1-token test request for each model to verify they exist and respond. If any model ID is invalid, flag as CRITICAL — all AI-powered features will fail.
+**Early AI model validation**: Check all AI model IDs used in code (e.g., `claude-opus-5-5`, `gpt-5`) against the provider's documentation. Send a 1-token test request for each model to verify they exist and respond. If any model ID is invalid, flag as CRITICAL — all AI-powered features will fail.
 
 Before testing pages, check for common env var issues:
 - Navigate to the app and view page source or `__NEXT_DATA__` (for Next.js) — check that `NEXT_PUBLIC_*` values are present and not `"undefined"` or empty
@@ -225,7 +225,7 @@ This gives fast, automated coverage of critical pages. **Important**: If any tes
 
 Navigate to EACH of these pages on the production URL and verify they load:
 
-**Public pages** — **CRITICAL**: Use a FRESH browser context (no cookies, no localStorage, no session tokens) for all unauthenticated route testing. Do NOT reuse a context that was previously authenticated. If using MCP browser tools: use `browser_close` to end any existing session, then `browser_navigate` to start fresh. If using Playwright tests: use `browser.newContext()` with no stored state. Do NOT merely "skip login" in the same context where you previously logged in — stale cookies or localStorage tokens may still grant access, masking middleware failures that affect real unauthenticated users.
+**Public pages** — Use a FRESH browser context (no cookies, no localStorage, no session tokens) for all unauthenticated route testing. Do not reuse a context that was previously authenticated. If using MCP browser tools: use `browser_close` to end any existing session, then `browser_navigate` to start fresh. If using Playwright tests: use `browser.newContext()` with no stored state. Do not merely "skip login" in the same context where you previously logged in — stale cookies or localStorage tokens may still grant access, masking middleware failures that affect real unauthenticated users.
 
 - Landing/home page (`/`)
 - Login page (`/login`)
@@ -244,15 +244,15 @@ Navigate to EACH of these pages on the production URL and verify they load:
   2. Response body is the **expected page content** (not an HTML login page served with 200 status — some middleware configs serve the login page with 200 instead of redirecting)
   3. No auth-related console errors (`token undefined`, `session expired`, `unauthorized`)
 - **Also verify protected route redirect**: Navigate to `/dashboard` and `/settings/profile` in the same unauthenticated context — verify they redirect to `/login?redirect=[path]` (not crash, not blank page, not redirect loop)
-  Protected routes MUST redirect to `/login?redirect=[original-path]` (with the redirect query param). If a protected route redirects to `/login` without the redirect param, flag as MEDIUM severity (not critical, but poor UX — user loses their destination after login).
+  Protected routes must redirect to `/login?redirect=[original-path]` (with the redirect query param). If a protected route redirects to `/login` without the redirect param, flag as MEDIUM severity (not critical, but poor UX — user loses their destination after login).
 - If ANY public page redirects to login, this is a **CRITICAL** failure — the auth middleware is blocking public routes in production. Check: edge middleware cache, middleware deployment version, `PUBLIC_ROUTES` array contents in the deployed code. This affects ALL unauthenticated visitors including search engine crawlers and social media link previews.
 
 **Authenticated pages** (log in as test user):
-- **PREREQUISITE — Production test users (MUST complete before proceeding)**:
-  Production test users MUST exist BEFORE running smoke tests. Unlike dev (where `globalSetup.ts` or CLI seeding can create them), production requires pre-provisioned accounts.
+- **PREREQUISITE — Production test users (must complete before proceeding)**:
+  Production test users must exist BEFORE running smoke tests. Unlike dev (where `globalSetup.ts` or CLI seeding can create them), production requires pre-provisioned accounts.
 
   1. **Verify**: Check whether production test users already exist by attempting to log in with credentials from `e2e/constants.ts` (look for a `PRODUCTION_TEST_USERS` section) or from the 7V report of a previous run.
-  2. **If test users do NOT exist, create them** using one of these methods (in order of preference):
+  2. **If test users do not exist, create them** using one of these methods (in order of preference):
      a. Use the auth provider's admin API to create users directly (e.g., WorkOS User Management API, Clerk Backend API)
      b. If the app has a BaaS CLI that can target production (e.g., `bunx convex run --prod auth:signUp`), use it to create users through the same auth flow as the app
      c. Create dedicated smoke test accounts via the app's signup flow on production (use identifiable emails like `smoke-test-starter@[domain]`)
@@ -295,7 +295,7 @@ If Stage 6R was run (`./plancasting/_audits/runtime-remediation/report.md` exist
 | i18n key added | Navigate to the page — verify translated text appears, not raw key string |
 | Broken href fixed | Click the link — verify it navigates to the correct destination |
 
-3. If ANY 6R fix is NOT present in production:
+3. If ANY 6R fix is not present in production:
    - Flag as **CRITICAL** — the deployment doesn't include the remediation
    - Check: deployed commit hash vs. 6R report commit hash
    - Resolution: redeploy from the correct commit that includes 6R fixes
@@ -348,7 +348,7 @@ If visual polish changes are MISSING in production, flag as **MEDIUM** (not CRIT
 
 Test that navigation paths work on production. This catches CSS purge issues (nav links invisible), edge middleware blocking (redirects), and deployment-specific routing failures.
 
-**This is NOT a comprehensive navigation crawl (that's 6V's job). Test only the highest-traffic navigation paths — ~5 minutes max.**
+**This is not a comprehensive navigation crawl (that's 6V's job). Test only the highest-traffic navigation paths — ~5 minutes max.**
 
 #### 7a. Shared Layout Navigation (Desktop)
 While logged in, from the dashboard:
@@ -448,21 +448,22 @@ Check each external service connection:
 - **Payment provider**: Does the billing page load pricing? (No need to complete payment)
 - **Email service**: Trigger a test email if possible (password reset, welcome email)
 - **Analytics**: Verify tracking script loads (check network tab for analytics requests)
-- **Error monitoring**: Verify error monitoring is configured by checking the monitoring service's project settings or API (e.g., Sentry project exists and has the correct DSN). Do NOT trigger deliberate errors in production — they pollute monitoring data and may trigger on-call alerts
+- **Error monitoring**: Verify error monitoring is configured by checking the monitoring service's project settings or API (e.g., Sentry project exists and has the correct DSN). Do not trigger deliberate errors in production — they pollute monitoring data and may trigger on-call alerts
 - **Webhook endpoints**: If webhook URLs are configured (Stripe, auth provider), verify they return 200 for health checks. Check the provider dashboard for recent delivery status if accessible.
 - **Real-time/WebSocket**: If the app uses a real-time backend (Convex, Supabase Realtime, Firebase), verify WebSocket connections establish successfully — check browser console for WebSocket errors and verify live data updates appear.
 
-#### 11.1 AI Model ID Verification (CRITICAL — MUST COMPLETE FIRST)
+#### 11.1 AI Model ID Verification (CRITICAL — must complete FIRST)
 
 Before running general API health checks, explicitly verify AI model IDs used in the codebase:
 1. Search the codebase for all AI model references (replace `[backend-dir]` with your actual backend directory from `plancasting/tech-stack.md`, e.g., `convex/`): `grep -rE 'claude-|gpt-|gemini-' [backend-dir]/ --include='*.ts' --include='*.js' | grep -v node_modules | grep -v test`
 2. For each unique model ID found, send a minimal test request (1-token prompt) to verify the model exists
 3. If any model returns 400 "invalid model" or 404, flag as **CRITICAL** — the model ID is likely hallucinated by a Stage 5 agent
 4. Common hallucinated patterns: wrong date suffixes, non-existent model tiers, outdated model names. Note: Model IDs change over time — always verify against the provider's current model documentation (e.g., console.anthropic.com/docs for Anthropic, platform.openai.com/docs for OpenAI) rather than relying on hardcoded examples.
+5. **Rejected request parameters** (Anthropic): a valid model ID can still fail with 400 if the request uses a shape from an older model generation. Grep the backend for `budget_tokens`, `type: "disabled"`, `output_format`, `tool_choice: { type: "any"`, `tool_choice: { type: "tool"`, `temperature:`, `top_p:`, `top_k:`, and a trailing `role: "assistant"` message built as a prefill. Any match is **CRITICAL**: unit tests mock the client and cannot catch it, and the feature fails on the first real request. Also confirm the code branches on `stop_reason` (including `"refusal"`, which is HTTP 200) before reading `content`.
 
 #### 11.2 External API Health Check (CRITICAL for AI-powered features)
 
-> **Cost warning**: These checks make real API calls against production keys. Use minimal requests (1-token completions, smallest possible payloads) to keep costs negligible. Do NOT run large completions, batch operations, or load tests. Each check should cost fractions of a cent.
+> **Cost warning**: These checks make real API calls against production keys. Use minimal requests (1-token completions, smallest possible payloads) to keep costs negligible. Do not run large completions, batch operations, or load tests. Each check should cost fractions of a cent.
 
 For each action that calls an external API (Anthropic/Claude, Stripe, GitHub, WorkOS, etc.):
 1. Verify the API key env var is set and non-empty in the production environment
@@ -479,8 +480,8 @@ For each action that calls an external API (Anthropic/Claude, Stripe, GitHub, Wo
 - Error handler swallows the response without logging → no server-side visibility into the failure
 
 Concrete verification examples (adapt to your stack):
-- **Anthropic**: `messages.create({ model: "<model-id-from-codebase>", max_tokens: 10, messages: [{ role: "user", content: "Say OK" }] })` — use the actual model ID found in the production code (search for `model:` in backend files). Verify 200 response, not 400 "invalid model"
-- **Stripe**: **IMPORTANT**: Verify the Stripe API key starts with `sk_test_` (test mode). NEVER create charges with a `sk_live_` key during smoke testing. Test-mode API key → `stripe.charges.create({ amount: 100, currency: 'usd', source: 'tok_visa' })` — verify charge succeeds
+- **Anthropic**: `messages.create({ model: "<model-id-from-codebase>", max_tokens: 16, messages: [{ role: "user", content: "Say OK" }] })` — use the actual model ID found in the production code (search for `model:` in backend files). Judge by the HTTP status: 200 = key and model valid; 400 = invalid model ID or a request parameter the model rejects (see Check 11.1 step 5); 401 = bad key. Do not require the text "OK" — on Claude 5 models thinking tokens count toward `max_tokens`, so a tiny budget can return an empty body with `stop_reason: "max_tokens"`. A `stop_reason: "refusal"` is also HTTP 200 and is not a configuration failure
+- **Stripe**: Verify the Stripe API key starts with `sk_test_` (test mode). never create charges with a `sk_live_` key during smoke testing. Test-mode API key → `stripe.charges.create({ amount: 100, currency: 'usd', source: 'tok_visa' })` — verify charge succeeds
 - **Auth provider**: GET user list endpoint with production API key — verify 200, not 401
 
 #### 11.3 OAuth Integration Health Check (CRITICAL for multi-service connections)
@@ -616,16 +617,16 @@ Generate `./plancasting/_audits/production-smoke/report.md`:
 - **CONDITIONAL PASS**: All P0 critical flows pass (happy paths complete), all pages load, but minor non-blocking issues exist in P0/P1 features (e.g., non-critical integration timeout, minor visual discrepancy from 6V baseline). Document issues for post-launch fix. Stage 7D and Stage 8 can proceed.
 - **FAIL**: Any critical flow broken OR pages don't load OR critical navigation failure (invisible/unstyled links) OR external API health check fails — immediate action required (see Rollback Guidance)
 
-Note: Stage 7V uses the universal three-outcome gate system: PASS, CONDITIONAL PASS, FAIL. CONDITIONAL PASS handles minor P1 issues that do not block downstream stages (P2 features are out of 7V's SMOKE scope). **FAIL triggers**: critical infrastructure broken, critical user flows broken, critical navigation invisible/unstyled, external API health checks fail, or 6R fixes missing from deployment. **Does NOT trigger FAIL**: non-critical visual issues (missing 6P enhancements, minor layout differences from dev), non-functional performance metrics below target. Non-critical issues are documented in the report but do NOT affect the gate decision — address them through Stage 8 (Feedback Loop).
+Note: Stage 7V uses the universal three-outcome gate system: PASS, CONDITIONAL PASS, FAIL. CONDITIONAL PASS handles minor P1 issues that do not block downstream stages (P2 features are out of 7V's SMOKE scope). **FAIL triggers**: critical infrastructure broken, critical user flows broken, critical navigation invisible/unstyled, external API health checks fail, or 6R fixes missing from deployment. **Does not trigger FAIL**: non-critical visual issues (missing 6P enhancements, minor layout differences from dev), non-functional performance metrics below target. Non-critical issues are documented in the report but do not affect the gate decision — address them through Stage 8 (Feedback Loop).
 
 **Flaky handling (7V vs 6V)**: In 6V, flaky scenarios are excluded from the pass-rate denominator. In 7V, flaky scenarios count as FAIL — see the Flaky Scenario Rule above.
 
-**Critical Production Failures**: If 7V result is FAIL (critical functionality broken in production), do NOT proceed to Stage 7D. Halt and escalate for hotfix + re-deploy or rollback. Only proceed to Stage 7D after 7V achieves PASS or CONDITIONAL PASS. After hotfix is deployed, re-run Stage 7V in full to verify the fix. If 7V PASS or CONDITIONAL PASS, continue to Stage 7D. Do NOT proceed to 7D based on partial re-verification — 7V must produce a full report.
+**Critical Production Failures**: If 7V result is FAIL (critical functionality broken in production), do not proceed to Stage 7D. Halt and escalate for hotfix + re-deploy or rollback. Only proceed to Stage 7D after 7V achieves PASS or CONDITIONAL PASS. After hotfix is deployed, re-run Stage 7V in full to verify the fix. If 7V PASS or CONDITIONAL PASS, continue to Stage 7D. Do not proceed to 7D based on partial re-verification — 7V must produce a full report.
 
 ## Next Steps
 - If PASS or CONDITIONAL PASS: proceed to Stage 7D (User Guide Generation) — if `plancasting/tech-stack.md` documentation section says "not needed," skip 7D and move to Stage 8 (Feedback Loop) / 9 (Maintenance). If CONDITIONAL PASS, document minor issues for post-launch fix via Stage 8.
 - If FAIL due to deployment config (env vars, DNS, CORS): fix config, redeploy, re-run 7V
-- If FAIL due to code regression (something that passed in 6V but fails in production): rollback deployment (`git revert`, not `git reset --hard`), investigate the discrepancy, fix, redeploy, re-run 7V. Do NOT proceed to 7D until 7V achieves PASS or CONDITIONAL PASS — documenting a broken product wastes effort
+- If FAIL due to code regression (something that passed in 6V but fails in production): rollback deployment (`git revert`, not `git reset --hard`), investigate the discrepancy, fix, redeploy, re-run 7V. Do not proceed to 7D until 7V achieves PASS or CONDITIONAL PASS — documenting a broken product wastes effort
 
 **FAIL decision tree**: (1) If issue is localized (1–2 files, <100 LOC fix): hotfix in code, re-deploy, re-run 7V. (2) If issue affects multiple systems or requires >2 hours to fix: execute rollback (`git revert HEAD`), verify reverted deploy is stable, investigate offline. Schedule follow-up implementation session.
 
@@ -679,22 +680,22 @@ After verification completes (regardless of gate decision):
 
 ## Critical Rules
 
-1. ALWAYS use the PRODUCTION URL — never accidentally test against localhost.
-2. NEVER modify production data beyond what's needed for testing (use test accounts with identifiable names like `smoke-test@[domain]`).
-3. NEVER test payment flows with real payment methods — use test card numbers or skip the actual charge step.
+1. always use the PRODUCTION URL — never accidentally test against localhost.
+2. never modify production data beyond what's needed for testing (use test accounts with identifiable names like `smoke-test@[domain]`).
+3. never test payment flows with real payment methods — use test card numbers or skip the actual charge step.
 4. Use clearly identifiable test accounts (e.g., `smoke-test-*@domain`) that cannot be confused with real users. See Check 4 for the test user creation protocol.
-5. If ANY critical flow fails, follow the Rollback Guidance above. Do NOT mark as "known issue for later."
+5. If ANY critical flow fails, follow the Rollback Guidance above. Do not mark as "known issue for later."
 6. Keep this stage FAST — 25–45 minutes max. This is smoke testing, not comprehensive regression. The navigation smoke test (Check 7) should take ~5 minutes — test highest-traffic paths only, not every link.
-7. ALWAYS compare against Stage 6V results — if something passed in 6V but fails in 7V, it's a deployment-specific issue (environment, config, infrastructure).
-7a. **Flaky scenarios**: See the Flaky Scenario Rule at the top of this prompt. Do NOT mark a scenario as passing if it required a retry. Document the flaky behavior in the report.
-8. ALWAYS clean up test accounts after verification to avoid polluting production data and analytics.
-9. ALWAYS verify test user login works BEFORE proceeding to authenticated page checks. If login fails, check: auth provider redirect URIs include production domain, auth env vars point to production (not dev), test users exist in the auth provider (not just the app database).
-10. ALWAYS test public utility routes (`/sitemap.xml`, `/robots.txt`, `/api/health`) WITHOUT authentication. These are the most commonly broken routes in production because they're easy to forget when configuring middleware whitelists.
-11. If a Stage 6R report exists, ALWAYS verify 6R fixes in production BEFORE detailed feature/navigation checks (Checks 7-8). Check 4 (page loads) is a prerequisite that must run first. If 6R fixes are missing, the deployment is wrong — flag immediately rather than discovering the same issues again through later checks. If 6R was skipped (6V returned PASS or CONDITIONAL PASS with only 6V-C issues), skip this check.
-12. ALWAYS test navigation at BOTH desktop and mobile viewports on production. CSS purging affects production builds differently than dev — navigation links that are visible in dev may be invisible in production due to dynamic Tailwind class purging.
-13. If a Stage 6R report exists, ALWAYS check the deployed commit hash against the 6R remediation commit hash (stored in `./plancasting/_audits/runtime-remediation/last-remediated-commit.txt` and in the 6R report's `Commit Hash` field). If they don't match, the production deployment doesn't include the remediation fixes. If 6R was skipped (6V returned PASS or CONDITIONAL PASS with only 6V-C issues, so no report exists), skip this check.
+7. always compare against Stage 6V results — if something passed in 6V but fails in 7V, it's a deployment-specific issue (environment, config, infrastructure).
+7a. **Flaky scenarios**: See the Flaky Scenario Rule at the top of this prompt. Do not mark a scenario as passing if it required a retry. Document the flaky behavior in the report.
+8. always clean up test accounts after verification to avoid polluting production data and analytics.
+9. always verify test user login works BEFORE proceeding to authenticated page checks. If login fails, check: auth provider redirect URIs include production domain, auth env vars point to production (not dev), test users exist in the auth provider (not just the app database).
+10. always test public utility routes (`/sitemap.xml`, `/robots.txt`, `/api/health`) WITHOUT authentication. These are the most commonly broken routes in production because they're easy to forget when configuring middleware whitelists.
+11. If a Stage 6R report exists, always verify 6R fixes in production BEFORE detailed feature/navigation checks (Checks 7-8). Check 4 (page loads) is a prerequisite that must run first. If 6R fixes are missing, the deployment is wrong — flag immediately rather than discovering the same issues again through later checks. If 6R was skipped (6V returned PASS or CONDITIONAL PASS with only 6V-C issues), skip this check.
+12. always test navigation at BOTH desktop and mobile viewports on production. CSS purging affects production builds differently than dev — navigation links that are visible in dev may be invisible in production due to dynamic Tailwind class purging.
+13. If a Stage 6R report exists, always check the deployed commit hash against the 6R remediation commit hash (stored in `./plancasting/_audits/runtime-remediation/last-remediated-commit.txt` and in the 6R report's `Commit Hash` field). If they don't match, the production deployment doesn't include the remediation fixes. If 6R was skipped (6V returned PASS or CONDITIONAL PASS with only 6V-C issues, so no report exists), skip this check.
 14. If a Stage 6P report exists, spot-check visual polish changes in production. CSS purging, font loading, and tree-shaking can silently remove visual enhancements that work in dev. These are MEDIUM severity (not blocking) but should be documented.
-15. NEVER modify application code, production configuration, or database records during this stage (except for creating/cleaning up test accounts as documented). This stage is verification-only. If issues are found, document them in the report for the Rollback Guidance procedure.
+15. never modify application code, production configuration, or database records during this stage (except for creating/cleaning up test accounts as documented). This stage is verification-only. If issues are found, document them in the report for the Rollback Guidance procedure.
 
 ## Failure Escalation Protocol
 
@@ -705,12 +706,12 @@ If 7V detects a critical production failure:
 | Auth completely broken (login 500s) | Rollback deployment immediately. Document in `./plancasting/_audits/production-smoke/rollback-log.md` |
 | Core data query empty (DB inaccessible) | Check backend deployment status. Rollback if backend deployed successfully but data is inaccessible |
 | SSR hydration errors on landing page | Check Tailwind CSS purging. Hotfix if CSS issue, rollback if structural |
-| 3rd-party integration failure (Stripe, Auth0) | Do NOT rollback. Escalate to operator to verify API keys and service status |
+| 3rd-party integration failure (Stripe, Auth0) | Do not rollback. Escalate to operator to verify API keys and service status |
 
 **Agent Abort Procedure** (for Tier 1 failures — Auth broken, DB inaccessible, landing page non-functional):
 1. Stop all further verification checks.
-2. Do NOT attempt fixes — 7V is verification-only.
+2. Do not attempt fixes — 7V is verification-only.
 3. Output partial report with gate decision FAIL and escalation details.
 4. Recommend rollback or hotfix + re-deploy + re-run 7V.
-5. Do NOT proceed to Stage 7D.
+5. Do not proceed to Stage 7D.
 ````

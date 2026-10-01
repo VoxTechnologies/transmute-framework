@@ -6,7 +6,9 @@ description: >-
   "clean up code quality", "eliminate duplication", "improve abstractions",
   "enforce consistency", "remove dead code", or "optimize architecture"
   — or when the transmute-pipeline agent reaches Stage 6E of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Stage 6E: Code Quality and Architecture Refinement
@@ -17,7 +19,7 @@ Lead a multi-agent code refactoring project. Audit the COMPLETE codebase for cod
 
 ## Cardinal Rule
 
-**NO BEHAVIORAL CHANGES.** Refactoring changes internal structure without altering external behavior. Every test that passed before refactoring MUST still pass after. If a refactoring would require changes to tests that validate external behavior (API contracts, acceptance criteria), the behavior is changing — stop and reconsider. Tests validating implementation details (private functions, internal state) may be restructured.
+**NO BEHAVIORAL CHANGES.** Refactoring changes internal structure without altering external behavior. Every test that passed before refactoring must still pass after. If a refactoring would require changes to tests that validate external behavior (API contracts, acceptance criteria), the behavior is changing — stop and reconsider. Tests validating implementation details (private functions, internal state) may be restructured.
 
 **Scope clarification**: 'No behavioral changes' means no changes to external APIs or user-facing behavior. Internal function signatures MAY change if all call sites are updated atomically in the same commit.
 
@@ -73,15 +75,15 @@ Complete BEFORE spawning teammates:
 
 5. Create `./plancasting/_audits/refactoring/plan.md` with prioritized opportunities, affected files, risk levels, and parallelizable work packages.
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/refactor-detailed-guide.md` for the complete teammate spawn prompts, coordination protocols, and analysis criteria.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/refactor-detailed-guide.md` for the complete teammate spawn prompts, coordination protocols, and analysis criteria.
 
 ## Phase 2: Spawn Refactoring Teammates
 
-Spawn 4 teammates. Each spawn prompt MUST include the refactoring plan and the cardinal rule.
+Spawn 4 teammates. Each spawn prompt must include the refactoring plan and the cardinal rule.
 
 **Teammate 1 — "backend-refactorer"**: Backend functions, schema, server-side code. Tasks: function deduplication, schema optimization (index cleanup with verification — BEFORE removing any index: search all backend files, check schema comments, verify production usage if accessible; if any uncertainty, KEEP with comment), consistency enforcement (error handling, auth, validation patterns), dead code removal (with string-reference search including dynamic imports and bracket notation), file splitting for 300+ line files, post-refactor cleanup (remove unused libraries, verify no `any` types or `@ts-ignore` introduced).
 
-**Teammate 2 — "frontend-component-refactorer"**: React components and pages. Tasks: component deduplication into shared directory, pattern extraction (forms, lists, modals, state components), prop interface cleanup (no `any`, consistent naming), file splitting for 300+ line components, design token compliance (flag hardcoded colors/fonts/spacing, consolidate icon imports via barrel file). Do NOT create hooks — send hook requirements to Teammate 3.
+**Teammate 2 — "frontend-component-refactorer"**: React components and pages. Tasks: component deduplication into shared directory, pattern extraction (forms, lists, modals, state components), prop interface cleanup (no `any`, consistent naming), file splitting for 300+ line components, design token compliance (flag hardcoded colors/fonts/spacing, consolidate icon imports via barrel file). Do not create hooks — send hook requirements to Teammate 3.
 
 **Teammate 3 — "hooks-and-logic-refactorer"**: Custom hooks, utilities, types, shared logic. Tasks: hook deduplication (generic parameterized hooks), utility consolidation, type consolidation into shared files, import cleanup (unused imports, path aliases, ordering), dead code removal.
 
@@ -97,7 +99,7 @@ Monitor progress and facilitate cross-team dependencies:
 - Utility moves affect imports everywhere — notify Teammates 2 and 4.
 - For shared-file conflicts: assign priority to the more structural change; other teammate waits.
 - After each teammate completes, run `bun run typecheck && bun run test` immediately. If tests fail, notify responsible teammate before others proceed.
-- If refactoring moves or renames files, check if any `.claude/rules/` file references the old path in its `globs` frontmatter and update accordingly.
+- If refactoring moves or renames files, check if any `.claude/rules/` file references the old path in its `paths` frontmatter and update accordingly.
 
 ## Phase 4: Integration Verification
 
@@ -145,17 +147,17 @@ Request shutdown for all teammates. Verify all modifications are saved and commi
 
 ## Critical Rules
 
-1. NEVER refactor and add features in the same change — refactoring must preserve behavior.
-2. NEVER delete a public export without verifying zero external consumers.
-3. NEVER refactor code without test coverage — add tests first, then refactor.
-4. NEVER remove database indexes without verifying all query patterns including production logs.
-5. ALWAYS commit after each logical refactoring unit for granular rollback.
-6. ALWAYS run the full test suite after every refactoring step, not just at the end.
+1. never refactor and add features in the same change — refactoring must preserve behavior.
+2. never delete a public export without verifying zero external consumers.
+3. never refactor code without test coverage — add tests first, then refactor.
+4. never remove database indexes without verifying all query patterns including production logs.
+5. always commit after each logical refactoring unit for granular rollback.
+6. always run the full test suite after every refactoring step, not just at the end.
 7. If refactoring reduces test count, it is a regression — investigate.
-8. Adding new tests during refactoring is acceptable. Removing tests that validate user-facing behavior is NOT. Tests validating implementation details may be restructured.
+8. Adding new tests during refactoring is acceptable. Removing tests that validate user-facing behavior is not. Tests validating implementation details may be restructured.
 9. Reference Stage 5B output to avoid refactoring incomplete features.
 10. If refactoring changes module boundaries, public APIs, or directory structure, update `ARCHITECTURE.md` (if exists).
-11. If a refactoring opportunity would require architectural changes beyond scope, document in the report under "Deferred Architectural Improvements" — do NOT attempt it.
+11. If a refactoring opportunity would require architectural changes beyond scope, document in the report under "Deferred Architectural Improvements" — do not attempt it.
 
 ## Cross-Stage References
 

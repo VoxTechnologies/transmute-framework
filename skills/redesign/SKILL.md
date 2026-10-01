@@ -8,14 +8,16 @@ description: >-
   "run frontend redesign", "design elevation",
   or "replace the generic AI look",
   or when the transmute-pipeline agent reaches Stage 6P-R of the pipeline.
-version: 1.1.0
+metadata:
+  version: 1.1.0
+effort: high
 ---
 
 # Stage 6P-R: Frontend Design Elevation (Interactive Redesign)
 
 Unlike the standard Stage 6P (visual polish — which fixes defects within an existing design system), this stage performs a FULL design elevation: collecting project context interactively, studying reference products, extracting Figma design tokens, making deliberate design decisions with the user, and implementing a cohesive visual overhaul.
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/redesign-detailed-guide.md` for full phases, anti-slop patterns, component matrices, review procedures, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/redesign-detailed-guide.md` for full phases, anti-slop patterns, component matrices, review procedures, and report templates.
 
 ## When to Use This vs. Standard 6P
 
@@ -101,7 +103,7 @@ This skill is framework-agnostic and design-library-agnostic. Adapt to your `pla
 
 ## Phase 0: Interactive Project Context Collection (User Input Required)
 
-**CRITICAL**: Collect ALL context BEFORE any design work. Ask each question ONE AT A TIME.
+Collect ALL context BEFORE any design work. Ask each question ONE AT A TIME.
 
 **Fast-path option**: After presenting scan results, offer batch mode for experienced users.
 
@@ -134,7 +136,7 @@ Present each as a numbered menu. Wait for user selection. Reference Phase 0 cont
 
 Derive concrete token values from decisions (color palette, typography scale, spacing, shadows, motion). Compile complete design plan including pages to modify (prioritized HIGH/MEDIUM/LOW). Save to `./plancasting/_audits/visual-polish/design-plan.md`.
 
-Present to user. **DO NOT proceed to Phase 3 until explicitly approved.**
+Present to user. **Do not proceed to Phase 3 until explicitly approved.**
 
 Phase 2 Outcomes: APPROVED → Phase 3 | REVISE (max 2 rounds) → update plan | REJECT → abandon branch, fall back to standard 6P.
 
@@ -145,7 +147,7 @@ Implement in this specific order. Each step cascades into the next:
 1. **Step 3.1 — Design Tokens**: Update all token sources (highest leverage — cascades ~80%)
 2. **Step 3.2 — Font Setup**: Install and configure approved font pairing
 3. **CHECKPOINT**: Run typecheck + lint after Steps 3.1-3.2. Fix failures before continuing.
-4. **Step 3.3 — Theme Provider Defaults**: Update theme config (NEVER use `setTheme()` for Hybrid themes)
+4. **Step 3.3 — Theme Provider Defaults**: Update theme config (never use `setTheme()` for Hybrid themes)
 5. **Step 3.4 — Shared UI Component Audit**: Scan for hardcoded values bypassing tokens
 6. **Step 3.5 — Anti-Slop Pre-Scan**: Document existing AI-slop patterns in `slop-inventory.md`
 7. **Step 3.6 — Layout Components**: Update sidebar, header, footer, nav, logo placement
@@ -202,22 +204,22 @@ Outcomes:
 
 ## Critical Rules
 
-1. NEVER change functional behavior — only visual presentation.
-2. NEVER replace design system components with custom implementations.
-3. ALWAYS get explicit user approval on the design plan (Phase 2).
-4. ALWAYS use the `frontend-design` skill if available.
-5. ALWAYS take before/after screenshots.
-6. ALWAYS run validation (typecheck + lint + test) after implementation.
-7. ALWAYS verify at all 3 breakpoints (1440, 768, 375).
-8. ALWAYS verify dark mode if supported.
-9. NEVER introduce new dependencies without checking package.json.
-10. ALWAYS apply anti-AI-slop patterns from Phase 5.
+1. never change functional behavior — only visual presentation.
+2. never replace design system components with custom implementations.
+3. always get explicit user approval on the design plan (Phase 2).
+4. always use the `frontend-design` skill if available.
+5. always take before/after screenshots.
+6. always run validation (typecheck + lint + test) after implementation.
+7. always verify at all 3 breakpoints (1440, 768, 375).
+8. always verify dark mode if supported.
+9. never introduce new dependencies without checking package.json.
+10. always apply anti-AI-slop patterns from Phase 5.
 11. Maximum 3 animation additions per page.
-12. ALWAYS preserve accessibility (focus rings, ARIA, keyboard nav).
+12. always preserve accessibility (focus rings, ARIA, keyboard nav).
 13. Token-first implementation — start with design tokens.
-14. ALWAYS check console errors during Playwright screenshots.
-15. NEVER write credentials to committed files.
-16. ALWAYS verify font availability before configuring.
+14. always check console errors during Playwright screenshots.
+15. never write credentials to committed files.
+16. always verify font availability before configuring.
 17. Treat contrast ratios as non-negotiable (WCAG AA minimum).
 18. ALL animations must respect `prefers-reduced-motion`.
 19. Maximum 3 fix-and-review cycles.

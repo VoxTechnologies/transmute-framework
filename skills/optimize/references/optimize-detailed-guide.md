@@ -55,7 +55,7 @@ Always read `CLAUDE.md` Part 2 (Backend Rules, Frontend Rules) for your project'
 
 Based on observed audit outcomes:
 
-1. **Lighthouse in dev mode**: Running Lighthouse against `localhost:3000` in development gives misleading scores (no minification, no tree-shaking, React dev warnings). ALWAYS measure against a production build (e.g., `next build && next start` for Next.js).
+1. **Lighthouse in dev mode**: Running Lighthouse against `localhost:3000` in development gives misleading scores (no minification, no tree-shaking, React dev warnings). always measure against a production build (e.g., `next build && next start` for Next.js).
 2. **Premature `React.memo`**: Agent adds `React.memo` to every component without measuring. `React.memo` adds comparison overhead — only use for components that re-render frequently with the same props.
 3. **Lazy loading above-the-fold content**: Agent adds `dynamic(() => import(...))` to components visible on initial render. This HURTS LCP by deferring critical content.
 4. **Over-aggressive `.take(N)`**: Agent adds `.take(10)` to queries that legitimately need to return more results, silently truncating data.
@@ -72,12 +72,12 @@ As the team lead, complete the following BEFORE spawning any teammates:
 1. Read `./CLAUDE.md`, `./plancasting/tech-stack.md`, and `./plancasting/prd/15-non-functional-specifications.md`.
 2. **Pre-optimization verification**: Before creating the baseline, run `bun run typecheck && bun run test` to verify the codebase is in a working state. If tests fail, STOP and resolve before proceeding with performance optimization.
 
-3. **Create the performance baseline** (the lead MUST complete baseline measurement synchronously — before spawning any teammates. Build production, measure, then spawn teammates):
+3. **Create the performance baseline** (the lead must complete baseline measurement synchronously — before spawning any teammates. Build production, measure, then spawn teammates):
    Capture baseline measurements per the Measurement Standards section below (Phase 4).
    ~~~bash
    mkdir -p ./plancasting/_audits/performance
    ~~~
-   Run Lighthouse on key pages (home, dashboard, main feature page) and record metrics in `./plancasting/_audits/performance/baseline.md`. Mark the baseline file with a comment at the top: `<!-- ORIGINAL BASELINE — DO NOT RECREATE ON SUBSEQUENT 6C RUNS -->`. This file is permanent and serves as the reference point for all before/after comparisons. Use a production build for accurate baselines:
+   Run Lighthouse on key pages (home, dashboard, main feature page) and record metrics in `./plancasting/_audits/performance/baseline.md`. Mark the baseline file with a comment at the top: `<!-- ORIGINAL BASELINE — Do not recreate on subsequent 6C RUNS -->`. This file is permanent and serves as the reference point for all before/after comparisons. Use a production build for accurate baselines:
    ~~~bash
    bun run build && bun run start &
    # Wait for server to be ready (adapt port to your project)
@@ -86,7 +86,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
    # Repeat for other key pages (e.g., /dashboard, /main-feature)
    kill $(lsof -ti:3000) 2>/dev/null  # adapt port to your project
    ~~~
-   NEVER measure against the dev server — dev mode includes HMR, unminified code, and source maps that produce misleading metrics.
+   never measure against the dev server — dev mode includes HMR, unminified code, and source maps that produce misleading metrics.
 4. Extract all performance budgets:
    - Page load time targets
    - API response time targets
@@ -98,7 +98,7 @@ As the team lead, complete the following BEFORE spawning any teammates:
 
 ### Phase 2: Spawn Optimization Teammates
 
-Spawn the following 3 teammates. Each teammate's spawn prompt MUST include the performance targets and instructions to read CLAUDE.md first. Note: Teammate numbering below does NOT reflect execution order — see the recommended execution order for spawn sequencing.
+Spawn the following 3 teammates. Each teammate's spawn prompt must include the performance targets and instructions to read CLAUDE.md first. Note: Teammate numbering below does not reflect execution order — see the recommended execution order for spawn sequencing.
 
 **Note**: Stage 6C can run **in parallel with Stages 6A and 6B** per CLAUDE.md. The teammate sequencing below applies only to 6C's *internal* teammates — it does not affect inter-stage parallelism.
 
@@ -132,7 +132,7 @@ Your tasks:
    - Identify pages that could benefit from SSR data loading (e.g., `preloadQuery` for Convex + Next.js). For Convex: use `preloadQuery`. For other backends: use your framework's server-side data fetching patterns (e.g., Next.js server components with direct data access, SvelteKit `load` functions, Remix loaders).
    - Verify loading skeleton screens exist for all routes (prevents layout shift = better CLS).
    - Check for unnecessary re-renders: components subscribing to backend data queries they don't need (e.g., Convex reactive queries, Supabase realtime subscriptions, or equivalent).
-   - Verify React.memo or useMemo is used ONLY where expensive computations or frequent re-renders with unchanged props occur (see Known Failure Pattern #2 — do NOT blanket-apply to all components).
+   - Verify React.memo or useMemo is used ONLY where expensive computations or frequent re-renders with unchanged props occur (see Known Failure Pattern #2 — do not blanket-apply to all components).
    - Check for layout shift sources: images without dimensions, dynamically injected content.
    Output: Rendering optimizations applied.
 
@@ -231,7 +231,7 @@ When done, message the lead with: improvements applied by category.
 
 If a violation cannot be fixed without architectural changes or would break another feature:
 1. Document the full conflict with evidence (what the violation is, what fixing it would break)
-2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do NOT attempt a fix that creates regressions
+2. Mark as **"REQUIRES HUMAN DECISION"** in the report — do not attempt a fix that creates regressions
 3. Include a recommended approach and estimated effort in the report
 4. If the unfixable issue causes Core Web Vitals to FAIL (per PRD targets), document as a potential launch blocker for Stage 6H review. Create `./plancasting/_audits/performance/unfixable-violations.md` for critical unfixable issues.
 5. Continue with remaining fixable violations — do not block the entire audit on one decision
@@ -260,7 +260,7 @@ After all teammates complete:
    ~~~
 
 2. Run Lighthouse on key pages and collect scores.
-   First, verify Lighthouse CLI is available: `bunx lighthouse --version 2>/dev/null || echo 'not installed'`. If not available and cannot be installed, use browser DevTools Lighthouse panel (consistent lab conditions). Do NOT use PageSpeed Insights as a substitute — it uses real user metrics, not lab-based synthetic measurements, making results incomparable with Lighthouse CLI. Document which tool was used in the report.
+   First, verify Lighthouse CLI is available: `bunx lighthouse --version 2>/dev/null || echo 'not installed'`. If not available and cannot be installed, use browser DevTools Lighthouse panel (consistent lab conditions). Do not use PageSpeed Insights as a substitute — it uses real user metrics, not lab-based synthetic measurements, making results incomparable with Lighthouse CLI. Document which tool was used in the report.
    If Lighthouse CLI is not available, install it: `bun add -g lighthouse`. Or use `npm install -g lighthouse` as a universal fallback. If installation fails: (1) use browser DevTools Lighthouse tab for local measurement, (2) record scores manually in `./plancasting/_audits/performance/lighthouse.json`, (3) document in the report: 'Lighthouse scores measured via DevTools, not CLI.' Always measure against a production build (`bun run build`), never a dev server.
    - **Performance Measurement Methodology**:
      a. Build for production: `bun run build` (or equivalent)
@@ -280,9 +280,9 @@ After all teammates complete:
    - **Measurement Standards**:
      - **Network throttling**: Use Lighthouse default throttling (simulated 4G) for consistency
      - **Cache state**: Always measure on cold cache (clear browser cache between runs)
-     - **Baseline Preservation**: On first 6C run, create baseline. On subsequent 6C re-runs, do NOT recreate baseline — always measure against the ORIGINAL baseline. If baseline is accidentally overwritten, restore from git history. Note: If 6A or 6B modified code before 6C starts (parallel execution), 6C's baseline captures the post-6A/6B state, not the original post-5B state. This is expected — the baseline reflects the current code at 6C start time.
+     - **Baseline Preservation**: On first 6C run, create baseline. On subsequent 6C re-runs, do not recreate baseline — always measure against the ORIGINAL baseline. If baseline is accidentally overwritten, restore from git history. Note: If 6A or 6B modified code before 6C starts (parallel execution), 6C's baseline captures the post-6A/6B state, not the original post-5B state. This is expected — the baseline reflects the current code at 6C start time.
      - **Parallel execution note**: If 6A or 6B completed and modified code before 6C started (because all three ran in parallel), 6C's baseline captures the post-6A/6B state. Document this in the baseline file and attribute performance deltas accordingly.
-     - **Baseline**: Compare against the baseline in `./plancasting/_audits/performance/baseline.md`. **Baseline timing**: The performance baseline MUST be created as the FIRST action in Phase 1 step 3, before any code changes, capturing the post-5B state. **Parallel 6A/6B/6C**: If all three start simultaneously, all baselines capture the same starting state. If 6A or 6B complete and modify code before 6C starts, 6C's baseline captures the post-6A/6B state — document this and attribute deltas accordingly. **Re-runs**: If the baseline already exists from a prior run, use it as the primary reference. Do NOT re-generate the baseline after 6A/6B changes — that would mask the performance cost of security/accessibility fixes. Measure post-6C metrics against the ORIGINAL baseline and document any performance delta attributable to 6A/6B changes separately (e.g., "Auth rate limiting added +15ms to login endpoint — expected and acceptable"). After optimizations, record new metrics as "post-Stage-6C" in the report for future reference
+     - **Baseline**: Compare against the baseline in `./plancasting/_audits/performance/baseline.md`. **Baseline timing**: The performance baseline must be created as the FIRST action in Phase 1 step 3, before any code changes, capturing the post-5B state. **Parallel 6A/6B/6C**: If all three start simultaneously, all baselines capture the same starting state. If 6A or 6B complete and modify code before 6C starts, 6C's baseline captures the post-6A/6B state — document this and attribute deltas accordingly. **Re-runs**: If the baseline already exists from a prior run, use it as the primary reference. Do not re-generate the baseline after 6A/6B changes — that would mask the performance cost of security/accessibility fixes. Measure post-6C metrics against the ORIGINAL baseline and document any performance delta attributable to 6A/6B changes separately (e.g., "Auth rate limiting added +15ms to login endpoint — expected and acceptable"). After optimizations, record new metrics as "post-Stage-6C" in the report for future reference
      - **Core Web Vitals targets**: Read performance targets from `./plancasting/prd/15-non-functional-specifications.md` first. Use these web.dev Good thresholds as defaults only if the PRD does not specify targets: LCP < 2.5s, INP < 200ms, CLS < 0.1 (Good rating per web.dev)
      - **Reporting**: Include both raw numbers and pass/fail against targets
 
@@ -314,14 +314,14 @@ After all teammates complete:
 
 ## Critical Rules
 
-1. NEVER optimize without measuring first — premature optimization adds complexity without benefit.
-2. NEVER convert Server Components to Client Components for optimization purposes (Next.js). For non-SSR frameworks: do not convert server-rendered routes to client-only routes solely to use client-side optimization hooks.
-3. NEVER run Lighthouse in development mode — always use your production build and start commands (e.g., `bun run build && bun run start`).
-4. ALWAYS verify optimizations don't break functionality — run the full test suite after changes.
-5. ALWAYS measure bundle size before and after changes using your framework's bundle analyzer (see Phase 2 Teammate 1 instructions for framework-specific commands).
-6. If using Convex: NEVER add `.take(N)` that is too small for the feature's actual data volume. Check PRD for expected data sizes.
+1. never optimize without measuring first — premature optimization adds complexity without benefit.
+2. never convert Server Components to Client Components for optimization purposes (Next.js). For non-SSR frameworks: do not convert server-rendered routes to client-only routes solely to use client-side optimization hooks.
+3. never run Lighthouse in development mode — always use your production build and start commands (e.g., `bun run build && bun run start`).
+4. always verify optimizations don't break functionality — run the full test suite after changes.
+5. always measure bundle size before and after changes using your framework's bundle analyzer (see Phase 2 Teammate 1 instructions for framework-specific commands).
+6. If using Convex: never add `.take(N)` that is too small for the feature's actual data volume. Check PRD for expected data sizes.
 7. Use the commands from CLAUDE.md for testing (e.g., `bun run test`).
 8. Reference Stage 5B output to avoid optimizing incomplete features.
 9. INP replaces FID (deprecated). Use TBT as lab proxy for INP. See Measurement Standards section above for details.
-10. **Parallel execution**: This stage may run concurrently with 6A and 6B. Document required changes to shared config files (`next.config.ts`, `middleware.ts`, `tailwind.config.ts`, `globals.css`) in the report under a `## Pending Config Changes` section rather than modifying them directly — this prevents silent overwrites when parallel stages commit. If a Core Web Vitals critical fix MUST modify a shared config file immediately (e.g., `next.config` image optimization settings), commit the change immediately and note it prominently in the report under `## Pending Config Changes`.
+10. **Parallel execution**: This stage may run concurrently with 6A and 6B. Document required changes to shared config files (`next.config.ts`, `middleware.ts`, `tailwind.config.ts`, `globals.css`) in the report under a `## Pending Config Changes` section rather than modifying them directly — this prevents silent overwrites when parallel stages commit. If a Core Web Vitals critical fix must modify a shared config file immediately (e.g., `next.config` image optimization settings), commit the change immediately and note it prominently in the report under `## Pending Config Changes`.
 ````

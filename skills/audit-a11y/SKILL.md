@@ -7,12 +7,14 @@ description: >-
   "check screen reader support", "fix accessibility issues",
   or "verify keyboard navigation",
   or when the transmute-pipeline agent reaches Stage 6B of the pipeline.
-version: 1.0.0
+metadata:
+  version: 1.0.0
+effort: medium
 ---
 
 # Accessibility Audit — Stage 6B
 
-Read the detailed guide at `${CLAUDE_SKILL_ROOT}/references/audit-a11y-detailed-guide.md` for the complete audit procedures, teammate spawn prompts, WCAG checklist patterns, and report templates.
+Read the detailed guide at `${CLAUDE_SKILL_DIR}/references/audit-a11y-detailed-guide.md` for the complete audit procedures, teammate spawn prompts, WCAG checklist patterns, and report templates.
 
 Lead a multi-agent accessibility audit of the complete frontend codebase against BRD/PRD WCAG requirements. Identify violations and fix them.
 
@@ -50,7 +52,7 @@ Adapt references to your actual stack:
 - React Aria patterns become your accessibility library's patterns
 - `bun run` becomes your package manager command
 
-**Component Library Rule**: If using a component library with built-in accessibility (React Aria, HeadlessUI, Radix, shadcn/ui, Untitled UI), do NOT add redundant ARIA attributes that conflict with the library's built-in handling — this can actually break accessibility. Check the library's documentation before adding ARIA attributes to library-provided components.
+**Component Library Rule**: If using a component library with built-in accessibility (React Aria, HeadlessUI, Radix, shadcn/ui, Untitled UI), do not add redundant ARIA attributes that conflict with the library's built-in handling — this can actually break accessibility. Check the library's documentation before adding ARIA attributes to library-provided components.
 
 ## Known Failure Patterns
 
@@ -136,7 +138,7 @@ When a violation cannot be fixed without architectural changes:
    - Fixes applied with code references
    - Automated test results (axe-core)
    - Remaining issues requiring manual testing (screen reader, cognitive review)
-   - **Scope note**: Screen reader testing (with NVDA, JAWS, or VoiceOver) is NOT in scope for 6B — it is a runtime verification done in Stage 6V. Stage 6B focuses on code-level accessibility.
+   - **Scope note**: Screen reader testing (with NVDA, JAWS, or VoiceOver) is not in scope for 6B — it is a runtime verification done in Stage 6V. Stage 6B focuses on code-level accessibility.
    - BRD NFR accessibility compliance matrix
 6. Include a **Gate Decision** under a `## Gate Decision` heading (6H parses this heading):
    - **PASS**: No Level A violations; all Level AA violations fixed or verified as false positives
@@ -151,13 +153,13 @@ When a violation cannot be fixed without architectural changes:
 
 ## Critical Rules
 
-1. ALWAYS prefer semantic HTML over ARIA roles (`<button>` over `<div role="button">`).
-2. NEVER add `aria-hidden="true"` to suppress axe violations — fix the underlying issue.
-3. NEVER add ARIA attributes that conflict with your component library's built-in accessibility.
-4. ALWAYS use the project's focus ring convention from CLAUDE.md. If unspecified, define one and document it.
-5. ALWAYS verify visual layout is preserved after semantic HTML changes.
-6. ALWAYS check `<html lang="...">` matches the session language.
-7. ALWAYS verify `prefers-reduced-motion` is respected for animations.
-8. ALWAYS run the full test suite after changes.
+1. always prefer semantic HTML over ARIA roles (`<button>` over `<div role="button">`).
+2. never add `aria-hidden="true"` to suppress axe violations — fix the underlying issue.
+3. never add ARIA attributes that conflict with your component library's built-in accessibility.
+4. always use the project's focus ring convention from CLAUDE.md. If unspecified, define one and document it.
+5. always verify visual layout is preserved after semantic HTML changes.
+6. always check `<html lang="...">` matches the session language.
+7. always verify `prefers-reduced-motion` is respected for animations.
+8. always run the full test suite after changes.
 9. Use commands from CLAUDE.md for testing.
 10. Reference Stage 5B output to identify incomplete features — skip auditing them entirely. Calculate compliance percentages based on audited features only (e.g., "Audited 12/15 features; 3 skipped as incomplete per Stage 5B").
