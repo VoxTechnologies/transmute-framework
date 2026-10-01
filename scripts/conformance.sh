@@ -68,6 +68,7 @@ check "no current-generation model ID carries a date suffix" bash -c '! rg -q "c
 check "hook script syntax" bash -n hooks/scripts/check-prerequisites.sh
 check "cast.md knows the attended mode and the early-verify (5V) alias" bash -c 'grep -q "attended" commands/cast.md && grep -q "early-verify" commands/cast.md'
 check "progress template carries Duration and Usage columns and the 5V row" bash -c 'grep -q "| Duration | Usage |" templates/progress.md && grep -q "^| 5V |" templates/progress.md'
+check "spawn-refusal rule present in the pipeline agent and the project CLAUDE.md" bash -c 'grep -q "When a spawn is refused" agents/transmute-pipeline.md && grep -q "Teammate spawn refused" templates/CLAUDE.md'
 check "pipeline agent defines the Stage 1 and 5V gates" bash -c 'grep -q "### Stage 1 Gate" agents/transmute-pipeline.md && grep -q "### 5V Gate" agents/transmute-pipeline.md'
 
 echo "== Gate hook behaviour (fixtures) =="

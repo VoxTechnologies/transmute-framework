@@ -304,6 +304,10 @@ Contributors: run `scripts/conformance.sh` before a release (`--live` also loads
 
 ## Changelog
 
+### v3.2.1
+
+- A lead whose teammate spawn is refused (concurrency cap, rate or usage limit, a hook) now continues in smaller waves instead of stopping to ask the operator. Found in a trial run where a machine-local cap of three concurrent subagents stopped Stage 1 with a question. The rule is in the pipeline agent's Execution Model and in the generated project's `CLAUDE.md` § Safety-Critical Rules, so stages invoked directly follow it too
+
 ### v3.2.0
 
 **Pipeline flow** — nine changes to how the stages run, in the order they pay off.
