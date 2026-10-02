@@ -71,6 +71,7 @@ check "progress template carries Duration and Usage columns and the 5V row" bash
 check "spawn-refusal rule present in the pipeline agent and the project CLAUDE.md" bash -c 'grep -q "When a spawn is refused" agents/transmute-pipeline.md && grep -q "Teammate spawn refused" templates/CLAUDE.md'
 check "BRD skill computes the assumption volume with its script" bash -c 'grep -q "scripts/assumption-volume.sh" skills/brd/SKILL.md && bash -n skills/brd/scripts/assumption-volume.sh'
 check "assumption-volume.sh counts a fixture exactly (2 / 4 = 50.0%)" bash -c 'd=$(mktemp -d); printf "FR-001 FR-002 BR-01\n> ⚠️ ASSUMPTION: a\n> ⚠️ ASSUMPTION: b\nNFR-010 FR-001\n" > $d/x.md; out=$(bash skills/brd/scripts/assumption-volume.sh $d); rm -rf $d; grep -q "50.0% (2 assumptions / 4 requirement IDs)" <<<"$out"'
+check "CLAUDE.md template forbids live calls on placeholder credentials and covers hook-refused staging" bash -c 'grep -q "No live calls on placeholder credentials" templates/CLAUDE.md && grep -q "A hook refuses to stage a file" templates/CLAUDE.md && grep -q "no requests to third-party services" skills/scaffold/SKILL.md'
 check "pipeline agent defines the Stage 1 and 5V gates" bash -c 'grep -q "### Stage 1 Gate" agents/transmute-pipeline.md && grep -q "### 5V Gate" agents/transmute-pipeline.md'
 
 echo "== Gate hook behaviour (fixtures) =="
