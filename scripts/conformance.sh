@@ -69,6 +69,8 @@ check "hook script syntax" bash -n hooks/scripts/check-prerequisites.sh
 check "cast.md knows the attended mode and the early-verify (5V) alias" bash -c 'grep -q "attended" commands/cast.md && grep -q "early-verify" commands/cast.md'
 check "progress template carries Duration and Usage columns and the 5V row" bash -c 'grep -q "| Duration | Usage |" templates/progress.md && grep -q "^| 5V |" templates/progress.md'
 check "spawn-refusal rule present in the pipeline agent and the project CLAUDE.md" bash -c 'grep -q "When a spawn is refused" agents/transmute-pipeline.md && grep -q "Teammate spawn refused" templates/CLAUDE.md'
+check "BRD skill computes the assumption volume with its script" bash -c 'grep -q "scripts/assumption-volume.sh" skills/brd/SKILL.md && bash -n skills/brd/scripts/assumption-volume.sh'
+check "assumption-volume.sh counts a fixture exactly (2 / 4 = 50.0%)" bash -c 'd=$(mktemp -d); printf "FR-001 FR-002 BR-01\n> ⚠️ ASSUMPTION: a\n> ⚠️ ASSUMPTION: b\nNFR-010 FR-001\n" > $d/x.md; out=$(bash skills/brd/scripts/assumption-volume.sh $d); rm -rf $d; grep -q "50.0% (2 assumptions / 4 requirement IDs)" <<<"$out"'
 check "pipeline agent defines the Stage 1 and 5V gates" bash -c 'grep -q "### Stage 1 Gate" agents/transmute-pipeline.md && grep -q "### 5V Gate" agents/transmute-pipeline.md'
 
 echo "== Gate hook behaviour (fixtures) =="

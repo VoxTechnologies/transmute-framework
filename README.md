@@ -304,6 +304,10 @@ Contributors: run `scripts/conformance.sh` before a release (`--live` also loads
 
 ## Changelog
 
+### v3.2.2
+
+- Stage 1 computes the assumption volume with `skills/brd/scripts/assumption-volume.sh` instead of counting by hand. In the 2026-10-02 trials the lead reported 60.1% for a BRD that measures 53.1%, and the Stage 1 gate turns on this number. The same plan still gave 53.1% under one stack and 29.4% under another, because the denominator depends on how finely requirements are split; the script makes the number reproducible for a given BRD, not independent of granularity
+
 ### v3.2.1
 
 - A lead whose teammate spawn is refused (concurrency cap, rate or usage limit, a hook) now continues in smaller waves instead of stopping to ask the operator. Found in a trial run where a machine-local cap of three concurrent subagents stopped Stage 1 with a question. The rule is in the pipeline agent's Execution Model and in the generated project's `CLAUDE.md` § Safety-Critical Rules, so stages invoked directly follow it too
