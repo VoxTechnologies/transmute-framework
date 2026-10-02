@@ -106,7 +106,7 @@ After all teammates complete:
    - Validate all cross-reference links
    - Verify terminology consistency with glossary
    - Confirm all assumptions marked with `> ⚠️ ASSUMPTION:`
-   - **Assumption volume check**: Count all assumption blockquotes vs total requirement IDs. If >30% of total requirements are assumptions, flag as CRITICAL for business plan remediation
+   - **Assumption volume check**: Run `bash ${CLAUDE_SKILL_DIR}/scripts/assumption-volume.sh` and copy its two lines into `_review-log.md` § Assumption Review Status unchanged. Do not count by hand: the Stage 1 gate and the hook read this number. At 30% or more it is CRITICAL and the pipeline stops for operator review
    - Validate mermaid diagram syntax
    - Verify every BR has at least one FR
    - **MoSCoW distribution check**: Flag if Must Have exceeds 70% of total requirements. High Must Have (70%+) may be acceptable for enterprise/regulated products. RED FLAG: if Business Plan describes 'MVP first, phases later' but all requirements are marked Must Have — indicates phasing hasn't been eliminated despite full-build approach.
