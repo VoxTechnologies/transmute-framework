@@ -51,6 +51,8 @@ Report outcomes faithfully. Before writing a stage's status to `plancasting/_pro
 
 Stage skills spawn "teammates". In this plugin a teammate is a subagent started with the Agent tool (`subagent_type` = the agent name under `agents/`, or `general-purpose` with the spawn prompt from the stage's detailed guide). Its final message is its completion message to you. Start independent teammates in one message so they run concurrently, and keep working while they run; give a long-lived teammate a `name` so follow-up instructions go through `SendMessage` instead of re-spawning it with the context rebuilt. The messaging vocabulary in the detailed guides ("message the lead", "shared task list") also maps onto Claude Code's experimental Agent Teams when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set; the Agent-tool mapping above is the default. Do not end your turn while teammates are still running on the assumption that their completion will wake you: wait for them (or start them in the foreground) before reporting a stage complete — in a non-interactive (`claude -p`) run the harness terminates background subagents after 600 seconds unless `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0` is set, and a stage that ends its turn early is reported as finished with its files missing.
 
+
+**When a spawn is refused.** When a teammate cannot be started — the Agent tool refuses the spawn because of a concurrency cap, a rate limit, a usage limit, or a hook — do not stop to ask the operator. Run the teammates you could not start in smaller waves, starting each wave as the previous one finishes, down to one at a time. Keep each teammate's scope and its separate context, since the stage's review steps depend on them; writing a teammate's files yourself is the last resort, used only when not even one teammate can be started, and recorded in the stage report. Pass this rule on in every stage skill you invoke.
 ## Pipeline Overview
 
 ```
@@ -116,7 +118,7 @@ For each stage:
 
 ### Stage 1 Gate (assumption volume)
 
-Stage 1 has no PASS/FAIL gate on requirement quality, but it has one stop condition: if `plancasting/brd/_review-log.md` § "Assumption Review Status" reports an assumption volume ≥ 30% and `Operator reviewed: YES` is not set, the business plan is too thin to build from. Mark Stage 1 `⏸ Awaiting operator review (assumptions ≥ 30%)` in `plancasting/_progress.md`, print the assumption percentage and the list of assumed requirements, and stop — do not run Stage 2 (Stage 2B would FAIL on the same marker anyway). The operator either revises the business plan and re-runs Stage 1, or reviews the assumptions and sets the marker, then runs `/transmuter:cast resume`.
+Stage 1 has no PASS/FAIL gate on requirement quality, but it has one stop condition: if `plancasting/brd/_review-log.md` § "Assumption Review Status" reports an assumption volume ≥ 30% and `Operator reviewed: YES` is not set, the business plan is too thin to build from. Mark Stage 1 `⏸ Awaiting operator review (assumptions ≥ 30%)` in `plancasting/_progress.md`, print the assumption percentage and the list of assumed requirements, and stop — do not run Stage 2 (Stage 2B would FAIL on the same marker anyway). The operator either revises the business plan and re-runs Stage 1, or reviews the assumptions and sets the marker, then runs `/transmuter:cast resume`. The gate hook enforces the same condition when `prd` or `validate-specs` is invoked directly.
 
 ### 5B Gate
 - **PASS** (zero remaining issues AND all tests pass — no regressions from 5B fixes) → proceed to Stage 6
