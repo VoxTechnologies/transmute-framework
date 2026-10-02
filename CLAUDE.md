@@ -12,7 +12,7 @@ The plugin is named `transmuter`; the repo and framework are named "Transmute". 
 
 ## Commands
 
-Run `scripts/conformance.sh` (static, seconds) after any change, and `scripts/conformance.sh --live` before a release — it loads the plugin with `claude -p` in a temp directory and checks routing and the gate hook. `examples/sample-plan/` is the fixture business plan. To validate a change by hand:
+Run `scripts/conformance.sh` (static, seconds) after any change, and `scripts/conformance.sh --live` before a release — it loads the plugin with `claude -p` in a temp directory and checks routing and the gate hook. `examples/sample-plan/` is the fixture business plan; `scripts/trial-run.sh <dir> <stage>...` runs it end to end and records usage (see `examples/sample-plan/README.md`, and set `ACCEPT_ASSUMPTIONS=1` for the fixture). To validate a change by hand:
 
 ```bash
 # Load the plugin for one session, from inside a test project directory

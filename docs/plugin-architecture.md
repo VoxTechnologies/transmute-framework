@@ -74,13 +74,19 @@ is a non-blocking error in Claude Code (the message is shown and the stage runs
 anyway), which is how the gates silently stopped gating before v3.1.0. It is
 macOS-compatible by design (`sed`, no `grep -P`).
 
+Since v3.2.1 the hook also enforces the Stage 1 stop condition for `prd` and
+`validate-specs`: it reads `Assumption volume` from `plancasting/brd/_review-log.md`
+and blocks at 30% or more unless the log says `Operator reviewed: YES` (matched in
+the bold list-item form the log writes). The volume itself is computed by
+`skills/brd/scripts/assumption-volume.sh` (v3.2.2), never counted by hand.
+
 The former `.claude-plugin/hooks/` copy (an unsupported `before:skill` schema)
 was deleted in v3.1.0; `plugin.json` declares no `hooks` field, so
 `hooks/hooks.json` is found by auto-discovery.
 
 ## Conformance script
 
-`scripts/conformance.sh` is the repository's test suite. Static checks (seconds, offline) verify the manifest, that every stage lands in `commands/cast.md`, the hook, the Stage Skills Map and the README, the Claude Code 2.1 facts above, and the gate hook's behaviour against fixtures (credential tiers, the Stage 4 placeholder check, the 5V bypass). `--live` loads the plugin with `claude -p` in a temporary directory and checks that `/transmuter:<stage>` is gated, that `/transmuter:cast help` prints the stage list and that `/transmuter:cast <stage>` routes `$0`. `examples/sample-plan/` is the fixture business plan for manual end-to-end runs.
+`scripts/conformance.sh` is the repository's test suite. Static checks (seconds, offline) verify the manifest, that every stage lands in `commands/cast.md`, the hook, the Stage Skills Map and the README, the Claude Code 2.1 facts above, and the gate hook's behaviour against fixtures (credential tiers, the Stage 4 placeholder check, the 5V bypass). `--live` loads the plugin with `claude -p` in a temporary directory and checks that `/transmuter:<stage>` is gated, that `/transmuter:cast help` prints the stage list and that `/transmuter:cast <stage>` routes `$0`. `examples/sample-plan/` is the fixture business plan for manual end-to-end runs, and `scripts/trial-run.sh` drives one: it runs stages with `claude -p` (exporting `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0`, without which print mode kills background teammates after 600 s), records duration and token usage in `plancasting/_trial/usage.tsv`, and stops at the first stage whose last output file is missing. The sample plan is thin on purpose and always trips the Stage 1 gate; `ACCEPT_ASSUMPTIONS=1` marks its assumptions reviewed after Stage 1.
 
 ## Opt-in execution modes (documented, not defaulted)
 
