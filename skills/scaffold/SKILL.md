@@ -67,7 +67,7 @@ Avoid these common scaffolding failures:
 
 ### Phase 2: Spawn 5 Teammates in Parallel
 
-Spawn all teammates simultaneously. Each has a distinct domain. See the detailed guide for complete teammate instructions.
+Spawn all teammates simultaneously. Each has a distinct domain. See the detailed guide for complete teammate instructions. Tell every teammate that credentials are placeholders until Stage 5: no requests to third-party services, mock the clients in tests (CLAUDE.md § Safety-Critical Rules).
 
 **Teammate 1: "backend-schema-and-functions"**
 - Backend schema (complete — every table/model for every feature)
