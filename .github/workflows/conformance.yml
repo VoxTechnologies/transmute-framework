@@ -2,24 +2,94 @@ name: conformance
 
 on:
   pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - docs/**
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - docs/**
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+  actions: read
+  pull-requests: read
 jobs:
   static:
     # Static checks only: manifests, every stage in its eight places, Claude Code 2.1
     # facts, and the gate hook against fixtures. The --live checks need an
     # authenticated Claude Code session and stay a manual pre-release step.
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 10
     steps:
+      - name: Plan lightweight and daily checks
+        id: ci-plan
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        env:
+          CI_WORKFLOW_FILE: conformance.yml
+        with:
+          script: |-
+            const repo = context.repo;
+            const workflow = context.workflow;
+            const workflowId = process.env.CI_WORKFLOW_FILE;
+            const heavy = ['schedule', 'workflow_dispatch'].includes(context.eventName);
+            let run = true;
+            if (context.eventName === 'push') {
+              const prs = await github.paginate(github.rest.repos.listPullRequestsAssociatedWithCommit, {
+                ...repo, commit_sha: context.sha, per_page: 100,
+              });
+              const merged = prs.find(pr => pr.merged_at && pr.merge_commit_sha === context.sha);
+              if (merged) {
+                const { data } = await github.rest.actions.listWorkflowRuns({
+                  ...repo, workflow_id: workflowId, event: 'pull_request',
+                  head_sha: merged.head.sha, per_page: 1,
+                });
+                run = data.workflow_runs[0]?.conclusion !== 'success';
+              }
+            }
+            if (context.eventName === 'schedule') {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                ...repo, workflow_id: workflowId, event: 'schedule', status: 'completed', per_page: 1,
+              });
+              const previous = data.workflow_runs[0];
+              if (previous?.conclusion === 'success' && previous.head_sha === context.sha) {
+                run = false;
+              } else if (previous?.conclusion === 'success') {
+                const { data: diff } = await github.rest.repos.compareCommitsWithBasehead({
+                  ...repo, basehead: `${previous.head_sha}...${context.sha}`,
+                });
+                const files = diff.files ?? [];
+                const documentsOnly = Array.isArray(diff.files) && files.length < 300 && files.every(file => {
+                  const ignored = name => !name.endsWith('.design.md') &&
+                    !name.startsWith('qms/') && !name.startsWith('docs/generated/') &&
+                    (name.endsWith('.md') || name.startsWith('docs/'));
+                  return ignored(file.filename) && (!file.previous_filename || ignored(file.previous_filename));
+                });
+                run = !documentsOnly;
+              }
+            }
+            core.setOutput('run', String(run));
+            core.setOutput('heavy', String(heavy));
+            await core.summary.addHeading(workflow).addRaw(
+              run ? (heavy ? 'Daily/full checks for this source.' : 'Lightweight PR/direct-push checks; full checks run daily.') :
+                'Reusing successful checks: merged PR or no executable changes since the last daily pass.',
+            ).write();
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        if: ${{ steps.ci-plan.outputs.run == 'true' }}
       - name: Install ripgrep and PyYAML
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ripgrep python3-yaml
+        if: ${{ steps.ci-plan.outputs.run == 'true' }}
       - name: Run conformance (static)
         run: bash scripts/conformance.sh
+        if: ${{ steps.ci-plan.outputs.run == 'true' }}
+    outputs:
+      run: ${{ steps.ci-plan.outputs.run }}
+      heavy: ${{ steps.ci-plan.outputs.heavy }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
